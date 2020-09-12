@@ -1,0 +1,77 @@
+{
+	"name": "advanced-cropper",
+	"version": "0.1.2",
+	"description": "Advanced cropper algorithms",
+	"author": "Norserium",
+	"license": "MIT",
+	"repository": "Norserium/advanced-cropper",
+	"keywords": [
+		"cropper",
+		"library",
+		"advanced",
+		"lightweight",
+		"customizable",
+		"flex"
+	],
+	"engines": {
+		"node": ">=8",
+		"npm": ">=5"
+	},
+	"scripts": {
+		"build": "cross-env NODE_ENV=production rollup -c",
+		"start": "cross-env NODE_ENV=build rollup -c -w",
+		"predeploy": "cd example && npm install && npm run build",
+		"deploy": "gh-pages -d example/docs/.vuepress/dist",
+		"test": "cross-env NODE_ENV=test jest",
+		"lint": "eslint src/**/*.{js,vue}",
+		"lint:fix": "eslint --fix src/**/*.{js,vue}",
+		"prepare:dist": "copyfiles package.json dist",
+		"publish:dist": "npm run prepare:dist && npm publish dist"
+	},
+	"dependencies": {
+		"tslib": "^2.0.1"
+	},
+	"devDependencies": {
+		"@rollup/plugin-commonjs": "^13.0.0",
+		"@rollup/plugin-multi-entry": "^4.0.0",
+		"@rollup/plugin-node-resolve": "^9.0.0",
+		"@rollup/plugin-replace": "^2.3.3",
+		"@typescript-eslint/eslint-plugin": "^2.34.0",
+		"@typescript-eslint/parser": "^2.34.0",
+		"@wessberg/rollup-plugin-ts": "^1.3.4",
+		"copyfiles": "^2.3.0",
+		"cross-env": "^5.2.1",
+		"eslint": "5.16.0",
+		"eslint-config-prettier": "^6.11.0",
+		"eslint-config-standard": "^11.0.0",
+		"eslint-plugin-import": "^2.22.0",
+		"eslint-plugin-node": "^7.0.1",
+		"eslint-plugin-prettier": "^3.1.4",
+		"eslint-plugin-promise": "^4.2.1",
+		"eslint-plugin-standard": "^3.1.0",
+		"gh-pages": "^1.2.0",
+		"husky": "^3.1.0",
+		"jest": "^24.9.0",
+		"jest-expect-message": "^1.0.2",
+		"lint-staged": "^9.5.0",
+		"prettier": "^2.1.1",
+		"rollup": "^2.26.10",
+		"typescript": "^4.0.2"
+	},
+	"files": [
+		"*"
+	],
+	"types": [],
+	"lint-staged": {
+		"*.{js,ts}": [
+			"prettier --write",
+			"eslint"
+		]
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	},
+	"main": "./index.js"
+}
