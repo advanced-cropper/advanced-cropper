@@ -7,8 +7,10 @@ export default {
 	input: [
 		'src/algorithms.ts',
 		'src/events.ts',
-		'src/interfaces.ts',
+		'src/typings.ts',
 		'src/constants.ts',
+		'src/image.ts',
+		'src/testing.ts',
 		'src/service.ts',
 		'src/utils.ts',
 		'src/index.ts',

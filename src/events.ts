@@ -1,31 +1,14 @@
-import { CropperEvent, Diff, MoveDirections, Point, ResizeDirections } from './interfaces';
+import { CropperEvent, Diff, MoveDirections, Point, ResizeDirections, Scale } from './typings';
 
-interface ManipulateImageEventScale {
-	factor: number;
-	center: Point;
-}
-interface ManipulateImageEventParams {
-	compensate: boolean;
-}
 export class ManipulateImageEvent implements CropperEvent {
 	type: 'manipulateImage';
 	nativeEvent: Event;
 	move: Partial<MoveDirections>;
-	scale: Partial<ManipulateImageEventScale>;
-	params: {
-		compensate?: boolean;
-	};
-	constructor(
-		nativeEvent: Event,
-		move: Partial<MoveDirections> = {},
-		scale: Partial<ManipulateImageEventScale> = {},
-		params: Partial<ManipulateImageEventParams> = {},
-	) {
+	scale: Partial<Scale>;
+	constructor(move: Partial<MoveDirections> = {}, scale: Partial<Scale> = {}) {
 		this.type = 'manipulateImage';
-		this.nativeEvent = nativeEvent;
 		this.move = move;
 		this.scale = scale;
-		this.params = params;
 	}
 }
 
@@ -38,13 +21,11 @@ export interface ResizeEventParams {
 
 export class ResizeEvent implements CropperEvent {
 	type: 'resize';
-	nativeEvent: Event;
 	directions: ResizeDirections;
 	params: ResizeEventParams;
 
-	constructor(nativeEvent: Event, directions: ResizeDirections, params: ResizeEventParams = {}) {
+	constructor(directions: ResizeDirections, params: ResizeEventParams = {}) {
 		this.type = 'resize';
-		this.nativeEvent = nativeEvent;
 		this.directions = directions;
 		this.params = params;
 	}
@@ -52,12 +33,10 @@ export class ResizeEvent implements CropperEvent {
 
 export class MoveEvent implements CropperEvent {
 	type: 'move';
-	nativeEvent: Event | null | undefined;
 	directions: MoveDirections;
 
-	constructor(nativeEvent: Event | null | undefined, directions: MoveDirections) {
+	constructor(directions: MoveDirections) {
 		this.type = 'move';
-		this.nativeEvent = nativeEvent;
 		this.directions = directions;
 	}
 }

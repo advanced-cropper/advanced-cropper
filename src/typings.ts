@@ -47,7 +47,7 @@ export interface Size {
 	width: number;
 	height: number;
 }
-
+export type ImageSize = Size;
 export type Boundaries = Size;
 
 export interface Intersections {
@@ -58,8 +58,8 @@ export interface Intersections {
 }
 
 export interface AspectRatio {
-	minimum: number;
-	maximum: number;
+	minimum?: number;
+	maximum?: number;
 }
 
 export interface CropperEvent {
@@ -84,3 +84,17 @@ export type MainDirections = 'left' | 'top';
 export type EventType = 'resize' | 'move' | 'drag' | 'manipulateImage';
 
 export type ImageRestriction = 'area' | 'stencil' | 'none';
+
+
+export interface Scale {
+	factor: number;
+	center: Point;
+}
+
+export interface ImageTransforms {
+	orientation: number;
+	scaleX?: number;
+	scaleY?: number;
+	rotate?: number;
+	flipped?: boolean;
+}

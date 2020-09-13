@@ -1,4 +1,4 @@
-import { HorizontalDirection, PositionDirection, VerticalDirection, MainDirections } from './interfaces';
+import { HorizontalDirection, PositionDirection, VerticalDirection, MainDirections } from './typings';
 
 export const ALL_DIRECTIONS: PositionDirection[] = ['left', 'right', 'top', 'bottom'];
 export const HORIZONTAL_DIRECTIONS: HorizontalDirection[] = ['left', 'right'];
