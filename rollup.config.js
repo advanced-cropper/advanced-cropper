@@ -5,16 +5,19 @@ import typescript from '@wessberg/rollup-plugin-ts';
 
 export default {
 	input: [
-		'src/algorithms.ts',
+		'src/html/index.ts',
+		'src/service/index.ts',
+		'src/state/index.ts',
+		'src/defaults/index.ts',
+		'src/animation.ts',
+		'src/canvas.ts',
 		'src/events.ts',
-		'src/typings.ts',
-		'src/constants.ts',
 		'src/image.ts',
-		'src/testing.ts',
-		'src/service.ts',
+		'src/touch.ts',
+		'src/types.ts',
 		'src/utils.ts',
-		'src/index.ts',
 	],
+	preserveModules: true,
 	output: [
 		{
 			dir: 'dist',

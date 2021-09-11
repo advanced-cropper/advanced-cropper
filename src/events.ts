@@ -1,56 +1,47 @@
-import { CropperEvent, Diff, MoveDirections, Point, ResizeDirections, Scale } from './typings';
+import { Diff, MoveDirections, Point, ResizeDirections, Scale } from './types';
 
-export class ManipulateImageEvent implements CropperEvent {
-	type: 'manipulateImage';
+export class TransformImageEvent {
 	nativeEvent: Event;
 	move: Partial<MoveDirections>;
-	scale: Partial<Scale>;
-	constructor(move: Partial<MoveDirections> = {}, scale: Partial<Scale> = {}) {
-		this.type = 'manipulateImage';
+	scale: Scale | number;
+	constructor(move: Partial<MoveDirections> = {}, scale: Scale | number = 1) {
 		this.move = move;
 		this.scale = scale;
 	}
 }
 
-export interface ResizeEventParams {
-	compensate?: boolean;
-	preserveRatio?: boolean;
-	allowedDirections?: ResizeDirections;
-	respectDirection?: 'width' | 'height';
-}
-
-export class ResizeEvent implements CropperEvent {
-	type: 'resize';
+export class ResizeEvent<Options = Record<string, unknown>> {
 	directions: ResizeDirections;
-	params: ResizeEventParams;
+	options: Options;
 
-	constructor(directions: ResizeDirections, params: ResizeEventParams = {}) {
-		this.type = 'resize';
+	constructor(directions: ResizeDirections, options: Options) {
 		this.directions = directions;
-		this.params = params;
+		this.options = options;
 	}
 }
 
-export class MoveEvent implements CropperEvent {
-	type: 'move';
+export class MoveEvent {
 	directions: MoveDirections;
 
 	constructor(directions: MoveDirections) {
-		this.type = 'move';
 		this.directions = directions;
 	}
 }
 
-export class DragEvent implements CropperEvent {
-	type: 'drag';
-	nativeEvent: Event;
+export class DragEvent {
+	nativeEvent: TouchEvent | MouseEvent;
 	position: Point;
 	previousPosition: Point;
 	anchor: Point;
 	element: HTMLElement;
 
-	constructor(nativeEvent: Event, element: HTMLElement, position: Point, previousPosition: Point, anchor: Point) {
-		this.type = 'drag';
+	constructor(
+		nativeEvent: TouchEvent | MouseEvent,
+		element: HTMLElement,
+		position: Point,
+		previousPosition: Point,
+		anchor: Point,
+	) {
 		this.nativeEvent = nativeEvent;
 		this.position = position;
 		this.previousPosition = previousPosition;

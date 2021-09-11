@@ -1,52 +1,9 @@
-import { ImageTransforms } from './typings';
+import { CropperImage, CropperState, CropperTransitions, Size, Transforms } from './types';
+import { getCoefficient, getComputedTransforms, getTransformedImageSize } from './service/helpers';
+import { isBlob, isLocal } from './utils';
+import { rotateSize } from './service';
 
-export const XHR_DONE = 4;
-
-export function prepareSource(canvas, image, { flipped, orientation }) {
-	const width = image.naturalWidth;
-	const height = image.naturalHeight;
-
-	const ctx = canvas.getContext('2d');
-	canvas.width = width;
-	canvas.height = height;
-
-	ctx.save();
-
-	if (flipped) {
-		canvas.width = height;
-		canvas.height = width;
-	}
-
-	// TODO: refactor this
-	if (orientation == 2) {
-		ctx.translate(width, 0);
-		ctx.scale(-1, 1);
-	} else if (orientation == 3) {
-		ctx.translate(width, height);
-		ctx.rotate((180 / 180) * Math.PI);
-	} else if (orientation == 4) {
-		ctx.translate(0, height);
-		ctx.scale(1, -1);
-	} else if (orientation == 5) {
-		ctx.rotate((90 / 180) * Math.PI);
-		ctx.scale(1, -1);
-	} else if (orientation == 6) {
-		ctx.rotate((90 / 180) * Math.PI);
-		ctx.translate(0, -height);
-	} else if (orientation == 7) {
-		ctx.rotate((270 / 180) * Math.PI);
-		ctx.translate(-width, height);
-		ctx.scale(1, -1);
-	} else if (orientation == 8) {
-		ctx.translate(0, width);
-		ctx.rotate((270 / 180) * Math.PI);
-	}
-
-	ctx.drawImage(image, 0, 0, width, height);
-	ctx.restore();
-
-	return canvas;
-}
+const XHR_DONE = 4;
 
 function base64ToArrayBuffer(base64) {
 	base64 = base64.replace(/^data:([^;]+);base64,/gim, '');
@@ -72,42 +29,44 @@ function objectURLToBlob(url, callback) {
 	http.send();
 }
 
-export function getImageTransforms(orientation: number) {
-	const result: ImageTransforms = {
-		orientation,
+function getTransforms(orientation: number) {
+	const result: Transforms = {
+		flip: {
+			horizontal: false,
+			vertical: false,
+		},
+		rotate: 0,
 	};
 	if (orientation) {
 		switch (orientation) {
 			case 2:
-				result.scaleX = -1;
+				result.flip.horizontal = true;
 				break;
 			case 3:
 				result.rotate = -180;
 				break;
 			case 4:
-				result.scaleY = -1;
+				result.flip.vertical = true;
 				break;
 			case 5:
 				result.rotate = 90;
-				result.scaleY = -1;
+				result.flip.vertical = true;
 				break;
 			case 6:
 				result.rotate = 90;
 				break;
 			case 7:
 				result.rotate = 90;
-				result.scaleX = -1;
+				result.flip.horizontal = true;
 				break;
 			case 8:
 				result.rotate = -90;
 				break;
 		}
 	}
-	if (result.rotate === 90 || result.rotate === -90) {
-		result.flipped = true;
-	}
 	return result;
 }
+
 function getImageData(img) {
 	return new Promise((resolve, reject) => {
 		try {
@@ -157,19 +116,11 @@ function getImageData(img) {
 	});
 }
 
-export function getStyleTransforms({ rotate, scaleX, scaleY }) {
+export function getStyleTransforms({ rotate, flip, scaleX, scaleY }) {
 	let transform = '';
-	if (rotate || scaleX || scaleY) {
-		if (rotate) {
-			transform += ` rotate(${rotate}deg) `;
-		}
-		if (scaleX) {
-			transform += ` scaleX(${scaleX}) `;
-		}
-		if (scaleY) {
-			transform += ` scaleY(${scaleY}) `;
-		}
-	}
+	transform += ` rotate(${rotate}deg) `;
+	transform += ` scaleX(${scaleX * (flip.horizontal ? -1 : 1)}) `;
+	transform += ` scaleY(${scaleY * (flip.vertical ? -1 : 1)}) `;
 	return transform;
 }
 
@@ -182,7 +133,7 @@ function getStringFromCharCode(dataView, start, length) {
 	return str;
 }
 
-function getOrientation(arrayBuffer) {
+function resetAndGetOrientation(arrayBuffer) {
 	try {
 		const dataView = new DataView(arrayBuffer);
 		let orientation;
@@ -243,24 +194,14 @@ function getOrientation(arrayBuffer) {
 	}
 }
 
-export function parseImage(src: string) {
-	return new Promise((resolve) => {
-		getImageData(src)
-			.then((data) => {
-				resolve(
-					data
-						? { source: src, arrayBuffer: data, orientation: getOrientation(data) }
-						: { source: src, arrayBuffer: null, orientation: null },
-				);
-			})
-			.catch((error) => {
-				console.warn(error);
-				resolve({ source: src, arrayBuffer: null, orientation: null });
-			});
-	});
+interface ParseResult {
+	src: string;
+	arrayBuffer: ArrayBuffer | null;
+	revoke: boolean;
+	transforms: Transforms;
 }
 
-export function arrayBufferToDataURL(arrayBuffer) {
+function arrayBufferToDataURL(arrayBuffer) {
 	const chunks = [];
 
 	// Chunk Typed Array for better performance
@@ -274,4 +215,261 @@ export function arrayBufferToDataURL(arrayBuffer) {
 	}
 
 	return `data:image/jpeg;base64,${btoa(chunks.join(''))}`;
+}
+
+function getImage({ src, arrayBuffer = null, orientation = null, parse = false }) {
+	const options: ParseResult = {
+		src,
+		arrayBuffer,
+		revoke: false,
+		transforms: {
+			flip: {
+				horizontal: false,
+				vertical: false,
+			},
+			rotate: 0,
+		},
+	};
+	if (arrayBuffer && orientation && orientation > 1 && isLocal(src)) {
+		if (isBlob(src)) {
+			options.src = URL.createObjectURL(new Blob([arrayBuffer]));
+			options.revoke = true;
+		} else {
+			options.src = arrayBufferToDataURL(arrayBuffer);
+		}
+	} else {
+		options.src = src;
+	}
+	if (orientation) {
+		options.transforms = getTransforms(orientation);
+	}
+	return options;
+}
+
+interface LoadImageSettings {
+	crossOrigin?: string | boolean;
+	checkOrientation?: boolean;
+	parse?: boolean;
+}
+
+function parseImage(src: string, settings: LoadImageSettings = {}) {
+	const { checkOrientation, parse } = settings;
+	return new Promise<ParseResult>((resolve) => {
+		if (checkOrientation || parse) {
+			getImageData(src)
+				.then((data) => {
+					const orientation = resetAndGetOrientation(data);
+					resolve(
+						getImage(
+							data
+								? { src, arrayBuffer: data, orientation }
+								: { src, arrayBuffer: null, orientation: null },
+						),
+					);
+				})
+				.catch((error) => {
+					console.warn(error);
+					resolve(getImage({ src }));
+				});
+		} else {
+			resolve(getImage({ src }));
+		}
+	});
+}
+
+export function loadImage(src: string, settings: LoadImageSettings = {}): Promise<CropperImage> {
+	return parseImage(src, settings).then((options) => {
+		return new Promise<CropperImage | null>((resolve, reject) => {
+			const image = document.createElement('img');
+
+			if (settings.crossOrigin) {
+				image.crossOrigin = settings.crossOrigin !== true ? settings.crossOrigin : 'anonymous';
+			}
+
+			image.src = options.src;
+
+			image.style.visibility = 'hidden';
+			image.style.position = 'fixed';
+
+			document.body.appendChild(image);
+
+			if (image.complete) {
+				resolve({
+					...options,
+					width: image.naturalWidth,
+					height: image.naturalHeight,
+				});
+				document.body.removeChild(image);
+			} else {
+				image.addEventListener('load', () => {
+					resolve({
+						...options,
+						width: image.naturalWidth,
+						height: image.naturalHeight,
+					});
+					document.body.removeChild(image);
+				});
+
+				image.addEventListener('error', () => {
+					reject(null);
+					document.body.removeChild(image);
+				});
+			}
+		});
+	});
+}
+
+export function getImageStyle(image: CropperImage, state: CropperState, transitions: CropperTransitions) {
+	if (state && image) {
+		const optimalImageSize =
+			image.width > image.height
+				? {
+						width: Math.min(512, image.width),
+						height: Math.min(512, image.width) / (image.width / image.height),
+				  }
+				: {
+						height: Math.min(512, image.height),
+						width: Math.min(512, image.height) * (image.width / image.height),
+				  };
+
+		const actualImageSize = getTransformedImageSize(state);
+
+		const imageTransforms = getComputedTransforms(state);
+
+		const coefficient = getCoefficient(state);
+
+		const compensations = {
+			rotate: {
+				left: (optimalImageSize.width - actualImageSize.width) / (2 * coefficient),
+				top: (optimalImageSize.height - actualImageSize.height) / (2 * coefficient),
+			},
+			scale: {
+				left: ((1 - 1 / coefficient) * optimalImageSize.width) / 2,
+				top: ((1 - 1 / coefficient) * optimalImageSize.height) / 2,
+			},
+		};
+
+		const transforms = {
+			...imageTransforms,
+			scaleX: imageTransforms.scaleX * (image.width / optimalImageSize.width),
+			scaleY: imageTransforms.scaleY * (image.height / optimalImageSize.height),
+		};
+
+		const result = {
+			width: `${optimalImageSize.width}px`,
+			height: `${optimalImageSize.height}px`,
+			left: '0px',
+			top: '0px',
+			transition: 'none',
+			transform:
+				`translate3d(${-compensations.rotate.left - compensations.scale.left - imageTransforms.translateX}px, ${
+					-compensations.rotate.top - compensations.scale.top - imageTransforms.translateY
+				}px, 0px)` + getStyleTransforms(transforms),
+			willChange: 'none',
+		};
+
+		if (transitions && transitions.active) {
+			result.willChange = 'transform';
+			result.transition = `${transitions.duration}ms ${transitions.timingFunction}`;
+		}
+		return result;
+	} else {
+		return {};
+	}
+}
+
+export function getPreviewStyle(
+	image: CropperImage,
+	state: CropperState,
+	transitions: CropperTransitions | null,
+	size: Size,
+) {
+	if (state.coordinates) {
+		const coefficient = state.coordinates.width / size.width;
+		const transforms = {
+			...getComputedTransforms(state),
+			scaleX: 1 / coefficient,
+			scaleY: 1 / coefficient,
+		};
+		const width = image.width;
+		const height = image.height;
+		const virtualSize = rotateSize(
+			{
+				width,
+				height,
+			},
+			transforms.rotate,
+		);
+		const result = {
+			width: `${width}px`,
+			height: `${height}px`,
+			left: '0px',
+			top: '0px',
+			transform: 'none',
+			transition: 'none',
+		};
+		const compensations = {
+			rotate: {
+				left: ((width - virtualSize.width) * transforms.scaleX) / 2,
+				top: ((height - virtualSize.height) * transforms.scaleY) / 2,
+			},
+			scale: {
+				left: ((1 - transforms.scaleX) * width) / 2,
+				top: ((1 - transforms.scaleY) * height) / 2,
+			},
+		};
+		result.transform =
+			`translate(
+				${-state.coordinates.left / coefficient - compensations.rotate.left - compensations.scale.left}px,${
+				-state.coordinates.top / coefficient - compensations.rotate.top - compensations.scale.top
+			}px) ` + getStyleTransforms(transforms);
+		if (transitions && transitions.active) {
+			result.transition = `${transitions.duration}ms ${transitions.timingFunction}`;
+		}
+		return result;
+	} else {
+		return {};
+	}
+}
+
+const imageMimes = [
+	{
+		format: 'image/png',
+		pattern: [0x89, 0x50, 0x4e, 0x47],
+	},
+	{
+		format: 'image/jpeg',
+		pattern: [0xff, 0xd8, 0xff],
+	},
+	{
+		format: 'image/gif',
+		pattern: [0x47, 0x49, 0x46, 0x38],
+	},
+	{
+		format: 'image/webp',
+		pattern: [
+			0x52,
+			0x49,
+			0x46,
+			0x46,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			0x57,
+			0x45,
+			0x42,
+			0x50,
+			0x56,
+			0x50,
+		],
+	},
+];
+
+export function getMimeType(arrayBuffer, fallback = null) {
+	const byteArray = new Uint8Array(arrayBuffer).subarray(0, 4);
+
+	const candidate = imageMimes.find((el) => el.pattern.every((p, i) => !p || byteArray[i] === p));
+
+	return candidate ? candidate.format : fallback;
 }

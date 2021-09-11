@@ -1,21 +1,27 @@
-// @ts-ignore
+type Protocol = 'http' | 'https';
 
-type Protocol = 'http' | 'https'
-
-export function directionNames(hDirection, vDirection) {
-	let name, classname;
+export function getDirectionNames(hDirection?: string, vDirection?: string) {
+	let camelCase, snakeCase;
 	if (hDirection && vDirection) {
-		name = `${hDirection}${vDirection[0].toUpperCase()}${vDirection.slice(1)}`;
-		classname = `${hDirection}-${vDirection}`;
+		camelCase = `${hDirection}${vDirection[0].toUpperCase()}${vDirection.slice(1)}`;
+		snakeCase = `${hDirection}-${vDirection}`;
 	} else {
-		name = hDirection || vDirection;
-		classname = hDirection || vDirection;
+		camelCase = hDirection || vDirection;
+		snakeCase = hDirection || vDirection;
 	}
-	return { name, classname };
+	return { camelCase, snakeCase };
+}
+
+export function isBlob(url: string) {
+	return /^blob:/.test(url);
+}
+
+export function isDataUrl(url: string) {
+	return /^data:/.test(url);
 }
 
 export function isLocal(url: string) {
-	return /^data:/.test(url) || /^blob:/.test(url);
+	return isBlob(url) || isDataUrl(url);
 }
 
 export function isCrossOriginURL(url: string) {
@@ -56,6 +62,14 @@ export function isCrossOriginURL(url: string) {
 	);
 }
 
+export function isArray<T, U>(value: Array<T> | U): value is Array<T> {
+	return Array.isArray(value);
+}
+
+export function isFunction<T extends Function, U>(value: T | U): value is T {
+	return typeof value === 'function';
+}
+
 export function isUndefined(obj: any): boolean {
 	return obj === undefined;
 }
@@ -64,15 +78,32 @@ export function isObject(obj) {
 	return typeof obj === 'object' && obj !== null;
 }
 
-export function getSettings(param, defaultParams = {}) {
-	let result = {
-		enabled: Boolean(param),
-		...defaultParams,
-	};
-	if (isObject(param)) {
-		result = { ...result, ...param };
+export function getOptions(options: any, defaultScheme: any, falseScheme: any = {}) {
+	const result: any = {};
+	if (isObject(options)) {
+		Object.keys(defaultScheme).forEach((key) => {
+			if (isUndefined(options[key])) {
+				result[key] = defaultScheme[key];
+			} else if (isObject(defaultScheme[key])) {
+				if (isObject(options[key])) {
+					result[key] = getOptions(options[key], defaultScheme[key], falseScheme[key]);
+				} else {
+					result[key] = options[key] ? defaultScheme[key] : falseScheme[key];
+				}
+			} else if (defaultScheme[key] === true || defaultScheme[key] === false) {
+				result[key] = Boolean(options[key]);
+			} else {
+				result[key] = options[key];
+			}
+		});
+		return result;
+	} else {
+		if (options) {
+			return defaultScheme;
+		} else {
+			return falseScheme;
+		}
 	}
-	return result;
 }
 
 export function parseNumber(number) {
@@ -84,17 +115,62 @@ export function parseNumber(number) {
 	}
 }
 
-export function replacedProp(value, oldName, currentName) {
-	if (!isEmpty(value) && process.env.NODE_ENV !== 'production') {
-		console.warn(`Warning: prop "${oldName}" is deprecated, use "${currentName}" instead. Value:`, value);
-	}
-	return true;
-}
-
 export function isEmpty(obj) {
 	return (!obj || Object.keys(obj).length === 0) && typeof obj !== 'function';
 }
 
-export function isLoadedImage(image) {
-	return Boolean(image.naturalWidth);
+export function isObjectLike(value) {
+	return typeof value === 'object' && value !== null;
+}
+
+export function isNumeric(value): value is number | string {
+	return !Number.isNaN(parseFloat(value)) && isFinite(value);
+}
+
+export function isNaN(value) {
+	return value !== value;
+}
+
+export function isNumber(value: unknown): value is number {
+	return typeof value === 'number';
+}
+
+export function distance(firstPoint, secondPoint) {
+	return Math.sqrt(Math.pow(firstPoint.x - secondPoint.x, 2) + Math.pow(firstPoint.y - secondPoint.y, 2));
+}
+
+export function isRoughlyEqual(a: number, b: number, tolerance = 1e-3): boolean {
+	return Math.abs(b - a) < Math.max(tolerance, tolerance * Math.max(Math.abs(a), Math.abs(b)));
+}
+
+export function isGreater(a: number, b: number, tolerance?: number): boolean {
+	return isRoughlyEqual(a, b, tolerance) ? false : a > b;
+}
+
+export function isLower(a: number, b: number, tolerance?: number): boolean {
+	return isRoughlyEqual(a, b, tolerance) ? false : a < b;
+}
+
+export function sign(value) {
+	const number = +value;
+	if (number === 0 || isNaN(number)) {
+		return number;
+	}
+	return number > 0 ? 1 : -1;
+}
+
+export function promiseTimeout(timeout) {
+	return new Promise((resolve) => {
+		setTimeout(() => {
+			resolve();
+		}, timeout);
+	});
+}
+
+export function mapObject<T extends object, V>(obj: T, callback: <K extends keyof T>(value: T[K], key: K) => V) {
+	const result = {} as { [K in keyof T]: V };
+	(Object.keys(obj) as Array<keyof T>).forEach((name) => {
+		result[name] = callback(obj[name], name);
+	});
+	return result;
 }

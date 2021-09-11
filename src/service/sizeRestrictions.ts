@@ -1,0 +1,92 @@
+import { CropperSettings, CropperState, SizeRestrictions } from '../types';
+import { isFunction, isNumeric, parseNumber } from '../utils';
+import { getAreaSizeRestrictions, getAspectRatio, getPositionRestrictions } from './helpers';
+import { ratio } from './utils';
+
+export function validateSizeRestrictions(sizeRestrictions: SizeRestrictions) {
+	const restrictions = { ...sizeRestrictions };
+
+	// Process the border cases when minimum height / width larger than maximum height / width
+	if (restrictions.minWidth > restrictions.maxWidth) {
+		if (process.env.NODE_ENV !== 'production') {
+			console.warn(
+				`[Size restrictions calculation] Warning: maximum width (${restrictions.maxWidth}px) fewer that the minimum width (${restrictions.minWidth}px). It is set equal to the minimum width and width resizing was blocked`,
+			);
+		}
+		restrictions.minWidth = restrictions.maxWidth;
+	}
+
+	if (restrictions.minHeight > restrictions.maxHeight) {
+		if (process.env.NODE_ENV !== 'production') {
+			console.warn(
+				`[Size restrictions calculation] Warning: maximum height (${restrictions.maxHeight}px) fewer that the minimum height (${restrictions.minHeight}px). It is set equal to the minimum height and height resizing was blocked`,
+			);
+		}
+		restrictions.minHeight = restrictions.maxHeight;
+	}
+	return restrictions;
+}
+
+export function mergeSizeRestrictions(a: SizeRestrictions, b: Partial<SizeRestrictions>): SizeRestrictions {
+	const first = a;
+
+	const second = {
+		minWidth: 0,
+		minHeight: 0,
+		maxWidth: Infinity,
+		maxHeight: Infinity,
+		...b,
+	};
+
+	return validateSizeRestrictions({
+		maxHeight: Math.min(first.maxHeight, second.maxHeight),
+		minHeight: Math.max(first.minHeight, second.minHeight),
+		maxWidth: Math.min(first.maxWidth, second.maxWidth),
+		minWidth: Math.max(first.minWidth, second.minWidth),
+	});
+}
+
+export function calculateSizeRestrictions(state: CropperState, settings: CropperSettings) {
+	const sizeRestrictions = isFunction(settings.sizeRestrictions)
+		? settings.sizeRestrictions(state, settings)
+		: settings.sizeRestrictions;
+
+	const positionRestrictions = getPositionRestrictions(state, settings);
+
+	// User can forget to set some of restrictions, so we should init them by default values
+	const restrictions = {
+		minWidth: isNumeric(sizeRestrictions.minWidth) ? parseNumber(sizeRestrictions.minWidth) : 0,
+		minHeight: isNumeric(sizeRestrictions.minHeight) ? parseNumber(sizeRestrictions.minHeight) : 0,
+		maxWidth: isNumeric(sizeRestrictions.maxWidth) ? parseNumber(sizeRestrictions.maxWidth) : Infinity,
+		maxHeight: isNumeric(sizeRestrictions.maxHeight) ? parseNumber(sizeRestrictions.maxHeight) : Infinity,
+	};
+
+	// The situation, when stencil can't be positioned in cropper due to positionRestrictions should be avoided
+	if (positionRestrictions.left !== undefined && positionRestrictions.right !== undefined) {
+		restrictions.maxWidth = Math.min(restrictions.maxWidth, positionRestrictions.right - positionRestrictions.left);
+	}
+	if (positionRestrictions.bottom !== undefined && positionRestrictions.top !== undefined) {
+		restrictions.maxHeight = Math.min(
+			restrictions.maxHeight,
+			positionRestrictions.bottom - positionRestrictions.top,
+		);
+	}
+
+	return validateSizeRestrictions(restrictions);
+}
+
+export function calculateAreaSizeRestrictions(state: CropperState, settings: CropperSettings) {
+	const sizeRestrictions = isFunction(settings.areaSizeRestrictions)
+		? settings.areaSizeRestrictions(state, settings)
+		: settings.areaSizeRestrictions;
+
+	if (sizeRestrictions.maxWidth < Infinity && sizeRestrictions.maxHeight < Infinity) {
+		if (ratio(state.boundary) > sizeRestrictions.maxWidth / sizeRestrictions.maxHeight) {
+			sizeRestrictions.maxHeight = sizeRestrictions.maxWidth / ratio(state.boundary);
+		} else {
+			sizeRestrictions.maxWidth = sizeRestrictions.maxHeight * ratio(state.boundary);
+		}
+	}
+
+	return validateSizeRestrictions(sizeRestrictions);
+}
