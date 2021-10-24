@@ -21,4 +21,4 @@ yarn add advanced-cropper
 
 ## License
 
-The source code of this library is licensed under MIT, the documentation content belongs to [Norserium](), except the photos that belong to their respective owners.
+The source code of this library is licensed under MIT, the documentation content belongs to [Norserium](https://github.com/Norserium), except the photos that belong to their respective owners.
