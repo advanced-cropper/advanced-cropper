@@ -22,8 +22,6 @@ export interface SizeRestrictions {
 }
 export type AreaSizeRestrictions = SizeRestrictions;
 
-export type PostprocessFunction = (state: CropperState, settings: CropperSettings, action?: string) => CropperState;
-
 export type PositionRestrictions = Limits;
 
 export type AreaPositionRestrictions = Limits;
@@ -102,6 +100,16 @@ export interface Scale {
 	center?: Point;
 }
 
+export interface Rotate {
+	angle: number;
+	center?: Point;
+}
+
+export interface Flip {
+	horizontal?: boolean;
+	vertical?: boolean;
+}
+
 export interface Transforms {
 	rotate: number;
 	flip: {
@@ -110,7 +118,19 @@ export interface Transforms {
 	};
 }
 
-export type CoordinatesTransform = ((state: CropperState, settings: CropperSettings) => Partial<Coordinates>) | Partial<Coordinates>;
+export interface ImageTransform {
+	scale?: number | Scale;
+	move?: {
+		left?: number;
+		top?: number;
+	};
+	rotate?: number | Rotate;
+	flip?: Flip;
+}
+
+export type CoordinatesTransform =
+	| ((state: CropperState, settings: CropperSettings) => Partial<Coordinates>)
+	| Partial<Coordinates>;
 
 export interface CropperState {
 	boundary: Boundary;
@@ -170,3 +190,20 @@ export interface CropperTransitions {
 export interface Stencil {
 	aspectRatio: () => AspectRatio;
 }
+
+export interface SimpleTouch {
+	clientX: number;
+	clientY: number;
+}
+
+export interface PostprocessAction {
+	name: string;
+	immediately?: boolean;
+	transitions?: boolean;
+}
+
+export type PostprocessFunction = (
+	state: CropperState,
+	settings: CropperSettings,
+	action?: PostprocessAction,
+) => CropperState;

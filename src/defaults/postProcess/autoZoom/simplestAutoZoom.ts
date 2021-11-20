@@ -1,4 +1,4 @@
-import { CropperSettings, CropperState } from '../../../types';
+import { CropperSettings, CropperState, PostprocessAction } from '../../../types';
 import { applyScale, fitVisibleArea, getAreaSizeRestrictions, maxScale } from '../../../service';
 import { copyState } from '../../../state';
 
@@ -31,8 +31,12 @@ export function simplestAutoZoomAlgorithm(state: CropperState, settings: Cropper
 	return fitVisibleArea(result, settings);
 }
 
-export function simplestAutoZoom(state: CropperState, settings: CropperSettings, action: string): CropperState {
-	if (action === 'setCoordinates') {
+export function simplestAutoZoom(
+	state: CropperState,
+	settings: CropperSettings,
+	action: PostprocessAction,
+): CropperState {
+	if (action && action.name === 'setCoordinates') {
 		return simplestAutoZoomAlgorithm(state, settings);
 	}
 

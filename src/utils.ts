@@ -174,3 +174,15 @@ export function mapObject<T extends object, V>(obj: T, callback: <K extends keyo
 	});
 	return result;
 }
+
+export function isWheelEvent(event: Event): event is WheelEvent {
+	return 'deltaX' in event;
+}
+
+export function isTouchEvent(event: Event): event is TouchEvent {
+	return 'touches' in event;
+}
+
+export function isMouseEvent(event: Event): event is MouseEvent {
+	return 'buttons' in event;
+}

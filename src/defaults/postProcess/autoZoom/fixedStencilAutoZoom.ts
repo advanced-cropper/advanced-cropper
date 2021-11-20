@@ -10,7 +10,7 @@ import {
 	moveToPositionRestrictions,
 	toLimits,
 } from '../../../service';
-import { CropperSettings, CropperState } from '../../../types';
+import { CropperSettings, CropperState, PostprocessAction } from '../../../types';
 import { getFixedStencilSize } from '../../helpers';
 import { copyState } from '../../../state';
 import { StencilSize } from '../../';
@@ -54,20 +54,9 @@ export function fixedStencilAutoZoomAlgorithm(
 export function fixedStencilAutoZoom(
 	state: CropperState,
 	settings: CropperSettings & { stencilSize: StencilSize },
-	action: string,
+	action: PostprocessAction,
 ): CropperState {
-	const actions = [
-		'create',
-		'reconcile',
-		'interactionEnd',
-		'rotate',
-		'zoom',
-		'setBoundary',
-		'setVisibleArea',
-		'setCoordinates',
-	];
-
-	if (actions.indexOf(action) !== -1) {
+	if (action && action.immediately) {
 		return fixedStencilAutoZoomAlgorithm(state, settings);
 	}
 	return state;

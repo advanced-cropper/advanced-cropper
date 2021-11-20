@@ -13,7 +13,12 @@ export function updateStretcher({ boundary, stretcher, size }: StretchParams): v
 
 	if (boundary) {
 		stretcher.style.height = `${Math.max(height, boundary.clientHeight)}px`;
+		stretcher.style.width = `${Math.max(
+			boundary.clientWidth,
+			stretcher.clientHeight * (size.height / size.width),
+		)}px`;
 	}
+
 	// Prevent stretching in future until stretcher will be reinitialized
 	stretcher.style.width = `${boundary.clientWidth}px`;
 }

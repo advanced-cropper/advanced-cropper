@@ -6,14 +6,14 @@ import typescript from '@wessberg/rollup-plugin-ts';
 export default {
 	input: [
 		'src/html/index.ts',
+		'src/algorithms/index.ts',
 		'src/service/index.ts',
 		'src/state/index.ts',
 		'src/defaults/index.ts',
 		'src/animation.ts',
 		'src/canvas.ts',
-		'src/events.ts',
+		'src/transforms.ts',
 		'src/image.ts',
-		'src/touch.ts',
 		'src/types.ts',
 		'src/utils.ts',
 	],

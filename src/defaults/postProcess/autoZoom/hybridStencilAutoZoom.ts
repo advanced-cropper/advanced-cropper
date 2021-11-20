@@ -12,7 +12,7 @@ import {
 	ratio,
 	toLimits,
 } from '../../../service';
-import { CropperSettings, CropperState, Size } from '../../../types';
+import { CropperSettings, CropperState, PostprocessAction, Size } from '../../../types';
 import { copyState } from '../../../state';
 
 export function hybridStencilAutoZoomAlgorithm(state: CropperState, settings: CropperSettings): CropperState {
@@ -64,8 +64,12 @@ export function hybridStencilAutoZoomAlgorithm(state: CropperState, settings: Cr
 	return result;
 }
 
-export function hybridStencilAutoZoom(state: CropperState, settings: CropperSettings, action: string): CropperState {
-	if (['interactionEnd', 'setCoordinates', 'setVisibleArea', 'setBoundary', 'init'].indexOf(action) >= 0) {
+export function hybridStencilAutoZoom(
+	state: CropperState,
+	settings: CropperSettings,
+	action: PostprocessAction,
+): CropperState {
+	if (action.immediately) {
 		return hybridStencilAutoZoomAlgorithm(state, settings);
 	}
 	return state;

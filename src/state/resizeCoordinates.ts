@@ -5,11 +5,22 @@ import {
 	getMinimumSize,
 	getPositionRestrictions,
 	getSizeRestrictions,
-	resizeCoordinatesAlgorithm,
-	ResizeOptions,
 	mergePositionRestrictions,
 	coordinatesToPositionRestrictions,
 } from '../service';
+import { resizeCoordinatesAlgorithm } from '../algorithms';
+
+export interface ResizeOptions {
+	compensate?: boolean;
+	preserveAspectRatio?: boolean;
+	allowedDirections?: {
+		left?: boolean;
+		right?: boolean;
+		top?: boolean;
+		bottom?: boolean;
+	};
+	respectDirection?: 'width' | 'height';
+}
 
 export type ResizeAlgorithm = (
 	state: CropperState,

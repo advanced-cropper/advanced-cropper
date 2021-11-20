@@ -1,10 +1,15 @@
 import { Coordinates, CropperSettings, CropperState, CoordinatesTransform } from '../types';
-import { mergePositionRestrictions, coordinatesToPositionRestrictions } from '../service/utils';
+import {
+	getAspectRatio,
+	getPositionRestrictions,
+	getSizeRestrictions,
+	mergePositionRestrictions,
+	coordinatesToPositionRestrictions,
+	approximateSize,
+} from '../service';
+import { moveCoordinatesAlgorithm } from '../algorithms';
 import { isUndefined } from '../utils';
 import { copyState } from './copyState';
-import { getAspectRatio, getPositionRestrictions, getSizeRestrictions } from '../service/helpers';
-import { moveCoordinatesAlgorithm } from '../service/moveCoordinatesAlgorithm';
-import { approximateSize } from '../service/approximateSize';
 
 export type SetCoordinatesAlgorithm = (
 	state: CropperState,

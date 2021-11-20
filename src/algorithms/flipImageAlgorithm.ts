@@ -1,16 +1,21 @@
 import { CropperSettings, CropperState } from '../types';
-import { applyMove, diff, moveToPositionRestrictions, getCenter, rotatePoint } from '../service/utils';
-import { getAreaPositionRestrictions, getTransformedImageSize } from '../service/helpers';
-import { copyState } from './copyState';
+import {
+	applyMove,
+	diff,
+	moveToPositionRestrictions,
+	getCenter,
+	rotatePoint,
+	getAreaPositionRestrictions,
+	getTransformedImageSize,
+} from '../service';
+import { copyState } from '../state';
 
-export type FlipImageAlgorithm = (
+export function flipImageAlgorithm(
 	state: CropperState,
 	settings: CropperSettings,
 	horizontal?: boolean,
 	vertical?: boolean,
-) => CropperState;
-
-export function flipImage(state: CropperState, settings: CropperSettings, horizontal?: boolean, vertical?: boolean) {
+) {
 	const result = copyState(state);
 
 	const rotate = state.transforms.rotate;

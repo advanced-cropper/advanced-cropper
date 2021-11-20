@@ -5,24 +5,29 @@ import {
 	resizeToSizeRestrictions,
 	getCenter,
 	rotatePoint,
-} from '../service/utils';
-import {
 	getTransformedImageSize,
 	getAspectRatio,
 	getPositionRestrictions,
 	getSizeRestrictions,
 	getAreaSizeRestrictions,
 	getAreaPositionRestrictions,
-} from '../service/helpers';
-import { copyState } from './copyState';
-import { approximateSize } from '../service/approximateSize';
-import { CropperSettings, CropperState } from '../types';
+	approximateSize,
+} from '../service';
+import { copyState } from '../state';
+import { CropperSettings, CropperState, Rotate } from '../types';
 import { mergeSizeRestrictions } from '../service';
+import { isNumber } from '../utils';
 
-export type RotateImageAlgorithm = (state: CropperState, settings: CropperSettings, angle: number) => CropperState;
+export type RotateImageAlgorithm = (
+	state: CropperState,
+	settings: CropperSettings,
+	rotate: number | Rotate,
+) => CropperState;
 
-export function rotateImage(state: CropperState, settings: CropperSettings, angle: number) {
+export function rotateImageAlgorithm(state: CropperState, settings: CropperSettings, rotate: number | Rotate) {
 	const result = copyState(state);
+
+	const angle = isNumber(rotate) ? rotate : rotate.angle;
 
 	const imageCenter = rotatePoint(
 		getCenter({
@@ -45,10 +50,14 @@ export function rotateImage(state: CropperState, settings: CropperSettings, angl
 		...rotatePoint(getCenter(result.coordinates), angle),
 	};
 
+	const center = !isNumber(rotate) && rotate.center ? rotate.center : getCenter(state.coordinates);
+
+	const shift = diff(getCenter(state.coordinates), rotatePoint(getCenter(state.coordinates), angle, center));
+
 	const imageSize = getTransformedImageSize(result);
 
-	result.coordinates.left -= imageCenter.left - imageSize.width / 2 + result.coordinates.width / 2;
-	result.coordinates.top -= imageCenter.top - imageSize.height / 2 + result.coordinates.height / 2;
+	result.coordinates.left -= imageCenter.left - imageSize.width / 2 + result.coordinates.width / 2 - shift.left;
+	result.coordinates.top -= imageCenter.top - imageSize.height / 2 + result.coordinates.height / 2 - shift.top;
 
 	// Check that visible area doesn't break the area restrictions:
 	result.visibleArea = resizeToSizeRestrictions(
