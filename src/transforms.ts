@@ -1,4 +1,4 @@
-import { distance, isNumber, isRoughlyEqual, sign } from './utils';
+import { distance, isRoughlyEqual, sign } from './utils';
 import { Point, SimpleTouch } from './types';
 
 interface GeometricProperties {

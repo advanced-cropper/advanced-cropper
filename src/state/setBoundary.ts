@@ -1,5 +1,4 @@
 import { Boundary, CropperSettings, CropperState } from '../types';
-import { fitCoordinates } from '../service/fitCoordinates';
 import {
 	applyMove,
 	applyScale,
@@ -9,9 +8,12 @@ import {
 	ratio,
 	toLimits,
 	fitToPositionRestrictions,
-} from '../service/utils';
+	fitCoordinates,
+	getAreaPositionRestrictions,
+	getAreaSizeRestrictions,
+	getSizeRestrictions,
+} from '../service';
 import { copyState } from './copyState';
-import { getAreaPositionRestrictions, getAreaSizeRestrictions, getSizeRestrictions } from '../service/helpers';
 
 export type SetBoundaryAlgorithm = (state: CropperState, settings: CropperSettings, boundary: Boundary) => CropperState;
 

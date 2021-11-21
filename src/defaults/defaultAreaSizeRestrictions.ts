@@ -1,6 +1,5 @@
 import { AreaSizeRestrictions, CropperSettings, CropperState, ImageRestriction } from '../types';
-import { getTransformedImageSize } from '../service/helpers';
-import { ratio } from '../service';
+import { ratio, getTransformedImageSize } from '../service';
 
 export function defaultAreaSizeRestrictions(
 	state: CropperState,

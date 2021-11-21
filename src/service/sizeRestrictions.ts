@@ -1,6 +1,6 @@
 import { CropperSettings, CropperState, SizeRestrictions } from '../types';
 import { isFunction, isNumeric, parseNumber } from '../utils';
-import { getAreaSizeRestrictions, getAspectRatio, getPositionRestrictions } from './helpers';
+import { getPositionRestrictions } from './helpers';
 import { ratio } from './utils';
 
 export function validateSizeRestrictions(sizeRestrictions: SizeRestrictions) {

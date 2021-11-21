@@ -3,8 +3,7 @@ import { defaultVisibleArea } from './defaultVisibleArea';
 import { defaultSize, fixedDefaultSize } from './defaultSize';
 import { getFixedStencilSize } from './helpers';
 import { pixelsRestrictions } from './defaultSizeRestrictions';
-import { mergeSizeRestrictions } from '../service/sizeRestrictions';
-import { getAreaSizeRestrictions } from '../service/helpers';
+import { getAreaSizeRestrictions, mergeSizeRestrictions } from '../service';
 import {
 	AreaPositionRestrictions,
 	AreaSizeRestrictions,

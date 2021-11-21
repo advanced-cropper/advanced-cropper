@@ -1,8 +1,12 @@
 import { CropperSettings, CropperState, Size } from '../types';
-import { getPositionRestrictions, getSizeRestrictions } from '../service/helpers';
-import { approximateSize } from '../service/approximateSize';
+import {
+	ratio,
+	positionToSizeRestrictions,
+	getPositionRestrictions,
+	getSizeRestrictions,
+	approximateSize,
+} from '../service';
 import { isFunction } from '../utils';
-import { positionToSizeRestrictions, ratio } from '../service';
 import { StencilSize } from './';
 
 export function defaultSize(state: CropperState, settings: CropperSettings): Size {

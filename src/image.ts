@@ -1,7 +1,6 @@
 import { CropperImage, CropperState, CropperTransitions, Size, Transforms } from './types';
-import { getCoefficient, getComputedTransforms, getTransformedImageSize } from './service/helpers';
+import { rotateSize, getCoefficient, getComputedTransforms, getTransformedImageSize } from './service';
 import { isBlob, isLocal } from './utils';
-import { rotateSize } from './service';
 
 const XHR_DONE = 4;
 
@@ -217,7 +216,7 @@ function arrayBufferToDataURL(arrayBuffer) {
 	return `data:image/jpeg;base64,${btoa(chunks.join(''))}`;
 }
 
-function getImage({ src, arrayBuffer = null, orientation = null, parse = false }) {
+function getImage({ src, arrayBuffer = null, orientation = null }) {
 	const options: ParseResult = {
 		src,
 		arrayBuffer,

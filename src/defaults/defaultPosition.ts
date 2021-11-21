@@ -1,8 +1,8 @@
-import { CropperSettings, CropperState } from '../types';
-import { getTransformedImageSize } from '../service/helpers';
+import { CropperState } from '../types';
+import { getTransformedImageSize } from '../service';
 
-export function defaultPosition(state: CropperState, props: CropperSettings) {
-	const { visibleArea, imageSize, coordinates } = state;
+export function defaultPosition(state: CropperState) {
+	const { visibleArea, coordinates } = state;
 	const area = visibleArea || getTransformedImageSize(state);
 
 	return {

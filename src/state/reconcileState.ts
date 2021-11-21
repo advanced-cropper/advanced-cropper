@@ -1,6 +1,5 @@
 import { CropperSettings, CropperState } from '../types';
-import { fitVisibleArea } from '../service/fitVisibleArea';
-import { fitCoordinates } from '../service/fitCoordinates';
+import { fitCoordinates, fitVisibleArea } from '../service';
 
 export type ReconcileStateAlgorithm = (state: CropperState, settings: CropperSettings) => CropperState;
 

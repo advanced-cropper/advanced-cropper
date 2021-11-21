@@ -1,5 +1,5 @@
 import { CropperSettings, CropperState, Limits } from '../types';
-import { getAreaSizeRestrictions, getTransformedImageSize } from '../service/helpers';
+import { getAreaSizeRestrictions, getTransformedImageSize } from '../service';
 import { getIntersections, moveToPositionRestrictions, ratio, resizeToSizeRestrictions, toLimits } from '../service';
 
 export function defaultVisibleArea(state: CropperState, settings: CropperSettings) {

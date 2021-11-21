@@ -1,6 +1,6 @@
 import { Boundary, CropperSettings, CropperState, ImageSize, Transforms } from '../types';
 import { setCoordinates } from './setCoordinates';
-import { getDefaultCoordinates, getDefaultVisibleArea } from '../service/helpers';
+import { getDefaultCoordinates, getDefaultVisibleArea } from '../service';
 import { setVisibleArea } from './setVisibleArea';
 
 export interface CreateStateOptions {

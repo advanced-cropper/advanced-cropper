@@ -1,7 +1,6 @@
 import { CropperSettings, CropperState } from '../types';
-import { approximateSize } from '../service/approximateSize';
+import { ratio, approximateSize } from '../service';
 import { isFunction } from '../utils';
-import { ratio } from '../service';
 import { StencilSize } from './';
 
 export function getFixedStencilSize(state: CropperState, settings: CropperSettings & { stencilSize: StencilSize }) {

@@ -1,7 +1,6 @@
 import { CropperSettings, CropperState, VisibleArea } from '../types';
 import { copyState } from './copyState';
-import { fitVisibleArea } from '../service/fitVisibleArea';
-import { fitCoordinates } from '../service/fitCoordinates';
+import { fitCoordinates, fitVisibleArea } from '../service';
 
 export type SetVisibleAreaAlgorithm = (
 	state: CropperState,

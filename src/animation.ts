@@ -57,7 +57,7 @@ export class Animation {
 			timingFunction = timingFunctions['ease-out'];
 		}
 
-		const percent =  1 - (this.endTime - performance.now()) / (this.endTime - this.startTime);
+		const percent = 1 - (this.endTime - performance.now()) / (this.endTime - this.startTime);
 
 		const progress = Math.min(1, timingFunction(percent));
 

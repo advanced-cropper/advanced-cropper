@@ -1,5 +1,5 @@
 import { CropperSettings, CropperState, ImageRestriction } from '../types';
-import { getTransformedImageSize } from '../service/helpers';
+import { getTransformedImageSize } from '../service';
 
 export function defaultPositionRestrictions(
 	state: CropperState,
