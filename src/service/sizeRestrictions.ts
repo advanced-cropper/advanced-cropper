@@ -8,20 +8,10 @@ export function validateSizeRestrictions(sizeRestrictions: SizeRestrictions) {
 
 	// Process the border cases when minimum height / width larger than maximum height / width
 	if (restrictions.minWidth > restrictions.maxWidth) {
-		if (process.env.NODE_ENV !== 'production') {
-			console.warn(
-				`[Size restrictions calculation] Warning: maximum width (${restrictions.maxWidth}px) fewer that the minimum width (${restrictions.minWidth}px). It is set equal to the minimum width and width resizing was blocked`,
-			);
-		}
 		restrictions.minWidth = restrictions.maxWidth;
 	}
 
 	if (restrictions.minHeight > restrictions.maxHeight) {
-		if (process.env.NODE_ENV !== 'production') {
-			console.warn(
-				`[Size restrictions calculation] Warning: maximum height (${restrictions.maxHeight}px) fewer that the minimum height (${restrictions.minHeight}px). It is set equal to the minimum height and height resizing was blocked`,
-			);
-		}
 		restrictions.minHeight = restrictions.maxHeight;
 	}
 	return restrictions;

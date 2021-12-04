@@ -1,7 +1,7 @@
 // This function returns the approximation size to width / height with respect to
 // restrictions and aspect ratio
 import { AspectRatio, Size, SizeRestrictions } from '../types';
-import { fitToSizeRestrictions, ratio, sizeDistance } from './utils';
+import { ratio, resizeToSizeRestrictions, sizeDistance } from './utils';
 import { isGreater, isLower } from '../utils';
 
 function validateSize(params: {
@@ -74,14 +74,7 @@ export function approximateSize(params: {
 	}
 
 	// Resize the candidates as much as possible to prevent breaking minimum size
-	candidates = candidates.map((candidate) => {
-		const scale = fitToSizeRestrictions(candidate, sizeRestrictions);
-		return {
-			...candidate,
-			width: candidate.width * scale,
-			height: candidate.height * scale,
-		};
-	});
+	candidates = candidates.map((candidate) => resizeToSizeRestrictions(candidate, sizeRestrictions));
 
 	const candidate = findBestCandidate(candidates) || findBestCandidate(candidates, true);
 

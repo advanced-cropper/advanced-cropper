@@ -87,28 +87,42 @@ export function applyMove(object: Coordinates, move: MoveDirections): Coordinate
 	};
 }
 
-export function applyScale(object: Coordinates, scaleFactor: number, center?: Point, progress?: number): Coordinates {
-	if (scaleFactor !== 1) {
-		if (center) {
-			const currentCenter = getCenter(object);
-			return {
-				width: object.width * scaleFactor,
-				height: object.height * scaleFactor,
-				left:
-					object.left +
-					(object.width * (1 - scaleFactor)) / 2 +
-					(center.left - currentCenter.left) * (progress || 1 - scaleFactor),
-				top:
-					object.top +
-					(object.height * (1 - scaleFactor)) / 2 +
-					(center.top - currentCenter.top) * (progress || 1 - scaleFactor),
-			};
+export function applyScale(object: Coordinates, factor: number, center?: Point, progress?: number): Coordinates;
+export function applyScale(object: Size, factor: number): Size;
+export function applyScale(
+	object: Coordinates | Size,
+	factor: number,
+	center?: Point,
+	progress?: number,
+): Coordinates | Size {
+	if (factor !== 1) {
+		if ('left' in object || 'top' in object) {
+			if (center) {
+				const currentCenter = getCenter(object);
+				return {
+					width: object.width * factor,
+					height: object.height * factor,
+					left:
+						object.left +
+						(object.width * (1 - factor)) / 2 +
+						(center.left - currentCenter.left) * (progress || 1 - factor),
+					top:
+						object.top +
+						(object.height * (1 - factor)) / 2 +
+						(center.top - currentCenter.top) * (progress || 1 - factor),
+				};
+			} else {
+				return {
+					width: object.width * factor,
+					height: object.height * factor,
+					left: object.left + (object.width * (1 - factor)) / 2,
+					top: object.top + (object.height * (1 - factor)) / 2,
+				};
+			}
 		} else {
 			return {
-				width: object.width * scaleFactor,
-				height: object.height * scaleFactor,
-				left: object.left + (object.width * (1 - scaleFactor)) / 2,
-				top: object.top + (object.height * (1 - scaleFactor)) / 2,
+				width: object.width * factor,
+				height: object.height * factor,
 			};
 		}
 	} else {
@@ -190,7 +204,9 @@ export function fitToSizeRestrictions(coordinates: Size, sizeRestrictions: SizeR
 	return scale;
 }
 
-export function resizeToSizeRestrictions(coordinates: Coordinates, sizeRestrictions: SizeRestrictions) {
+export function resizeToSizeRestrictions(coordinates: Coordinates, sizeRestrictions: SizeRestrictions): Coordinates;
+export function resizeToSizeRestrictions(coordinates: Size, sizeRestrictions: SizeRestrictions): Size;
+export function resizeToSizeRestrictions(coordinates: Coordinates | Size, sizeRestrictions: SizeRestrictions) {
 	return applyScale(coordinates, fitToSizeRestrictions(coordinates, sizeRestrictions));
 }
 
