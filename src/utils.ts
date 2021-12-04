@@ -1,6 +1,6 @@
 type Protocol = 'http' | 'https';
 
-export function getDirectionNames(hDirection?: string, vDirection?: string) {
+export function getDirectionNames(hDirection?: string | null, vDirection?: string | null) {
 	let camelCase, snakeCase;
 	if (hDirection && vDirection) {
 		camelCase = `${hDirection}${vDirection[0].toUpperCase()}${vDirection.slice(1)}`;
@@ -185,4 +185,13 @@ export function isTouchEvent(event: Event): event is TouchEvent {
 
 export function isMouseEvent(event: Event): event is MouseEvent {
 	return 'buttons' in event;
+}
+
+export function emptyCoordinates() {
+	return {
+		left: 0,
+		top: 0,
+		width: 0,
+		height: 0,
+	};
 }

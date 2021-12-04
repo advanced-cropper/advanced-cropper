@@ -1,5 +1,5 @@
 import { CropperSettings, CropperState } from '../types';
-import { isFunction, isNumeric } from '../utils';
+import { emptyCoordinates, isFunction, isNumeric } from '../utils';
 import { rotateSize } from './utils';
 import { calculateSizeRestrictions, calculateAreaSizeRestrictions } from './sizeRestrictions';
 
@@ -38,12 +38,7 @@ export function getStencilCoordinates(state: CropperState | null) {
 			top: (top - state.visibleArea.top) / coefficient,
 		};
 	} else {
-		return {
-			width: 0,
-			height: 0,
-			left: 0,
-			top: 0,
-		};
+		return emptyCoordinates();
 	}
 }
 

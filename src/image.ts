@@ -318,7 +318,7 @@ export function loadImage(src: string, settings: LoadImageSettings = {}): Promis
 	});
 }
 
-export function getImageStyle(image: CropperImage, state: CropperState, transitions: CropperTransitions) {
+export function getImageStyle(image: CropperImage, state: CropperState, transitions?: CropperTransitions) {
 	if (state && image) {
 		const optimalImageSize =
 			image.width > image.height
@@ -380,8 +380,8 @@ export function getImageStyle(image: CropperImage, state: CropperState, transiti
 export function getPreviewStyle(
 	image: CropperImage,
 	state: CropperState,
-	transitions: CropperTransitions | null,
-	size: Size,
+	transitions?: CropperTransitions,
+	size?: Partial<Size>,
 ) {
 	if (state.coordinates) {
 		const coefficient = state.coordinates.width / size.width;

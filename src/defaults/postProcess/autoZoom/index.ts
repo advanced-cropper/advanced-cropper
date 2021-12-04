@@ -5,8 +5,8 @@ import { CropperSettings, CropperState, PostprocessAction, PostprocessFunction }
 import { StencilSize } from '../../';
 
 interface AutoZoomCropperSettings extends CropperSettings {
-	autoZoom: boolean;
-	stencilSize: StencilSize;
+	autoZoom?: boolean;
+	stencilSize?: StencilSize;
 }
 
 export function autoZoom(state: CropperState, settings: AutoZoomCropperSettings, action?: PostprocessAction) {
