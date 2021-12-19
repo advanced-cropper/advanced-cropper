@@ -171,15 +171,7 @@ export function withDefaults(settings: ExtendedCropperSettings) {
 			}
 			if (settings.stencilSize) {
 				const stencilSize = getFixedStencilSize(state, { ...basicSettings, stencilSize: settings.stencilSize });
-				if (getBrokenRatio(ratio(stencilSize), { minimum, maximum })) {
-					if (process.env.NODE_ENV !== 'production') {
-						console.error(
-							`[Adjusting stencil] The aspect ratio of stencil doesn't correspondent to aspect ratio limitations`,
-						);
-					}
-				}
-				minimum = ratio(stencilSize);
-				maximum = ratio(stencilSize);
+				minimum = maximum = ratio(stencilSize);
 			}
 			return {
 				minimum,

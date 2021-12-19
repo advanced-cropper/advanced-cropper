@@ -286,11 +286,6 @@ export function resizeCoordinatesAlgorithm(
 		? ratio(actualCoordinates)
 		: getBrokenRatio(currentWidth / currentHeight, aspectRatio);
 	if (ratioBroken && Math.abs(ratioBroken - currentWidth / currentHeight) > 1e-3) {
-		if (process.env.NODE_ENV !== 'production') {
-			console.error(
-				`Something went wrong and ratio was broken: ${currentWidth / currentHeight} instead of ${ratioBroken}`,
-			);
-		}
 		ALL_DIRECTIONS.forEach((direction) => {
 			if (!allowedDirections[direction]) {
 				directions[direction] = 0;

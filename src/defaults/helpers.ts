@@ -9,11 +9,6 @@ export function getFixedStencilSize(state: CropperState, settings: CropperSettin
 	let size = isFunction(settings.stencilSize) ? settings.stencilSize(state, settings) : settings.stencilSize;
 
 	if (size.width > boundary.width || size.height > boundary.height) {
-		if (process.env.NODE_ENV !== 'production') {
-			console.error(
-				`[Adjusting stencil] The width and height of stencil (${size.width}, ${size.height}) should be fewer or equal to the width and height of boundary (${boundary.width},${boundary.height}) respectively`,
-			);
-		}
 		size = approximateSize({
 			sizeRestrictions: {
 				maxWidth: boundary.width,
