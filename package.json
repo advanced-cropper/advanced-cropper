@@ -26,7 +26,8 @@
 		"lint": "eslint src/**/*.{js,vue}",
 		"lint:fix": "eslint --fix src/**/*.{js,vue}",
 		"prepare:dist": "copyfiles package.json dist",
-		"publish:dist": "npm run prepare:dist && npm publish dist"
+		"publish:dist": "cross-env RELEASE=true && npm run prepare:dist && npm publish dist",
+		"prepublishOnly": "node prepublish.js"
 	},
 	"dependencies": {
 		"tslib": "^2.0.1"
