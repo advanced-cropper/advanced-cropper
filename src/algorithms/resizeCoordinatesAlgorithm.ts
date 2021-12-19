@@ -3,6 +3,7 @@ import { ALL_DIRECTIONS, HORIZONTAL_DIRECTIONS, VERTICAL_DIRECTIONS } from '../c
 import { applyDirections, getBrokenRatio, getIntersections, ratio } from '../service';
 import { moveCoordinatesAlgorithm } from './moveCoordinatesAlgorithm';
 import { ResizeOptions } from '../state';
+import { isRoughlyEqual } from '../utils';
 
 interface FitDirectionsParams {
 	directions: ResizeDirections;
@@ -159,11 +160,11 @@ export interface ResizeLimitations {
 }
 
 function distributeOverlap(overlap: number, first: number, second: number) {
-	if (first == 0 && second == 0) {
+	if (isRoughlyEqual(first + second, 0)) {
 		return overlap / 2;
-	} else if (first == 0) {
+	} else if (isRoughlyEqual(first, 0)) {
 		return 0;
-	} else if (second == 0) {
+	} else if (isRoughlyEqual(second, 0)) {
 		return overlap;
 	} else {
 		return overlap * Math.abs(first / (first + second));
@@ -230,7 +231,7 @@ export function resizeCoordinatesAlgorithm(
 
 	if (ratioBroken) {
 		let { respectDirection } = options;
-		if (!respectDirection) {
+		if (respectDirection !== 'width' && respectDirection !== 'height') {
 			if (actualCoordinates.width >= actualCoordinates.height || ratioBroken === 1) {
 				respectDirection = 'width';
 			} else {
