@@ -7,20 +7,18 @@ export interface StretchParams {
 }
 
 export function updateStretcher({ boundary, stretcher, size }: StretchParams): void {
-	const height = boundary.clientWidth * (size.height / size.width);
+	// Reset stretcher
+	stretcher.style.width = `0px`;
+	stretcher.style.height = `0px`;
 
-	stretcher.style.height = `${height}px`;
+	// Try to fit the size by width:
+	stretcher.style.width = `${Math.max(boundary.clientWidth, size.width)}px`;
 
-	if (boundary) {
-		stretcher.style.height = `${Math.max(height, boundary.clientHeight)}px`;
-		stretcher.style.width = `${Math.max(
-			boundary.clientWidth,
-			stretcher.clientHeight * (size.height / size.width),
-		)}px`;
-	}
+	// After that try to fit the size by height and resulted width:
+	const ratio = size.width / size.height;
 
-	// Prevent stretching in future until stretcher will be reinitialized
-	stretcher.style.width = `${boundary.clientWidth}px`;
+	stretcher.style.height = `${Math.max(boundary.clientHeight, stretcher.clientWidth / ratio)}px`;
+	stretcher.style.width = `${stretcher.clientHeight * ratio}px`;
 }
 
 export type StretchAlgorithm = typeof updateStretcher;
