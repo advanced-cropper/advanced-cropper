@@ -1,5 +1,5 @@
-import { CropperImage, CropperState, CropperTransitions, Size, Transforms } from './types';
-import { rotateSize, getCoefficient, getComputedTransforms, getTransformedImageSize } from './service';
+import { Coordinates, CropperImage, CropperState, CropperTransitions, Transforms } from './types';
+import { getCoefficient, getTransformedImageSize } from './service';
 import { isBlob, isLocal } from './utils';
 
 const XHR_DONE = 4;
@@ -318,60 +318,78 @@ export function loadImage(src: string, settings: LoadImageSettings = {}): Promis
 	});
 }
 
-export function getImageStyle(image: CropperImage, state: CropperState, transitions?: CropperTransitions) {
-	if (state && image) {
-		const optimalImageSize =
-			image.width > image.height
-				? {
-						width: Math.min(512, image.width),
-						height: Math.min(512, image.width) / (image.width / image.height),
-				  }
-				: {
-						height: Math.min(512, image.height),
-						width: Math.min(512, image.height) * (image.width / image.height),
-				  };
+export function getImageStyle(
+	image: CropperImage,
+	state: CropperState,
+	area: Coordinates,
+	coefficient: number,
+	transitions?: CropperTransitions,
+) {
+	const optimalImageSize =
+		image.width > image.height
+			? {
+					width: Math.min(512, image.width),
+					height: Math.min(512, image.width) / (image.width / image.height),
+			  }
+			: {
+					height: Math.min(512, image.height),
+					width: Math.min(512, image.height) * (image.width / image.height),
+			  };
 
-		const actualImageSize = getTransformedImageSize(state);
+	const actualImageSize = getTransformedImageSize(state);
 
-		const imageTransforms = getComputedTransforms(state);
+	const imageTransforms = {
+		rotate: state.transforms.rotate,
+		flip: {
+			horizontal: state.transforms.flip.horizontal,
+			vertical: state.transforms.flip.vertical,
+		},
+		translateX: area.left / coefficient,
+		translateY: area.top / coefficient,
+		scaleX: 1 / coefficient,
+		scaleY: 1 / coefficient,
+	};
 
-		const coefficient = getCoefficient(state);
+	const compensations = {
+		rotate: {
+			left: (optimalImageSize.width - actualImageSize.width) / (2 * coefficient),
+			top: (optimalImageSize.height - actualImageSize.height) / (2 * coefficient),
+		},
+		scale: {
+			left: ((1 - 1 / coefficient) * optimalImageSize.width) / 2,
+			top: ((1 - 1 / coefficient) * optimalImageSize.height) / 2,
+		},
+	};
 
-		const compensations = {
-			rotate: {
-				left: (optimalImageSize.width - actualImageSize.width) / (2 * coefficient),
-				top: (optimalImageSize.height - actualImageSize.height) / (2 * coefficient),
-			},
-			scale: {
-				left: ((1 - 1 / coefficient) * optimalImageSize.width) / 2,
-				top: ((1 - 1 / coefficient) * optimalImageSize.height) / 2,
-			},
-		};
+	const transforms = {
+		...imageTransforms,
+		scaleX: imageTransforms.scaleX * (image.width / optimalImageSize.width),
+		scaleY: imageTransforms.scaleY * (image.height / optimalImageSize.height),
+	};
 
-		const transforms = {
-			...imageTransforms,
-			scaleX: imageTransforms.scaleX * (image.width / optimalImageSize.width),
-			scaleY: imageTransforms.scaleY * (image.height / optimalImageSize.height),
-		};
+	const result = {
+		width: `${optimalImageSize.width}px`,
+		height: `${optimalImageSize.height}px`,
+		left: '0px',
+		top: '0px',
+		transition: 'none',
+		transform:
+			`translate3d(${-compensations.rotate.left - compensations.scale.left - imageTransforms.translateX}px, ${
+				-compensations.rotate.top - compensations.scale.top - imageTransforms.translateY
+			}px, 0px)` + getStyleTransforms(transforms),
+		willChange: 'none',
+	};
 
-		const result = {
-			width: `${optimalImageSize.width}px`,
-			height: `${optimalImageSize.height}px`,
-			left: '0px',
-			top: '0px',
-			transition: 'none',
-			transform:
-				`translate3d(${-compensations.rotate.left - compensations.scale.left - imageTransforms.translateX}px, ${
-					-compensations.rotate.top - compensations.scale.top - imageTransforms.translateY
-				}px, 0px)` + getStyleTransforms(transforms),
-			willChange: 'none',
-		};
+	if (transitions && transitions.active) {
+		result.willChange = 'transform';
+		result.transition = `${transitions.duration}ms ${transitions.timingFunction}`;
+	}
+	return result;
+}
 
-		if (transitions && transitions.active) {
-			result.willChange = 'transform';
-			result.transition = `${transitions.duration}ms ${transitions.timingFunction}`;
-		}
-		return result;
+export function getBackgroundStyle(image: CropperImage, state: CropperState, transitions?: CropperTransitions) {
+	if (image && state && state.visibleArea) {
+		return getImageStyle(image, state, state.visibleArea, getCoefficient(state), transitions);
 	} else {
 		return {};
 	}
@@ -381,51 +399,10 @@ export function getPreviewStyle(
 	image: CropperImage,
 	state: CropperState,
 	transitions?: CropperTransitions,
-	size?: Partial<Size>,
+	coefficient?: number,
 ) {
-	if (state.coordinates) {
-		const coefficient = state.coordinates.width / size.width;
-		const transforms = {
-			...getComputedTransforms(state),
-			scaleX: 1 / coefficient,
-			scaleY: 1 / coefficient,
-		};
-		const width = image.width;
-		const height = image.height;
-		const virtualSize = rotateSize(
-			{
-				width,
-				height,
-			},
-			transforms.rotate,
-		);
-		const result = {
-			width: `${width}px`,
-			height: `${height}px`,
-			left: '0px',
-			top: '0px',
-			transform: 'none',
-			transition: 'none',
-		};
-		const compensations = {
-			rotate: {
-				left: ((width - virtualSize.width) * transforms.scaleX) / 2,
-				top: ((height - virtualSize.height) * transforms.scaleY) / 2,
-			},
-			scale: {
-				left: ((1 - transforms.scaleX) * width) / 2,
-				top: ((1 - transforms.scaleY) * height) / 2,
-			},
-		};
-		result.transform =
-			`translate(
-				${-state.coordinates.left / coefficient - compensations.rotate.left - compensations.scale.left}px,${
-				-state.coordinates.top / coefficient - compensations.rotate.top - compensations.scale.top
-			}px) ` + getStyleTransforms(transforms);
-		if (transitions && transitions.active) {
-			result.transition = `${transitions.duration}ms ${transitions.timingFunction}`;
-		}
-		return result;
+	if (image && state && state.visibleArea) {
+		return getImageStyle(image, state, state.coordinates, coefficient, transitions);
 	} else {
 		return {};
 	}

@@ -73,21 +73,6 @@ export function getTransformedImageSize(state: CropperState) {
 	}
 }
 
-export function getComputedTransforms(state: CropperState) {
-	const coefficient = getCoefficient(state);
-	return {
-		rotate: state.transforms.rotate,
-		flip: {
-			horizontal: state.transforms.flip.horizontal,
-			vertical: state.transforms.flip.vertical,
-		},
-		translateX: state.visibleArea ? state.visibleArea.left / coefficient : 0,
-		translateY: state.visibleArea ? state.visibleArea.top / coefficient : 0,
-		scaleX: 1 / coefficient,
-		scaleY: 1 / coefficient,
-	};
-}
-
 export function getMinimumSize(state: CropperState) {
 	// The magic number is the approximation of the handler size
 	// Temporary solution that should be improved in the future
