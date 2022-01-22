@@ -1,4 +1,4 @@
-import { Boundary, CropperSettings, CropperState, ImageSize, Transforms } from '../types';
+import { Boundary, CropperSettings, CropperState, ImageSize, PartialTransforms } from '../types';
 import { setCoordinates } from './setCoordinates';
 import { getDefaultCoordinates, getDefaultVisibleArea } from '../service';
 import { setVisibleArea } from './setVisibleArea';
@@ -6,7 +6,7 @@ import { setVisibleArea } from './setVisibleArea';
 export interface CreateStateOptions {
 	boundary: Boundary;
 	imageSize: ImageSize;
-	transforms?: Transforms;
+	transforms?: PartialTransforms;
 	priority?: 'visibleArea' | 'coordinates';
 }
 
@@ -24,12 +24,11 @@ export function createState(options: CreateStateOptions, settings: CropperSettin
 			height: imageSize.height,
 		},
 		transforms: {
+			rotate: transforms?.rotate || 0,
 			flip: {
-				...(transforms && transforms.flip),
-				horizontal: false,
-				vertical: false,
+				horizontal: transforms?.flip?.horizontal || false,
+				vertical: transforms?.flip?.vertical || false,
 			},
-			rotate: (transforms && transforms.rotate) || 0,
 		},
 		visibleArea: null,
 		coordinates: null,

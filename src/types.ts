@@ -118,6 +118,14 @@ export interface Transforms {
 	};
 }
 
+export interface PartialTransforms {
+	rotate?: number;
+	flip?: {
+		horizontal?: boolean;
+		vertical?: boolean;
+	};
+}
+
 export interface ImageTransform {
 	scale?: number | Scale;
 	move?: {

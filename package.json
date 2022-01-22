@@ -1,6 +1,6 @@
 {
 	"name": "advanced-cropper",
-	"version": "0.4.0",
+	"version": "0.4.1",
 	"description": "The core of the advanced cropper libraries family",
 	"author": "Norserium",
 	"license": "MIT",
@@ -26,8 +26,7 @@
 		"lint": "eslint src/**/*.{js,vue}",
 		"lint:fix": "eslint --fix src/**/*.{js,vue}",
 		"prepare:dist": "copyfiles package.json dist",
-		"publish:dist": "cross-env RELEASE=true && npm run prepare:dist && npm publish dist",
-		"prepublishOnly": "node prepublish.js"
+		"publish:dist": "npm run prepare:dist && npm publish dist"
 	},
 	"dependencies": {
 		"tslib": "^2.0.1"
