@@ -229,8 +229,8 @@ function getImage({ src, arrayBuffer = null, orientation = null }) {
 			rotate: 0,
 		},
 	};
-	if (arrayBuffer && orientation && orientation > 1 && isLocal(src)) {
-		if (isBlob(src)) {
+	if (arrayBuffer && orientation && orientation > 1) {
+		if (isBlob(src) || !isLocal(src)) {
 			options.src = URL.createObjectURL(new Blob([arrayBuffer]));
 			options.revoke = true;
 		} else {
