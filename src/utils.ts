@@ -1,10 +1,21 @@
+import {
+	CardinalDirection,
+	HorizontalCardinalDirection,
+	OrdinalDirection,
+	Point,
+	VerticalCardinalDirection,
+} from './types';
+
 type Protocol = 'http' | 'https';
 
-export function getDirectionNames(hDirection?: string | null, vDirection?: string | null) {
+export function getDirectionNames(
+	hDirection?: HorizontalCardinalDirection | null,
+	vDirection?: VerticalCardinalDirection | null,
+) {
 	let camelCase, snakeCase;
 	if (hDirection && vDirection) {
-		camelCase = `${hDirection}${vDirection[0].toUpperCase()}${vDirection.slice(1)}`;
-		snakeCase = `${hDirection}-${vDirection}`;
+		camelCase = `${hDirection}${vDirection[0].toUpperCase()}${vDirection.slice(1)}` as OrdinalDirection;
+		snakeCase = `${hDirection}-${vDirection}` as string;
 	} else {
 		camelCase = hDirection || vDirection;
 		snakeCase = hDirection || vDirection;
@@ -70,14 +81,15 @@ export function isFunction<T extends Function, U>(value: T | U): value is T {
 	return typeof value === 'function';
 }
 
-export function isUndefined(obj: any): boolean {
+export function isUndefined(obj: unknown): obj is undefined {
 	return obj === undefined;
 }
 
-export function isObject(obj) {
+export function isObject(obj: unknown) {
 	return typeof obj === 'object' && obj !== null;
 }
 
+// TODO: add the typing
 export function getOptions(options: any, defaultScheme: any, falseScheme: any = {}) {
 	const result: any = {};
 	if (isObject(options)) {
@@ -106,37 +118,36 @@ export function getOptions(options: any, defaultScheme: any, falseScheme: any = 
 	}
 }
 
-export function parseNumber(number) {
+export function parseNumber(number: string | number) {
 	const parsedNumber = Number(number);
 	if (Number.isNaN(parsedNumber)) {
-		return number;
+		return number as number;
 	} else {
 		return parsedNumber;
 	}
-}
-
-export function isEmpty(obj) {
-	return (!obj || Object.keys(obj).length === 0) && typeof obj !== 'function';
-}
-
-export function isObjectLike(value) {
-	return typeof value === 'object' && value !== null;
-}
-
-export function isNumeric(value): value is number | string {
-	return !Number.isNaN(parseFloat(value)) && isFinite(value);
-}
-
-export function isNaN(value) {
-	return value !== value;
 }
 
 export function isNumber(value: unknown): value is number {
 	return typeof value === 'number';
 }
 
-export function distance(firstPoint, secondPoint) {
-	return Math.sqrt(Math.pow(firstPoint.x - secondPoint.x, 2) + Math.pow(firstPoint.y - secondPoint.y, 2));
+export const isString = <T>(value: string | T): value is string => {
+	return typeof value === 'string';
+};
+
+export function isNaN(value: unknown) {
+	return value !== value;
+}
+
+export function isNumeric(value: unknown): value is number | string {
+	return (
+		(isNumber(value) && !isNaN(value)) ||
+		(isString(value) && !Number.isNaN(parseFloat(value)) && isFinite(parseFloat(value)))
+	);
+}
+
+export function distance(firstPoint: Point, secondPoint: Point) {
+	return Math.sqrt(Math.pow(firstPoint.left - secondPoint.left, 2) + Math.pow(firstPoint.top - secondPoint.top, 2));
 }
 
 export function isRoughlyEqual(a: number, b: number, tolerance = 1e-3): boolean {
@@ -151,7 +162,7 @@ export function isLower(a: number, b: number, tolerance?: number): boolean {
 	return isRoughlyEqual(a, b, tolerance) ? false : a < b;
 }
 
-export function sign(value) {
+export function sign(value: number) {
 	const number = +value;
 	if (number === 0 || isNaN(number)) {
 		return number;
@@ -159,7 +170,7 @@ export function sign(value) {
 	return number > 0 ? 1 : -1;
 }
 
-export function promiseTimeout(timeout) {
+export function promiseTimeout(timeout: number) {
 	return new Promise((resolve) => {
 		setTimeout(() => {
 			resolve();
@@ -194,4 +205,18 @@ export function emptyCoordinates() {
 		width: 0,
 		height: 0,
 	};
+}
+
+export function isCardinalDirection(value: unknown): value is CardinalDirection {
+	return value === 'west' || value === 'south' || value === 'north' || value === 'east';
+}
+
+export function isOrdinalDirection(value: unknown): value is OrdinalDirection {
+	return (
+		isCardinalDirection(value) ||
+		value === 'westNorth' ||
+		value === 'westSouth' ||
+		value === 'eastNorth' ||
+		value === 'eastSouth'
+	);
 }

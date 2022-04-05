@@ -9,34 +9,38 @@ export function normalizeResizeDirections(
 	const coefficient = getCoefficient(state);
 
 	return {
-		left: 'left' in directions ? directions.left * coefficient : 0,
-		top: 'top' in directions ? directions.top * coefficient : 0,
-		right: 'right' in directions ? directions.right * coefficient : 0,
-		bottom: 'bottom' in directions ? directions.bottom * coefficient : 0,
+		left: isNumber(directions.left) ? directions.left * coefficient : 0,
+		top: isNumber(directions.top) ? directions.top * coefficient : 0,
+		right: isNumber(directions.right) ? directions.right * coefficient : 0,
+		bottom: isNumber(directions.bottom) ? directions.bottom * coefficient : 0,
 	};
 }
 
 export function normalizeCenter(state: CropperState, center: Point) {
 	const coefficient = getCoefficient(state);
 
-	return {
-		left: center.left * coefficient + state.visibleArea.left,
-		top: center.top * coefficient + state.visibleArea.top,
-	};
+	if (state.visibleArea) {
+		return {
+			left: center.left * coefficient + state.visibleArea.left,
+			top: center.top * coefficient + state.visibleArea.top,
+		};
+	} else {
+		return center;
+	}
 }
 
 export function fillMoveDirections(directions: Partial<MoveDirections>): MoveDirections {
 	return {
-		left: 'left' in directions ? directions.left : 0,
-		top: 'top' in directions ? directions.top : 0,
+		left: isNumber(directions.left) ? directions.left : 0,
+		top: isNumber(directions.top) ? directions.top : 0,
 	};
 }
 export function fillResizeDirections(directions: Partial<ResizeDirections>): ResizeDirections {
 	return {
-		left: 'left' in directions ? directions.left : 0,
-		top: 'top' in directions ? directions.top : 0,
-		right: 'right' in directions ? directions.right : 0,
-		bottom: 'bottom' in directions ? directions.bottom : 0,
+		left: isNumber(directions.left) ? directions.left : 0,
+		top: isNumber(directions.top) ? directions.top : 0,
+		right: isNumber(directions.right) ? directions.right : 0,
+		bottom: isNumber(directions.bottom) ? directions.bottom : 0,
 	};
 }
 
@@ -44,8 +48,8 @@ export function normalizeMoveDirections(state: CropperState, directions: Partial
 	const coefficient = getCoefficient(state);
 
 	return {
-		left: 'left' in directions ? directions.left * coefficient : 0,
-		top: 'top' in directions ? directions.top * coefficient : 0,
+		left: isNumber(directions.left) ? directions.left * coefficient : 0,
+		top: isNumber(directions.top) ? directions.top * coefficient : 0,
 	};
 }
 

@@ -15,7 +15,7 @@ export function setVisibleArea(
 	// If you set safe to `false`, the coordinates can leave the visible area
 	safe = true,
 ) {
-	let result = { ...copyState(state), visibleArea };
+	let result: CropperState = { ...copyState(state), visibleArea };
 
 	// There is no possibility to break visible area limitations.
 	result = fitVisibleArea(result, settings);

@@ -20,8 +20,8 @@ function calculateGeometricProperties(touches: SimpleTouch[], container: HTMLEle
 
 	touches.forEach((touch) => {
 		spread += distance(
-			{ x: centerMass.left, y: centerMass.top },
-			{ x: touch.clientX - left, y: touch.clientY - top },
+			{ left: centerMass.left, top: centerMass.top },
+			{ left: touch.clientX - left, top: touch.clientY - top },
 		);
 	});
 
@@ -97,7 +97,7 @@ export function wheelEventToImageTransform(
 	ratio = 0.1,
 ) {
 	const { left, top } = container.getBoundingClientRect();
-	const factor = 1 - ratio * sign(event.deltaY || event.detail || event.wheelDelta);
+	const factor = 1 - ratio * sign((event.deltaY || event.detail || event.wheelDelta) as number);
 	const center = {
 		left: event.clientX - left,
 		top: event.clientY - top,

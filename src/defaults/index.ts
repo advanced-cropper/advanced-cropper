@@ -23,7 +23,7 @@ import { defaultPosition } from './defaultPosition';
 import { defaultAreaPositionRestrictions } from './defaultAreaPositionRestrictions';
 import { defaultAreaSizeRestrictions } from './defaultAreaSizeRestrictions';
 import { isFunction } from '../utils';
-import { getBrokenRatio, ratio } from '../service';
+import { ratio } from '../service';
 import { autoZoom } from './postProcess/autoZoom';
 
 export type StencilSize<Settings = CropperSettings> = Size | ((state: CropperState, props: Settings) => Size);
@@ -130,9 +130,9 @@ export function withDefaults(settings: ExtendedCropperSettings) {
 				let defaultSizeAlgorithm = settings.defaultSize;
 				if (!defaultSizeAlgorithm) {
 					if (settings.stencilSize) {
-						defaultSizeAlgorithm = fixedDefaultSize;
+						defaultSizeAlgorithm = fixedDefaultSize as DefaultSize;
 					} else {
-						defaultSizeAlgorithm = defaultSize;
+						defaultSizeAlgorithm = defaultSize as DefaultSize;
 					}
 				}
 
@@ -144,7 +144,7 @@ export function withDefaults(settings: ExtendedCropperSettings) {
 
 				return [
 					size,
-					(state) => ({
+					(state: CropperState) => ({
 						...(isFunction(defaultPositionAlgorithm)
 							? defaultPositionAlgorithm(state, basicSettings)
 							: defaultPositionAlgorithm),
@@ -165,9 +165,15 @@ export function withDefaults(settings: ExtendedCropperSettings) {
 			let minimum = 0;
 			let maximum = Infinity;
 			if (settings.aspectRatio) {
-				({ minimum, maximum } = isFunction(settings.aspectRatio)
+				const value = isFunction(settings.aspectRatio)
 					? settings.aspectRatio(state, basicSettings)
-					: settings.aspectRatio);
+					: settings.aspectRatio;
+				if (value.minimum) {
+					minimum = value.minimum;
+				}
+				if (value.maximum) {
+					maximum = value.maximum;
+				}
 			}
 			if (settings.stencilSize) {
 				const stencilSize = getFixedStencilSize(state, { ...basicSettings, stencilSize: settings.stencilSize });

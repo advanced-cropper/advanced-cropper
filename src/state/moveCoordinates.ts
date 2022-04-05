@@ -6,6 +6,7 @@ import {
 	moveToPositionRestrictions,
 	coordinatesToPositionRestrictions,
 	getPositionRestrictions,
+	isInitialized,
 } from '../service';
 
 export type MoveAlgorithm = (
@@ -15,17 +16,19 @@ export type MoveAlgorithm = (
 ) => CropperState;
 
 export function moveCoordinates(state: CropperState, settings: CropperSettings, directions: MoveDirections) {
-	const result = copyState(state);
+	if (isInitialized(state)) {
+		const result = copyState(state);
 
-	result.coordinates = applyMove(result.coordinates, directions);
+		result.coordinates = applyMove(result.coordinates, directions);
+		result.coordinates = moveToPositionRestrictions(
+			result.coordinates,
+			mergePositionRestrictions(
+				coordinatesToPositionRestrictions(result.visibleArea),
+				getPositionRestrictions(result, settings),
+			),
+		);
+		return result;
+	}
 
-	result.coordinates = moveToPositionRestrictions(
-		result.coordinates,
-		mergePositionRestrictions(
-			coordinatesToPositionRestrictions(result.visibleArea),
-			getPositionRestrictions(result, settings),
-		),
-	);
-
-	return result;
+	return state;
 }

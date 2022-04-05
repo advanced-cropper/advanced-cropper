@@ -7,6 +7,7 @@ import {
 	getSizeRestrictions,
 	mergePositionRestrictions,
 	coordinatesToPositionRestrictions,
+	isInitialized,
 } from '../service';
 import { resizeCoordinatesAlgorithm } from '../algorithms';
 
@@ -39,20 +40,25 @@ export function resizeCoordinates(
 
 	const sizeRestrictions = getSizeRestrictions(state, settings);
 
-	return {
-		...copyState(state),
-		coordinates: resizeCoordinatesAlgorithm(state.coordinates, directions, options, {
-			positionRestrictions: mergePositionRestrictions(
-				getPositionRestrictions(state, settings),
-				coordinatesToPositionRestrictions(state.visibleArea),
-			),
-			sizeRestrictions: {
-				maxWidth: Math.min(sizeRestrictions.maxWidth, state.visibleArea.width),
-				maxHeight: Math.min(sizeRestrictions.maxHeight, state.visibleArea.height),
-				minWidth: Math.max(Math.min(sizeRestrictions.minWidth, state.visibleArea.width), minimumSize),
-				minHeight: Math.max(Math.min(sizeRestrictions.minHeight, state.visibleArea.height), minimumSize),
-			},
-			aspectRatio: getAspectRatio(state, settings),
-		}),
-	};
+	return isInitialized(state)
+		? {
+				...copyState(state),
+				coordinates: resizeCoordinatesAlgorithm(state.coordinates, directions, options, {
+					positionRestrictions: mergePositionRestrictions(
+						getPositionRestrictions(state, settings),
+						coordinatesToPositionRestrictions(state.visibleArea),
+					),
+					sizeRestrictions: {
+						maxWidth: Math.min(sizeRestrictions.maxWidth, state.visibleArea.width),
+						maxHeight: Math.min(sizeRestrictions.maxHeight, state.visibleArea.height),
+						minWidth: Math.max(Math.min(sizeRestrictions.minWidth, state.visibleArea.width), minimumSize),
+						minHeight: Math.max(
+							Math.min(sizeRestrictions.minHeight, state.visibleArea.height),
+							minimumSize,
+						),
+					},
+					aspectRatio: getAspectRatio(state, settings),
+				}),
+		  }
+		: state;
 }

@@ -1,4 +1,4 @@
-import { Coordinates, CropperSettings, CropperState, CoordinatesTransform } from '../types';
+import { Coordinates, CropperSettings, CropperState, CoordinatesTransform, Point, Size } from '../types';
 import {
 	getAspectRatio,
 	getPositionRestrictions,
@@ -8,7 +8,7 @@ import {
 	approximateSize,
 } from '../service';
 import { moveCoordinatesAlgorithm } from '../algorithms';
-import { isUndefined } from '../utils';
+import { emptyCoordinates, isUndefined } from '../utils';
 import { copyState } from './copyState';
 
 export type SetCoordinatesAlgorithm = (
@@ -46,7 +46,7 @@ export function setCoordinates(
 		);
 	}
 
-	const move = (prevCoordinates, newCoordinates) => {
+	const move = (prevCoordinates: Coordinates, newCoordinates: Point) => {
 		return moveCoordinatesAlgorithm(
 			prevCoordinates,
 			{
@@ -57,7 +57,7 @@ export function setCoordinates(
 		);
 	};
 
-	const resize = (prevCoordinates, newCoordinates) => {
+	const resize = (prevCoordinates: Coordinates, newCoordinates: Size) => {
 		const coordinates = {
 			...prevCoordinates,
 			...approximateSize({
@@ -76,7 +76,7 @@ export function setCoordinates(
 		});
 	};
 
-	let coordinates = { ...state.coordinates };
+	let coordinates = state.coordinates ? { ...state.coordinates } : emptyCoordinates();
 
 	const transforms = Array.isArray(transform) ? transform : [transform];
 

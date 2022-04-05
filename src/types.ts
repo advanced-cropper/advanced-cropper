@@ -1,3 +1,5 @@
+import { TimingFunction } from './animation';
+
 export interface Coordinates {
 	width: number;
 	height: number;
@@ -148,6 +150,14 @@ export interface CropperState {
 	coordinates: Coordinates | null;
 }
 
+export interface InitializedCropperState {
+	boundary: Boundary;
+	imageSize: ImageSize;
+	transforms: Transforms;
+	visibleArea: VisibleArea;
+	coordinates: Coordinates;
+}
+
 export type BoundarySizeAlgorithm = ({ boundary, size }: { boundary: HTMLElement; size: Size }) => Boundary;
 
 export type DefaultSize<Settings = CropperSettings> = Size | ((state: CropperState, props: Settings) => Size);
@@ -190,7 +200,7 @@ export interface CropperImage {
 }
 
 export interface CropperTransitions {
-	timingFunction: string;
+	timingFunction: TimingFunction;
 	duration: number;
 	active: boolean;
 }
@@ -205,13 +215,13 @@ export interface SimpleTouch {
 }
 
 export interface PostprocessAction {
-	name: string;
+	name?: string;
 	immediately?: boolean;
 	transitions?: boolean;
 }
 
-export type PostprocessFunction = (
-	state: CropperState,
-	settings: CropperSettings,
+export type PostprocessFunction<Settings = CropperSettings, State = CropperState> = (
+	state: State,
+	settings: Settings,
 	action?: PostprocessAction,
-) => CropperState;
+) => State;

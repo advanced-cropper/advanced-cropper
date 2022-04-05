@@ -1,7 +1,11 @@
-import { CropperSettings, CropperState } from '../types';
+import { CropperSettings, CropperState, InitializedCropperState } from '../types';
 import { emptyCoordinates, isFunction, isNumeric } from '../utils';
 import { rotateSize } from './utils';
 import { calculateSizeRestrictions, calculateAreaSizeRestrictions } from './sizeRestrictions';
+
+export function isInitialized(state: CropperState | null): state is InitializedCropperState {
+	return Boolean(state && state.visibleArea && state.coordinates);
+}
 
 export function getAreaSizeRestrictions(state: CropperState, settings: CropperSettings) {
 	return calculateAreaSizeRestrictions(state, settings);
@@ -28,7 +32,7 @@ export function getCoefficient(state: CropperState) {
 }
 
 export function getStencilCoordinates(state: CropperState | null) {
-	if (state) {
+	if (isInitialized(state)) {
 		const { width, height, left, top } = state.coordinates;
 		const coefficient = getCoefficient(state);
 		return {
@@ -76,5 +80,7 @@ export function getTransformedImageSize(state: CropperState) {
 export function getMinimumSize(state: CropperState) {
 	// The magic number is the approximation of the handler size
 	// Temporary solution that should be improved in the future
-	return Math.min(state.coordinates.width, state.coordinates.height, 20 * getCoefficient(state));
+	return state.coordinates
+		? Math.min(state.coordinates.width, state.coordinates.height, 20 * getCoefficient(state))
+		: 1;
 }

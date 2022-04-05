@@ -4,7 +4,7 @@ import { isBlob, isLocal } from './utils';
 
 const XHR_DONE = 4;
 
-function base64ToArrayBuffer(base64) {
+function base64ToArrayBuffer(base64: string) {
 	base64 = base64.replace(/^data:([^;]+);base64,/gim, '');
 	const binary = atob(base64);
 	const len = binary.length;
@@ -16,7 +16,7 @@ function base64ToArrayBuffer(base64) {
 	return buffer;
 }
 
-function objectURLToBlob(url, callback) {
+function objectURLToBlob(url: string, callback: (...args: any[]) => void) {
 	const http = new XMLHttpRequest();
 	http.open('GET', url, true);
 	http.responseType = 'blob';
@@ -66,8 +66,8 @@ function getTransforms(orientation: number) {
 	return result;
 }
 
-function getImageData(img) {
-	return new Promise((resolve, reject) => {
+function getImageData(img: string) {
+	return new Promise<ArrayBuffer>((resolve, reject) => {
 		try {
 			if (img) {
 				if (/^data:/i.test(img)) {
@@ -77,14 +77,14 @@ function getImageData(img) {
 					// Blob
 					const fileReader = new FileReader();
 					fileReader.onload = function (e) {
-						resolve(e.target.result);
+						resolve(e.target?.result as ArrayBuffer);
 					};
 					objectURLToBlob(img, function (blob) {
 						fileReader.readAsArrayBuffer(blob);
 					});
 				} else {
 					// Simple URL
-					let http = new XMLHttpRequest();
+					const http = new XMLHttpRequest();
 					http.onreadystatechange = function () {
 						if (http.readyState !== XHR_DONE) return;
 
@@ -93,7 +93,6 @@ function getImageData(img) {
 						} else {
 							reject('Warning: could not load an image to parse its orientation');
 						}
-						http = null;
 					};
 					http.onprogress = function () {
 						// Abort the request directly if it not a JPEG image for better performance
@@ -115,15 +114,15 @@ function getImageData(img) {
 	});
 }
 
-export function getStyleTransforms({ rotate, flip, scaleX, scaleY }) {
+export function getStyleTransforms({ rotate, flip, scale }: Transforms & { scale: number }) {
 	let transform = '';
 	transform += ` rotate(${rotate}deg) `;
-	transform += ` scaleX(${scaleX * (flip.horizontal ? -1 : 1)}) `;
-	transform += ` scaleY(${scaleY * (flip.vertical ? -1 : 1)}) `;
+	transform += ` scaleX(${scale * (flip.horizontal ? -1 : 1)}) `;
+	transform += ` scaleY(${scale * (flip.vertical ? -1 : 1)}) `;
 	return transform;
 }
 
-function getStringFromCharCode(dataView, start, length) {
+function getStringFromCharCode(dataView: DataView, start: number, length: number) {
 	let str = '';
 	let i;
 	for (i = start, length += start; i < length; i++) {
@@ -132,7 +131,7 @@ function getStringFromCharCode(dataView, start, length) {
 	return str;
 }
 
-function resetAndGetOrientation(arrayBuffer) {
+function resetAndGetOrientation(arrayBuffer: ArrayBuffer) {
 	try {
 		const dataView = new DataView(arrayBuffer);
 		let orientation;
@@ -200,7 +199,7 @@ interface ParseResult {
 	transforms: Transforms;
 }
 
-function arrayBufferToDataURL(arrayBuffer) {
+function arrayBufferToDataURL(arrayBuffer: ArrayBuffer) {
 	const chunks = [];
 
 	// Chunk Typed Array for better performance
@@ -209,14 +208,22 @@ function arrayBufferToDataURL(arrayBuffer) {
 
 	while (uint8.length > 0) {
 		const value = uint8.subarray(0, chunkSize);
-		chunks.push(String.fromCharCode.apply(null, Array.from ? Array.from(value) : value.slice()));
+		chunks.push(String.fromCharCode.apply(null, (Array.from ? Array.from(value) : value.slice()) as number[]));
 		uint8 = uint8.subarray(chunkSize);
 	}
 
 	return `data:image/jpeg;base64,${btoa(chunks.join(''))}`;
 }
 
-function getImage({ src, arrayBuffer = null, orientation = null }) {
+function getImage({
+	src,
+	arrayBuffer = null,
+	orientation = null,
+}: {
+	src: string;
+	orientation?: number | null;
+	arrayBuffer?: ArrayBuffer | null;
+}) {
 	const options: ParseResult = {
 		src,
 		arrayBuffer,
@@ -278,7 +285,7 @@ function parseImage(src: string, settings: LoadImageSettings = {}) {
 
 export function loadImage(src: string, settings: LoadImageSettings = {}): Promise<CropperImage> {
 	return parseImage(src, settings).then((options) => {
-		return new Promise<CropperImage | null>((resolve, reject) => {
+		return new Promise<CropperImage>((resolve, reject) => {
 			const image = document.createElement('img');
 
 			if (settings.crossOrigin) {
@@ -323,7 +330,7 @@ export function getImageStyle(
 	state: CropperState,
 	area: Coordinates,
 	coefficient: number,
-	transitions?: CropperTransitions,
+	transitions: CropperTransitions | null = null,
 ) {
 	const optimalImageSize =
 		image.width > image.height
@@ -346,8 +353,7 @@ export function getImageStyle(
 		},
 		translateX: area.left / coefficient,
 		translateY: area.top / coefficient,
-		scaleX: 1 / coefficient,
-		scaleY: 1 / coefficient,
+		scale: 1 / coefficient,
 	};
 
 	const compensations = {
@@ -363,8 +369,7 @@ export function getImageStyle(
 
 	const transforms = {
 		...imageTransforms,
-		scaleX: imageTransforms.scaleX * (image.width / optimalImageSize.width),
-		scaleY: imageTransforms.scaleY * (image.height / optimalImageSize.height),
+		scale: imageTransforms.scale * (image.width / optimalImageSize.width),
 	};
 
 	const result = {
@@ -387,7 +392,11 @@ export function getImageStyle(
 	return result;
 }
 
-export function getBackgroundStyle(image: CropperImage, state: CropperState, transitions?: CropperTransitions) {
+export function getBackgroundStyle(
+	image: CropperImage,
+	state: CropperState,
+	transitions: CropperTransitions | null = null,
+) {
 	if (image && state && state.visibleArea) {
 		return getImageStyle(image, state, state.visibleArea, getCoefficient(state), transitions);
 	} else {
@@ -398,10 +407,10 @@ export function getBackgroundStyle(image: CropperImage, state: CropperState, tra
 export function getPreviewStyle(
 	image: CropperImage,
 	state: CropperState,
-	transitions?: CropperTransitions,
-	coefficient?: number,
+	coefficient: number,
+	transitions: CropperTransitions | null = null,
 ) {
-	if (image && state && state.visibleArea) {
+	if (image && state && state.visibleArea && state.coordinates) {
 		return getImageStyle(image, state, state.coordinates, coefficient, transitions);
 	} else {
 		return {};
@@ -442,7 +451,7 @@ const imageMimes = [
 	},
 ];
 
-export function getMimeType(arrayBuffer, fallback = null) {
+export function getMimeType(arrayBuffer: ArrayBuffer, fallback = null) {
 	const byteArray = new Uint8Array(arrayBuffer).subarray(0, 4);
 
 	const candidate = imageMimes.find((el) => el.pattern.every((p, i) => !p || byteArray[i] === p));

@@ -1,30 +1,32 @@
+const timingFunctions = {
+	linear: (t: number) => {
+		return t;
+	},
+	'ease-in': (t: number) => {
+		return Math.pow(t, 1.675);
+	},
+	'ease-out': (t: number) => {
+		return 1 - Math.pow(1 - t, 1.675);
+	},
+	'ease-in-out': (t: number) => {
+		return 0.5 * (Math.sin((t - 0.5) * Math.PI) + 1);
+	},
+};
+
+export type TimingFunction = keyof typeof timingFunctions;
+
 interface AnimationOptions {
-	timingFunction: string;
+	timingFunction: TimingFunction;
 	duration: number;
 	onStart?: () => void;
 	onProgress?: (progress: number) => void;
 	onStop?: () => void;
 }
 
-const timingFunctions = {
-	linear: (t) => {
-		return t;
-	},
-	'ease-in': (t) => {
-		return Math.pow(t, 1.675);
-	},
-	'ease-out': (t) => {
-		return 1 - Math.pow(1 - t, 1.675);
-	},
-	'ease-in-out': (t) => {
-		return 0.5 * (Math.sin((t - 0.5) * Math.PI) + 1);
-	},
-};
-
 export class Animation {
 	endTime?: number;
 	startTime?: number;
-	timingFunction: string;
+	timingFunction: TimingFunction;
 	duration: number;
 	active: boolean;
 	onStart?: () => void;
@@ -49,23 +51,27 @@ export class Animation {
 		this.animate();
 	}
 	animate() {
-		let timingFunction = this.timingFunction in timingFunctions ? timingFunctions[this.timingFunction] : null;
-		if (!timingFunction) {
-			console.warn(
-				`[Animation] The timing function '${timingFunction}' is not supported. Available timing function: 'linear', 'ease-in', 'ease-in-out', 'ease-out'. Reset to 'ease-out'.`,
-			);
-			timingFunction = timingFunctions['ease-out'];
-		}
+		if (this.startTime && this.endTime) {
+			let timingFunction = this.timingFunction in timingFunctions ? timingFunctions[this.timingFunction] : null;
+			if (!timingFunction) {
+				console.warn(
+					`[Animation] The timing function '${timingFunction}' is not supported. Available timing function: 'linear', 'ease-in', 'ease-in-out', 'ease-out'. Reset to 'ease-out'.`,
+				);
+				timingFunction = timingFunctions['ease-out'];
+			}
 
-		const percent = 1 - (this.endTime - performance.now()) / (this.endTime - this.startTime);
+			const percent = 1 - (this.endTime - performance.now()) / (this.endTime - this.startTime);
 
-		const progress = Math.min(1, timingFunction(percent));
+			const progress = Math.min(1, timingFunction(percent));
 
-		if (this.onProgress) {
-			this.onProgress(progress);
-		}
-		if (percent <= 1) {
-			this.id = window.requestAnimationFrame(() => this.animate());
+			if (this.onProgress) {
+				this.onProgress(progress);
+			}
+			if (percent <= 1) {
+				this.id = window.requestAnimationFrame(() => this.animate());
+			} else {
+				this.stop();
+			}
 		} else {
 			this.stop();
 		}

@@ -14,7 +14,7 @@ export type CreateStateAlgorithm = (options: CreateStateOptions, settings: Cropp
 
 export function createState(options: CreateStateOptions, settings: CropperSettings): CropperState {
 	const { boundary, imageSize, transforms, priority } = options;
-	let state = {
+	let state: CropperState = {
 		boundary: {
 			width: boundary.width,
 			height: boundary.height,
@@ -34,12 +34,12 @@ export function createState(options: CreateStateOptions, settings: CropperSettin
 		coordinates: null,
 	};
 
-	if (priority !== 'visibleArea') {
-		state = setCoordinates(state, settings, getDefaultCoordinates(state, settings), false);
-		state = setVisibleArea(state, settings, getDefaultVisibleArea(state, settings), true);
-	} else {
+	if (priority === 'visibleArea') {
 		state = setVisibleArea(state, settings, getDefaultVisibleArea(state, settings), false);
 		state = setCoordinates(state, settings, getDefaultCoordinates(state, settings), true);
+	} else {
+		state = setCoordinates(state, settings, getDefaultCoordinates(state, settings), false);
+		state = setVisibleArea(state, settings, getDefaultVisibleArea(state, settings), true);
 	}
 
 	return state;

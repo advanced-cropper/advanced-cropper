@@ -12,8 +12,8 @@ function validateSize(params: {
 }) {
 	const { size, aspectRatio, ignoreMinimum, sizeRestrictions } = params;
 	return (
-		!isLower(ratio(size), aspectRatio.minimum) &&
-		!isGreater(ratio(size), aspectRatio.maximum) &&
+		!isLower(ratio(size), aspectRatio.minimum || 0) &&
+		!isGreater(ratio(size), aspectRatio.maximum || Infinity) &&
 		!isGreater(size.height, sizeRestrictions.maxHeight) &&
 		!isGreater(size.width, sizeRestrictions.maxWidth) &&
 		size.width &&
@@ -78,10 +78,9 @@ export function approximateSize(params: {
 
 	const candidate = findBestCandidate(candidates) || findBestCandidate(candidates, true);
 
-	return (
-		candidate && {
-			width: candidate.width,
-			height: candidate.height,
-		}
-	);
+	// TODO: fix the type of return value
+	return (candidate && {
+		width: candidate.width,
+		height: candidate.height,
+	}) as Size;
 }

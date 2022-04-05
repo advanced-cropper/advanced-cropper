@@ -21,7 +21,8 @@
 	"moduleResolution": "node",
 	"noEmit": true,
 	"resolveJsonModule": true,
-	"skipLibCheck": true
+	"skipLibCheck": true,
+	"strict" : true,
   },
   "include": [
     "src"
