@@ -12,6 +12,7 @@ import {
 	SizeRestrictions,
 } from '../types';
 import { ALL_DIRECTIONS } from '../constants';
+import { isUndefined } from '../utils';
 
 export function toLimits(object: Coordinates): Limits {
 	return {
@@ -306,5 +307,29 @@ export function coordinatesToPositionRestrictions(coordinates: Coordinates) {
 		top: coordinates.top,
 		right: coordinates.left + coordinates.width,
 		bottom: coordinates.top + coordinates.height,
+	};
+}
+
+export function calculateAspectRatio(
+	local: AspectRatio = {},
+	global: {
+		minAspectRatio?: number;
+		maxAspectRatio?: number;
+		aspectRatio?: number;
+	} = {},
+): Required<AspectRatio> {
+	const { minAspectRatio, maxAspectRatio, aspectRatio } = global;
+
+	let { minimum, maximum } = local;
+
+	if (isUndefined(minimum)) {
+		minimum = !isUndefined(aspectRatio) ? aspectRatio : minAspectRatio;
+	}
+	if (isUndefined(maximum)) {
+		maximum = !isUndefined(aspectRatio) ? aspectRatio : maxAspectRatio;
+	}
+	return {
+		minimum: minimum || 0,
+		maximum: maximum || Infinity,
 	};
 }
