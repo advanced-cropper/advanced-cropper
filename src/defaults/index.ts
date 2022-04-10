@@ -28,6 +28,11 @@ import { autoZoom } from './postProcess/autoZoom';
 
 export type StencilSize<Settings = CropperSettings> = Size | ((state: CropperState, props: Settings) => Size);
 
+export type ScaleImage = {
+	enabled?: boolean;
+	adjustStencil?: boolean;
+};
+
 export interface ExtendedCropperSettings {
 	minWidth?: number;
 	minHeight?: number;
@@ -38,9 +43,8 @@ export interface ExtendedCropperSettings {
 	defaultCoordinates?: DefaultCoordinates<DefaultSettings>;
 	defaultVisibleArea?: DefaultVisibleArea<DefaultSettings>;
 	stencilSize?: StencilSize<DefaultSettings>;
+	scaleImage?: ScaleImage;
 	imageRestriction?: ImageRestriction;
-	adjustStencil?: boolean;
-	scaleImage?: boolean;
 	aspectRatio?: AspectRatio | ((state: CropperState, setting: CropperSettings) => AspectRatio);
 	areaSizeRestrictions?:
 		| AreaSizeRestrictions
@@ -62,6 +66,7 @@ type DefaultSettings = CropperSettings & {
 	defaultSize?: DefaultSize<DefaultSettings>;
 	defaultPosition?: DefaultPosition<DefaultSettings>;
 	defaultVisibleArea?: DefaultVisibleArea<DefaultSettings>;
+	scaleImage?: ScaleImage;
 	stencilSize?: StencilSize<DefaultSettings>;
 	imageRestriction?: ImageRestriction;
 };
@@ -185,7 +190,10 @@ export function withDefaults(settings: ExtendedCropperSettings) {
 				maximum,
 			};
 		},
-		adjustStencil: !settings.stencilSize && settings.adjustStencil,
+		scaleImage: {
+			adjustStencil: settings.scaleImage?.adjustStencil && !settings.stencilSize,
+			enabled: settings.scaleImage?.enabled,
+		},
 	};
 }
 
