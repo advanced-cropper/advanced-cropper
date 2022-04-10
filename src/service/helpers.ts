@@ -3,7 +3,7 @@ import { emptyCoordinates, isFunction, isNumeric } from '../utils';
 import { rotateSize } from './utils';
 import { calculateSizeRestrictions, calculateAreaSizeRestrictions } from './sizeRestrictions';
 
-export function isInitialized(state: CropperState | null): state is InitializedCropperState {
+export function isInitializedState(state: CropperState | null): state is InitializedCropperState {
 	return Boolean(state && state.visibleArea && state.coordinates);
 }
 
@@ -32,7 +32,7 @@ export function getCoefficient(state: CropperState) {
 }
 
 export function getStencilCoordinates(state: CropperState | null) {
-	if (isInitialized(state)) {
+	if (isInitializedState(state)) {
 		const { width, height, left, top } = state.coordinates;
 		const coefficient = getCoefficient(state);
 		return {

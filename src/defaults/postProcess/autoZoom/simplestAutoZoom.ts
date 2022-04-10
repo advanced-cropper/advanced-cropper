@@ -1,9 +1,9 @@
 import { CropperSettings, CropperState, PostprocessAction } from '../../../types';
-import { applyScale, fitVisibleArea, getAreaSizeRestrictions, isInitialized, maxScale } from '../../../service';
+import { applyScale, fitVisibleArea, getAreaSizeRestrictions, isInitializedState, maxScale } from '../../../service';
 import { copyState } from '../../../state';
 
 export function simplestAutoZoomAlgorithm(state: CropperState, settings: CropperSettings): CropperState {
-	if (isInitialized(state)) {
+	if (isInitializedState(state)) {
 		const result = copyState(state);
 
 		const widthIntersections = Math.max(0, result.coordinates.width - result.visibleArea.width);

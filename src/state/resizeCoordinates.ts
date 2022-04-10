@@ -7,7 +7,7 @@ import {
 	getSizeRestrictions,
 	mergePositionRestrictions,
 	coordinatesToPositionRestrictions,
-	isInitialized,
+	isInitializedState,
 } from '../service';
 import { resizeCoordinatesAlgorithm } from '../algorithms';
 
@@ -40,7 +40,7 @@ export function resizeCoordinates(
 
 	const sizeRestrictions = getSizeRestrictions(state, settings);
 
-	return isInitialized(state)
+	return isInitializedState(state)
 		? {
 				...copyState(state),
 				coordinates: resizeCoordinatesAlgorithm(state.coordinates, directions, options, {

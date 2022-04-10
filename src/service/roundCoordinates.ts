@@ -1,9 +1,9 @@
 import { Coordinates, CropperSettings, CropperState } from '../types';
 import { moveToPositionRestrictions } from './utils';
-import { getPositionRestrictions, getSizeRestrictions, isInitialized } from './helpers';
+import { getPositionRestrictions, getSizeRestrictions, isInitializedState } from './helpers';
 
 export function roundCoordinates(state: CropperState, settings: CropperSettings): Coordinates | null {
-	if (isInitialized(state)) {
+	if (isInitializedState(state)) {
 		const sizeRestrictions = getSizeRestrictions(state, settings);
 
 		const positionRestrictions = getPositionRestrictions(state, settings);

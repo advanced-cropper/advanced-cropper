@@ -3,7 +3,7 @@ import {
 	getAreaPositionRestrictions,
 	getAreaSizeRestrictions,
 	getTransformedImageSize,
-	isInitialized,
+	isInitializedState,
 	moveToPositionRestrictions,
 	ratio,
 } from '../../../service';
@@ -15,7 +15,7 @@ export function staticAutoZoom(
 	settings: CropperSettings,
 	action?: PostprocessAction,
 ): CropperState {
-	if (action && action.immediately && isInitialized(state)) {
+	if (action && action.immediately && isInitializedState(state)) {
 		const result = copyState(state);
 
 		const imageSize = getTransformedImageSize(state);

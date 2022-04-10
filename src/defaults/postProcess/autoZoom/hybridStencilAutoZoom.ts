@@ -7,7 +7,7 @@ import {
 	getAreaSizeRestrictions,
 	getCenter,
 	getPositionRestrictions,
-	isInitialized,
+	isInitializedState,
 	mergePositionRestrictions,
 	moveToPositionRestrictions,
 	ratio,
@@ -17,7 +17,7 @@ import { CropperSettings, CropperState, PostprocessAction, Size } from '../../..
 import { copyState } from '../../../state';
 
 export function hybridStencilAutoZoomAlgorithm(state: CropperState, settings: CropperSettings): CropperState {
-	if (isInitialized(state)) {
+	if (isInitializedState(state)) {
 		const result = copyState(state);
 
 		// Checks that coordinates has the same ratio that coordinates:

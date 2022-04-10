@@ -15,7 +15,7 @@ import {
 	getAreaSizeRestrictions,
 	getPositionRestrictions,
 	getSizeRestrictions,
-	isInitialized,
+	isInitializedState,
 } from '../service';
 import { copyState } from '../state';
 import { isNumber, isRoughlyEqual } from '../utils';
@@ -31,7 +31,7 @@ export function transformImageAlgorithm(
 
 	const { adjustStencil } = settings;
 
-	if (isInitialized(state)) {
+	if (isInitializedState(state)) {
 		const result = copyState(state) as InitializedCropperState;
 
 		// It's reversed because zooming in the image is actually zooming out visible area

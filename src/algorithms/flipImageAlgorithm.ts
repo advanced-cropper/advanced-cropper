@@ -7,7 +7,7 @@ import {
 	rotatePoint,
 	getAreaPositionRestrictions,
 	getTransformedImageSize,
-	isInitialized,
+	isInitializedState,
 } from '../service';
 import { copyState } from '../state';
 
@@ -17,7 +17,7 @@ export function flipImageAlgorithm(
 	horizontal?: boolean,
 	vertical?: boolean,
 ) {
-	if (isInitialized(state)) {
+	if (isInitializedState(state)) {
 		const result = copyState(state);
 
 		const rotate = state.transforms.rotate;

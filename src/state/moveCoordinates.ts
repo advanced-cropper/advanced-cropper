@@ -6,7 +6,7 @@ import {
 	moveToPositionRestrictions,
 	coordinatesToPositionRestrictions,
 	getPositionRestrictions,
-	isInitialized,
+	isInitializedState,
 } from '../service';
 
 export type MoveAlgorithm = (
@@ -16,7 +16,7 @@ export type MoveAlgorithm = (
 ) => CropperState;
 
 export function moveCoordinates(state: CropperState, settings: CropperSettings, directions: MoveDirections) {
-	if (isInitialized(state)) {
+	if (isInitializedState(state)) {
 		const result = copyState(state);
 
 		result.coordinates = applyMove(result.coordinates, directions);

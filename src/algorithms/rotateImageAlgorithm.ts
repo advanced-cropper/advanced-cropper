@@ -12,7 +12,7 @@ import {
 	getAreaSizeRestrictions,
 	getAreaPositionRestrictions,
 	approximateSize,
-	isInitialized,
+	isInitializedState,
 } from '../service';
 import { copyState } from '../state';
 import { CropperSettings, CropperState, Rotate } from '../types';
@@ -26,7 +26,7 @@ export type RotateImageAlgorithm = (
 ) => CropperState;
 
 export function rotateImageAlgorithm(state: CropperState, settings: CropperSettings, rotate: number | Rotate) {
-	if (isInitialized(state)) {
+	if (isInitializedState(state)) {
 		const result = copyState(state);
 
 		const angle = isNumber(rotate) ? rotate : rotate.angle;

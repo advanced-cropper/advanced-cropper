@@ -1,5 +1,5 @@
 import { Coordinates, CropperState, Size, Transforms } from './types';
-import { getCenter, rotatePoint, rotateSize, approximateSize, isInitialized } from './service';
+import { getCenter, rotatePoint, rotateSize, approximateSize, isInitializedState } from './service';
 import { isNumeric } from './utils';
 
 interface UpdateOptions {
@@ -111,7 +111,7 @@ export function drawCroppedArea(
 	spareCanvas: HTMLCanvasElement,
 	options: DrawOptions,
 ) {
-	if (isInitialized(state)) {
+	if (isInitializedState(state)) {
 		const { transforms, coordinates } = state;
 
 		const imageTransformed = transforms.rotate !== 0 || transforms.flip.horizontal || transforms.flip.vertical;

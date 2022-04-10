@@ -6,7 +6,7 @@ import {
 	getAreaPositionRestrictions,
 	getAreaSizeRestrictions,
 	getCenter,
-	isInitialized,
+	isInitializedState,
 	mergePositionRestrictions,
 	moveToPositionRestrictions,
 	coordinatesToPositionRestrictions,
@@ -20,7 +20,7 @@ export function fixedStencilAutoZoomAlgorithm(
 	state: CropperState,
 	settings: CropperSettings & { stencilSize: StencilSize },
 ): CropperState {
-	if (isInitialized(state)) {
+	if (isInitializedState(state)) {
 		const result = copyState(state);
 
 		const stencil = getFixedStencilSize(state, settings);
