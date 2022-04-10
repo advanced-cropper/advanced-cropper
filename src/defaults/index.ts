@@ -40,6 +40,7 @@ export interface ExtendedCropperSettings {
 	stencilSize?: StencilSize<DefaultSettings>;
 	imageRestriction?: ImageRestriction;
 	adjustStencil?: boolean;
+	scaleImage?: boolean;
 	aspectRatio?: AspectRatio | ((state: CropperState, setting: CropperSettings) => AspectRatio);
 	areaSizeRestrictions?:
 		| AreaSizeRestrictions
