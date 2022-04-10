@@ -1,6 +1,6 @@
 import { applyMove, diff, moveToPositionRestrictions, getCenter, ratio } from './utils';
 import { CropperSettings, CropperState } from '../types';
-import { getAreaPositionRestrictions, getAreaSizeRestrictions, isInitialized } from './helpers';
+import { getAreaPositionRestrictions, getAreaSizeRestrictions } from './helpers';
 import { copyState } from '../state';
 import { approximateSize } from './approximateSize';
 

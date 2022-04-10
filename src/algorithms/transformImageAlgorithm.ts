@@ -10,7 +10,7 @@ import {
 	minScale,
 	moveToPositionRestrictions,
 	positionToSizeRestrictions,
-	toLimits,
+	coordinatesToPositionRestrictions,
 	getAreaPositionRestrictions,
 	getAreaSizeRestrictions,
 	getPositionRestrictions,
@@ -144,7 +144,7 @@ export function transformImageAlgorithm(
 		// Move the coordinates to prevent the intersection with visible area and position restrictions
 		result.coordinates = moveToPositionRestrictions(
 			result.coordinates,
-			mergePositionRestrictions(toLimits(result.visibleArea), positionRestrictions),
+			mergePositionRestrictions(coordinatesToPositionRestrictions(result.visibleArea), positionRestrictions),
 		);
 
 		// Resize only area if stencil can't be resized and stencil resize is disabled
@@ -174,7 +174,12 @@ export function transformImageAlgorithm(
 				// Move to prevent the intersection with coordinates:
 				result.visibleArea = applyMove(
 					result.visibleArea,
-					inverseMove(fitToPositionRestrictions(result.coordinates, toLimits(result.visibleArea))),
+					inverseMove(
+						fitToPositionRestrictions(
+							result.coordinates,
+							coordinatesToPositionRestrictions(result.visibleArea),
+						),
+					),
 				);
 			}
 		}

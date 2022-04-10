@@ -11,7 +11,7 @@ import {
 	mergePositionRestrictions,
 	moveToPositionRestrictions,
 	ratio,
-	toLimits,
+	coordinatesToPositionRestrictions,
 } from '../../../service';
 import { CropperSettings, CropperState, PostprocessAction, Size } from '../../../types';
 import { copyState } from '../../../state';
@@ -63,7 +63,10 @@ export function hybridStencilAutoZoomAlgorithm(state: CropperState, settings: Cr
 
 		result.coordinates = moveToPositionRestrictions(
 			result.coordinates,
-			mergePositionRestrictions(toLimits(result.visibleArea), getPositionRestrictions(result, settings)),
+			mergePositionRestrictions(
+				coordinatesToPositionRestrictions(result.visibleArea),
+				getPositionRestrictions(result, settings),
+			),
 		);
 
 		return result;

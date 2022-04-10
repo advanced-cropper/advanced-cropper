@@ -6,7 +6,7 @@ import {
 	resizeToSizeRestrictions,
 	inverseMove,
 	ratio,
-	toLimits,
+	coordinatesToPositionRestrictions,
 	fitToPositionRestrictions,
 	fitCoordinates,
 	getAreaPositionRestrictions,
@@ -48,7 +48,9 @@ export function setBoundary(state: CropperState, settings: CropperSettings, boun
 		result.visibleArea = resizeToSizeRestrictions(result.visibleArea, getAreaSizeRestrictions(result, settings));
 
 		// Move visible are to prevent moving of the coordinates:
-		const move = inverseMove(fitToPositionRestrictions(result.coordinates, toLimits(result.visibleArea)));
+		const move = inverseMove(
+			fitToPositionRestrictions(result.coordinates, coordinatesToPositionRestrictions(result.visibleArea)),
+		);
 		if (result.visibleArea.width < result.coordinates.width) {
 			move.left = 0;
 		}

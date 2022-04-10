@@ -3,7 +3,6 @@ import {
 	Coordinates,
 	Diff,
 	Intersections,
-	Limits,
 	MoveDirections,
 	Point,
 	PositionRestrictions,
@@ -14,24 +13,11 @@ import {
 import { ALL_DIRECTIONS } from '../constants';
 import { isUndefined } from '../utils';
 
-export function toLimits(object: Coordinates): Limits {
-	return {
-		left: object.left,
-		top: object.top,
-		right: object.left + object.width,
-		bottom: object.top + object.height,
-	};
-}
-
 export function diff(firstObject: Point, secondObject: Point): Diff {
 	return {
 		left: firstObject.left - secondObject.left,
 		top: firstObject.top - secondObject.top,
 	};
-}
-
-export function sizeDistance(a: Size, b: Size): number {
-	return Math.pow(a.width - b.width, 2) + Math.pow(a.height - b.height, 2);
 }
 
 export function getCenter(object: Coordinates): Point {
@@ -41,27 +27,8 @@ export function getCenter(object: Coordinates): Point {
 	};
 }
 
-export function getIntersections(object: Coordinates, limits: Limits): Intersections {
-	const intersections: Intersections = {
-		left: 0,
-		top: 0,
-		right: 0,
-		bottom: 0,
-	};
-	ALL_DIRECTIONS.forEach((direction) => {
-		const areaLimit = limits[direction];
-		const objectLimit = toLimits(object)[direction];
-		if (areaLimit !== undefined && objectLimit !== undefined) {
-			if (direction === 'left' || direction === 'top') {
-				intersections[direction] = Math.max(0, areaLimit - objectLimit);
-			} else {
-				intersections[direction] = Math.max(0, objectLimit - areaLimit);
-			}
-		} else {
-			intersections[direction] = 0;
-		}
-	});
-	return intersections;
+export function sizeDistance(a: Size, b: Size): number {
+	return Math.pow(a.width - b.width, 2) + Math.pow(a.height - b.height, 2);
 }
 
 export function applyDirections(coordinates: Coordinates, directions: ResizeDirections): Coordinates {
@@ -85,6 +52,15 @@ export function applyMove(object: Coordinates, move: MoveDirections): Coordinate
 		...object,
 		left: object.left + move.left,
 		top: object.top + move.top,
+	};
+}
+
+export function coordinatesToPositionRestrictions(coordinates: Coordinates) {
+	return {
+		left: coordinates.left,
+		top: coordinates.top,
+		right: coordinates.left + coordinates.width,
+		bottom: coordinates.top + coordinates.height,
 	};
 }
 
@@ -205,6 +181,29 @@ export function fitToSizeRestrictions(coordinates: Size, sizeRestrictions: SizeR
 	return scale;
 }
 
+export function getIntersections(object: Coordinates, positionRestrictions: PositionRestrictions): Intersections {
+	const intersections: Intersections = {
+		left: 0,
+		top: 0,
+		right: 0,
+		bottom: 0,
+	};
+	ALL_DIRECTIONS.forEach((direction) => {
+		const areaLimit = positionRestrictions[direction];
+		const objectLimit = coordinatesToPositionRestrictions(object)[direction];
+		if (areaLimit !== undefined && objectLimit !== undefined) {
+			if (direction === 'left' || direction === 'top') {
+				intersections[direction] = Math.max(0, areaLimit - objectLimit);
+			} else {
+				intersections[direction] = Math.max(0, objectLimit - areaLimit);
+			}
+		} else {
+			intersections[direction] = 0;
+		}
+	});
+	return intersections;
+}
+
 export function resizeToSizeRestrictions(coordinates: Coordinates, sizeRestrictions: SizeRestrictions): Coordinates;
 export function resizeToSizeRestrictions(coordinates: Size, sizeRestrictions: SizeRestrictions): Size;
 export function resizeToSizeRestrictions(coordinates: Coordinates | Size, sizeRestrictions: SizeRestrictions) {
@@ -256,23 +255,23 @@ export function positionToSizeRestrictions(positionRestrictions: PositionRestric
 }
 
 export function mergePositionRestrictions(a: PositionRestrictions, b: PositionRestrictions) {
-	const limits: Limits = {};
+	const restrictions: PositionRestrictions = {};
 	ALL_DIRECTIONS.forEach((direction) => {
 		const firstDirection = a[direction];
 		const secondDirection = b[direction];
 		if (firstDirection !== undefined && secondDirection !== undefined) {
 			if (direction === 'left' || direction === 'top') {
-				limits[direction] = Math.max(firstDirection, secondDirection);
+				restrictions[direction] = Math.max(firstDirection, secondDirection);
 			} else {
-				limits[direction] = Math.min(firstDirection, secondDirection);
+				restrictions[direction] = Math.min(firstDirection, secondDirection);
 			}
 		} else if (secondDirection !== undefined) {
-			limits[direction] = secondDirection;
+			restrictions[direction] = secondDirection;
 		} else if (firstDirection !== undefined) {
-			limits[direction] = firstDirection;
+			restrictions[direction] = firstDirection;
 		}
 	});
-	return limits;
+	return restrictions;
 }
 
 export function fitToPositionRestrictions(coordinates: Coordinates, positionRestrictions: PositionRestrictions) {
@@ -299,15 +298,6 @@ export function fitToPositionRestrictions(coordinates: Coordinates, positionRest
 
 export function moveToPositionRestrictions(coordinates: Coordinates, positionRestrictions: PositionRestrictions) {
 	return applyMove(coordinates, fitToPositionRestrictions(coordinates, positionRestrictions));
-}
-
-export function coordinatesToPositionRestrictions(coordinates: Coordinates) {
-	return {
-		left: coordinates.left,
-		top: coordinates.top,
-		right: coordinates.left + coordinates.width,
-		bottom: coordinates.top + coordinates.height,
-	};
 }
 
 export function calculateAspectRatio(

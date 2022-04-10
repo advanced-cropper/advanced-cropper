@@ -1,4 +1,11 @@
-import { applyMove, diff, getCenter, mergePositionRestrictions, moveToPositionRestrictions, toLimits } from './utils';
+import {
+	applyMove,
+	diff,
+	getCenter,
+	mergePositionRestrictions,
+	moveToPositionRestrictions,
+	coordinatesToPositionRestrictions,
+} from './utils';
 import { CropperSettings, CropperState } from '../types';
 import { getAspectRatio, getPositionRestrictions, getSizeRestrictions } from './helpers';
 import { copyState } from '../state';
@@ -40,7 +47,10 @@ export function fitCoordinates(state: CropperState, settings: CropperSettings) {
 		result.coordinates = moveToPositionRestrictions(
 			result.coordinates,
 			state.visibleArea
-				? mergePositionRestrictions(toLimits(state.visibleArea), getPositionRestrictions(result, settings))
+				? mergePositionRestrictions(
+						coordinatesToPositionRestrictions(state.visibleArea),
+						getPositionRestrictions(result, settings),
+				  )
 				: getPositionRestrictions(result, settings),
 		);
 		return result;

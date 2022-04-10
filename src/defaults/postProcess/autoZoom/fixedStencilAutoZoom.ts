@@ -9,7 +9,7 @@ import {
 	isInitialized,
 	mergePositionRestrictions,
 	moveToPositionRestrictions,
-	toLimits,
+	coordinatesToPositionRestrictions,
 } from '../../../service';
 import { CropperSettings, CropperState, PostprocessAction } from '../../../types';
 import { getFixedStencilSize } from '../../helpers';
@@ -50,7 +50,10 @@ export function fixedStencilAutoZoomAlgorithm(
 		);
 		result.coordinates = moveToPositionRestrictions(
 			result.coordinates,
-			mergePositionRestrictions(toLimits(result.visibleArea), getAreaPositionRestrictions(result, settings)),
+			mergePositionRestrictions(
+				coordinatesToPositionRestrictions(result.visibleArea),
+				getAreaPositionRestrictions(result, settings),
+			),
 		);
 
 		return result;

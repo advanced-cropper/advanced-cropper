@@ -15,7 +15,7 @@ import {
 	isInitialized,
 } from '../service';
 import { copyState } from '../state';
-import { CropperSettings, CropperState, InitializedCropperState, Rotate } from '../types';
+import { CropperSettings, CropperState, Rotate } from '../types';
 import { mergeSizeRestrictions } from '../service';
 import { isNumber } from '../utils';
 

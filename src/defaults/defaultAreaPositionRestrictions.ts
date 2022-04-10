@@ -1,19 +1,19 @@
-import { CropperSettings, CropperState, ImageRestriction, Limits } from '../types';
+import { CropperSettings, CropperState, ImageRestriction, PositionRestrictions } from '../types';
 import { getTransformedImageSize, ratio } from '../service';
 
 export function defaultAreaPositionRestrictions(
 	state: CropperState,
 	settings: CropperSettings & { imageRestriction?: ImageRestriction },
-): Limits {
+): PositionRestrictions {
 	const { visibleArea, boundary } = state;
 	const { imageRestriction } = settings;
 
 	const imageSize = getTransformedImageSize(state);
 
-	let limits: Limits = {};
+	let restrictions: PositionRestrictions = {};
 
 	if (imageRestriction === ImageRestriction.fillArea) {
-		limits = {
+		restrictions = {
 			left: 0,
 			top: 0,
 			right: imageSize.width,
@@ -21,35 +21,35 @@ export function defaultAreaPositionRestrictions(
 		};
 	} else if (imageRestriction === ImageRestriction.fitArea) {
 		if (ratio(boundary) > ratio(imageSize)) {
-			limits = {
+			restrictions = {
 				top: 0,
 				bottom: imageSize.height,
 			};
 			if (visibleArea) {
 				if (visibleArea.width > imageSize.width) {
-					limits.left = -(visibleArea.width - imageSize.width) / 2;
-					limits.right = imageSize.width - limits.left;
+					restrictions.left = -(visibleArea.width - imageSize.width) / 2;
+					restrictions.right = imageSize.width - restrictions.left;
 				} else {
-					limits.left = 0;
-					limits.right = imageSize.width;
+					restrictions.left = 0;
+					restrictions.right = imageSize.width;
 				}
 			}
 		} else {
-			limits = {
+			restrictions = {
 				left: 0,
 				right: imageSize.width,
 			};
 			if (visibleArea) {
 				if (visibleArea.height > imageSize.height) {
-					limits.top = -(visibleArea.height - imageSize.height) / 2;
-					limits.bottom = imageSize.height - limits.top;
+					restrictions.top = -(visibleArea.height - imageSize.height) / 2;
+					restrictions.bottom = imageSize.height - restrictions.top;
 				} else {
-					limits.top = 0;
-					limits.bottom = imageSize.height;
+					restrictions.top = 0;
+					restrictions.bottom = imageSize.height;
 				}
 			}
 		}
 	}
 
-	return limits;
+	return restrictions;
 }

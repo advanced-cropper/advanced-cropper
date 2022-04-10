@@ -1,4 +1,4 @@
-import { AspectRatio, Coordinates, Limits, PositionRestrictions, ResizeDirections, SizeRestrictions } from '../types';
+import { AspectRatio, Coordinates, PositionRestrictions, ResizeDirections, SizeRestrictions } from '../types';
 import { ALL_DIRECTIONS, HORIZONTAL_DIRECTIONS, VERTICAL_DIRECTIONS } from '../constants';
 import { applyDirections, getBrokenRatio, getIntersections, ratio } from '../service';
 import { moveCoordinatesAlgorithm } from './moveCoordinatesAlgorithm';
@@ -8,7 +8,7 @@ import { isRoughlyEqual } from '../utils';
 interface FitDirectionsParams {
 	directions: ResizeDirections;
 	coordinates: Coordinates;
-	positionRestrictions: Limits;
+	positionRestrictions: PositionRestrictions;
 	sizeRestrictions: SizeRestrictions;
 	preserveRatio?: boolean;
 	compensate?: boolean;

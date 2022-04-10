@@ -1,6 +1,12 @@
-import { CropperSettings, CropperState, Limits } from '../types';
+import { CropperSettings, CropperState, PositionRestrictions } from '../types';
 import { getAreaSizeRestrictions, getTransformedImageSize } from '../service';
-import { getIntersections, moveToPositionRestrictions, ratio, resizeToSizeRestrictions, toLimits } from '../service';
+import {
+	getIntersections,
+	moveToPositionRestrictions,
+	ratio,
+	resizeToSizeRestrictions,
+	coordinatesToPositionRestrictions,
+} from '../service';
 
 export function defaultVisibleArea(state: CropperState, settings: CropperSettings) {
 	const { coordinates, boundary } = state;
@@ -34,26 +40,26 @@ export function defaultVisibleArea(state: CropperState, settings: CropperSetting
 		// If the coordinates are beyond image visible area will be allowed to be beyond image alike:
 		const coordinatesIntersection = getIntersections(
 			coordinates,
-			toLimits({
+			coordinatesToPositionRestrictions({
 				left: 0,
 				top: 0,
 				...imageSize,
 			}),
 		);
 
-		const limits: Limits = {};
+		const restrictions: PositionRestrictions = {};
 
 		if (!coordinatesIntersection.left && !coordinatesIntersection.right && visibleArea.width <= imageSize.width) {
-			limits.left = 0;
-			limits.right = imageSize.width;
+			restrictions.left = 0;
+			restrictions.right = imageSize.width;
 		}
 
 		if (!coordinatesIntersection.top && !coordinatesIntersection.bottom && visibleArea.height <= imageSize.height) {
-			limits.top = 0;
-			limits.bottom = imageSize.height;
+			restrictions.top = 0;
+			restrictions.bottom = imageSize.height;
 		}
 
-		return moveToPositionRestrictions(visibleArea, limits);
+		return moveToPositionRestrictions(visibleArea, restrictions);
 	} else {
 		const imageRatio = ratio(imageSize);
 
