@@ -79,13 +79,23 @@ export interface Position {
 	top: number;
 }
 
-export type Priority = 'coordinates' | 'visibleArea';
+export enum ImageRestriction {
+	fillArea = 'fillArea',
+	fitArea = 'fitArea',
+	stencil = 'stencil',
+	none = 'none',
+}
+
+export enum Priority {
+	coordinates = 'coordinates',
+	visibleArea = 'visibleArea',
+}
 
 export type PositionDirection = 'left' | 'top' | 'right' | 'bottom';
 export type HorizontalDirection = 'left' | 'right';
 export type VerticalDirection = 'top' | 'bottom';
 export type MainDirections = 'left' | 'top';
-export type ImageRestriction = 'fillArea' | 'fitArea' | 'stencil' | 'none';
+
 export type HorizontalCardinalDirection = 'west' | 'east';
 export type VerticalCardinalDirection = 'north' | 'south';
 export type CardinalDirection = HorizontalCardinalDirection | VerticalCardinalDirection;

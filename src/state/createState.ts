@@ -1,4 +1,4 @@
-import { Boundary, CropperSettings, CropperState, ImageSize, PartialTransforms } from '../types';
+import { Boundary, CropperSettings, CropperState, ImageSize, PartialTransforms, Priority } from '../types';
 import { setCoordinates } from './setCoordinates';
 import { getDefaultCoordinates, getDefaultVisibleArea } from '../service';
 import { setVisibleArea } from './setVisibleArea';
@@ -7,7 +7,7 @@ export interface CreateStateOptions {
 	boundary: Boundary;
 	imageSize: ImageSize;
 	transforms?: PartialTransforms;
-	priority?: 'visibleArea' | 'coordinates';
+	priority?: Priority;
 }
 
 export type CreateStateAlgorithm = (options: CreateStateOptions, settings: CropperSettings) => CropperState;
@@ -34,7 +34,7 @@ export function createState(options: CreateStateOptions, settings: CropperSettin
 		coordinates: null,
 	};
 
-	if (priority === 'visibleArea') {
+	if (priority === Priority.visibleArea) {
 		state = setVisibleArea(state, settings, getDefaultVisibleArea(state, settings), false);
 		state = setCoordinates(state, settings, getDefaultCoordinates(state, settings), true);
 	} else {

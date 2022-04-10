@@ -1,5 +1,5 @@
 import { CropperSettings, CropperState, ImageRestriction, Limits } from '../types';
-import { ratio, getTransformedImageSize } from '../service';
+import { getTransformedImageSize, ratio } from '../service';
 
 export function defaultAreaPositionRestrictions(
 	state: CropperState,
@@ -12,14 +12,14 @@ export function defaultAreaPositionRestrictions(
 
 	let limits: Limits = {};
 
-	if (imageRestriction === 'fillArea') {
+	if (imageRestriction === ImageRestriction.fillArea) {
 		limits = {
 			left: 0,
 			top: 0,
 			right: imageSize.width,
 			bottom: imageSize.height,
 		};
-	} else if (imageRestriction === 'fitArea') {
+	} else if (imageRestriction === ImageRestriction.fitArea) {
 		if (ratio(boundary) > ratio(imageSize)) {
 			limits = {
 				top: 0,

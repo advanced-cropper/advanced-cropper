@@ -1,5 +1,5 @@
 import { AreaSizeRestrictions, CropperSettings, CropperState, ImageRestriction } from '../types';
-import { ratio, getTransformedImageSize } from '../service';
+import { getTransformedImageSize, ratio } from '../service';
 
 export function defaultAreaSizeRestrictions(
 	state: CropperState,
@@ -17,10 +17,10 @@ export function defaultAreaSizeRestrictions(
 		maxHeight: Infinity,
 	};
 
-	if (imageRestriction === 'fillArea') {
+	if (imageRestriction === ImageRestriction.fillArea) {
 		restrictions.maxWidth = imageSize.width;
 		restrictions.maxHeight = imageSize.height;
-	} else if (imageRestriction === 'fitArea') {
+	} else if (imageRestriction === ImageRestriction.fitArea) {
 		if (ratio(boundary) > ratio(imageSize)) {
 			restrictions.maxHeight = imageSize.height;
 		} else {
