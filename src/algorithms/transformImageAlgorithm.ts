@@ -19,12 +19,12 @@ import {
 } from '../service';
 import { copyState } from '../state';
 import { isNumber, isRoughlyEqual } from '../utils';
-import { ScaleImage } from '../defaults';
+import { ScaleImageOptions } from '../defaults';
 
 export function transformImageAlgorithm(
 	state: CropperState,
 	settings: CropperSettings & {
-		scaleImage?: ScaleImage;
+		scaleImage?: ScaleImageOptions;
 	},
 	transform: ImageTransform,
 ): CropperState {

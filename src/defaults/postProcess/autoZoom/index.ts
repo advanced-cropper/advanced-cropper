@@ -2,13 +2,13 @@ import { hybridStencilAutoZoom } from './hybridStencilAutoZoom';
 import { simplestAutoZoom } from './simplestAutoZoom';
 import { fixedStencilAutoZoom } from './fixedStencilAutoZoom';
 import { CropperSettings, CropperState, PostprocessAction } from '../../../types';
-import { ScaleImage, StencilSize } from '../../';
+import { ScaleImageOptions, StencilSize } from '../../';
 import { staticAutoZoom } from './staticAutoZoom';
 
 interface AutoZoomCropperSettings extends CropperSettings {
 	autoZoom?: boolean;
 	stencilSize?: StencilSize;
-	scaleImage?: ScaleImage;
+	scaleImage?: ScaleImageOptions;
 }
 
 export function autoZoom(state: CropperState, settings: AutoZoomCropperSettings, action: PostprocessAction = {}) {

@@ -28,7 +28,7 @@ import { autoZoom } from './postProcess/autoZoom';
 
 export type StencilSize<Settings = CropperSettings> = Size | ((state: CropperState, props: Settings) => Size);
 
-export type ScaleImage = {
+export type ScaleImageOptions = {
 	enabled?: boolean;
 	adjustStencil?: boolean;
 };
@@ -43,7 +43,7 @@ export interface ExtendedCropperSettings {
 	defaultCoordinates?: DefaultCoordinates<DefaultSettings>;
 	defaultVisibleArea?: DefaultVisibleArea<DefaultSettings>;
 	stencilSize?: StencilSize<DefaultSettings>;
-	scaleImage?: ScaleImage;
+	scaleImage?: ScaleImageOptions;
 	imageRestriction?: ImageRestriction;
 	aspectRatio?: AspectRatio | ((state: CropperState, setting: CropperSettings) => AspectRatio);
 	areaSizeRestrictions?:
@@ -66,7 +66,7 @@ type DefaultSettings = CropperSettings & {
 	defaultSize?: DefaultSize<DefaultSettings>;
 	defaultPosition?: DefaultPosition<DefaultSettings>;
 	defaultVisibleArea?: DefaultVisibleArea<DefaultSettings>;
-	scaleImage?: ScaleImage;
+	scaleImage?: ScaleImageOptions;
 	stencilSize?: StencilSize<DefaultSettings>;
 	imageRestriction?: ImageRestriction;
 };
