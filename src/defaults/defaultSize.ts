@@ -7,7 +7,6 @@ import {
 	approximateSize,
 } from '../service';
 import { isFunction } from '../utils';
-import { StencilSize } from './';
 
 export function defaultSize(state: CropperState, settings: CropperSettings): Size {
 	const { imageSize, visibleArea } = state;
@@ -44,33 +43,5 @@ export function defaultSize(state: CropperState, settings: CropperSettings): Siz
 		...size,
 		aspectRatio,
 		sizeRestrictions: sizeRestrictions,
-	});
-}
-
-export function fixedDefaultSize(state: CropperState, settings: CropperSettings & { stencilSize: StencilSize }): Size {
-	const { imageSize, visibleArea, boundary } = state;
-
-	const sizeRestrictions = getSizeRestrictions(state, settings);
-
-	const stencilSize = isFunction(settings.stencilSize) ? settings.stencilSize(state, settings) : settings.stencilSize;
-
-	const aspectRatio = isFunction(settings.aspectRatio) ? settings.aspectRatio(state, settings) : settings.aspectRatio;
-
-	const area = (visibleArea || imageSize) as Size;
-
-	let height, width;
-	if (ratio(area) > ratio(boundary)) {
-		height = (stencilSize.height * area.height) / boundary.height;
-		width = height * ratio(stencilSize);
-	} else {
-		width = (stencilSize.width * area.width) / boundary.width;
-		height = width / ratio(stencilSize);
-	}
-
-	return approximateSize({
-		width,
-		height,
-		aspectRatio,
-		sizeRestrictions,
 	});
 }

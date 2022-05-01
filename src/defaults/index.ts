@@ -1,9 +1,8 @@
 import { defaultPositionRestrictions } from './defaultPositionRestrictions';
 import { defaultVisibleArea } from './defaultVisibleArea';
-import { defaultSize, fixedDefaultSize } from './defaultSize';
-import { getFixedStencilSize } from './helpers';
+import { defaultSize } from './defaultSize';
 import { pixelsRestrictions } from './defaultSizeRestrictions';
-import { getAreaSizeRestrictions, mergeSizeRestrictions } from '../service';
+import { mergePositionRestrictions, mergeSizeRestrictions } from '../service';
 import {
 	AreaPositionRestrictions,
 	AreaSizeRestrictions,
@@ -17,64 +16,102 @@ import {
 	ImageRestriction,
 	PositionRestrictions,
 	SizeRestrictions,
-	Size,
 } from '../types';
 import { defaultPosition } from './defaultPosition';
 import { defaultAreaPositionRestrictions } from './defaultAreaPositionRestrictions';
 import { defaultAreaSizeRestrictions } from './defaultAreaSizeRestrictions';
 import { isFunction } from '../utils';
-import { ratio } from '../service';
 import { autoZoom } from './postProcess/autoZoom';
-
-export type StencilSize<Settings = CropperSettings> = Size | ((state: CropperState, props: Settings) => Size);
+import { Settings } from 'http2';
 
 export type ScaleImageOptions = {
 	enabled?: boolean;
 	adjustStencil?: boolean;
 };
 
-export interface ExtendedCropperSettings {
+export interface WithDefaultsSettings<Settings extends DefaultSettings> {
 	minWidth?: number;
 	minHeight?: number;
 	maxWidth?: number;
 	maxHeight?: number;
-	defaultSize?: DefaultSize<DefaultSettings>;
-	defaultPosition?: DefaultPosition<DefaultSettings>;
-	defaultCoordinates?: DefaultCoordinates<DefaultSettings>;
-	defaultVisibleArea?: DefaultVisibleArea<DefaultSettings>;
-	stencilSize?: StencilSize<DefaultSettings>;
-	scaleImage?: ScaleImageOptions;
+	defaultSize?: DefaultSize<Settings>;
+	defaultPosition?: DefaultPosition<Settings>;
+	defaultCoordinates?: DefaultCoordinates<Settings>;
+	defaultVisibleArea?: DefaultVisibleArea<Settings>;
 	imageRestriction?: ImageRestriction;
-	aspectRatio?: AspectRatio | ((state: CropperState, setting: CropperSettings) => AspectRatio);
-	areaSizeRestrictions?:
-		| AreaSizeRestrictions
-		| ((state: CropperState, settings: DefaultSettings) => AreaSizeRestrictions);
+	aspectRatio?: AspectRatio | ((state: CropperState, setting: Settings) => AspectRatio);
+	areaSizeRestrictions?: AreaSizeRestrictions | ((state: CropperState, settings: Settings) => AreaSizeRestrictions);
 	areaPositionRestrictions?:
 		| AreaPositionRestrictions
-		| ((state: CropperState, settings: DefaultSettings) => AreaPositionRestrictions);
-	sizeRestrictions?: SizeRestrictions | ((state: CropperState, settings: DefaultSettings) => SizeRestrictions);
-	positionRestrictions?:
-		| PositionRestrictions
-		| ((state: CropperState, settings: DefaultSettings) => PositionRestrictions);
+		| ((state: CropperState, settings: Settings) => AreaPositionRestrictions);
+	sizeRestrictions?: SizeRestrictions | ((state: CropperState, settings: Settings) => SizeRestrictions);
+	positionRestrictions?: PositionRestrictions | ((state: CropperState, settings: Settings) => PositionRestrictions);
 }
 
-type DefaultSettings = CropperSettings & {
+export interface DefaultSettings extends CropperSettings {
 	minWidth?: number;
 	minHeight?: number;
 	maxWidth?: number;
 	maxHeight?: number;
 	defaultSize?: DefaultSize<DefaultSettings>;
 	defaultPosition?: DefaultPosition<DefaultSettings>;
-	defaultVisibleArea?: DefaultVisibleArea<DefaultSettings>;
-	scaleImage?: ScaleImageOptions;
-	stencilSize?: StencilSize<DefaultSettings>;
 	imageRestriction?: ImageRestriction;
-};
+}
 
-export function withDefaults(settings: ExtendedCropperSettings) {
+export type DefaultSettingsExtension<Settings> = Omit<Settings, keyof DefaultSettings>;
+
+export function withDefaultSizeRestrictions<Settings extends CropperSettings>(
+	sizeRestrictions: SizeRestrictions | ((state: CropperState, settings: Settings) => SizeRestrictions),
+) {
+	return (state: CropperState, basicSettings: DefaultSettings & Settings) => {
+		const value = isFunction(sizeRestrictions) ? sizeRestrictions(state, basicSettings) : sizeRestrictions;
+		return mergeSizeRestrictions(pixelsRestrictions(state, basicSettings), value);
+	};
+}
+
+export function withDefaultPositionRestrictions<Settings extends CropperSettings>(
+	positionRestrictions: PositionRestrictions | ((state: CropperState, settings: Settings) => PositionRestrictions),
+) {
+	return (state: CropperState, basicSettings: DefaultSettings & Settings) => {
+		const value = isFunction(positionRestrictions)
+			? positionRestrictions(state, basicSettings)
+			: positionRestrictions;
+		return mergePositionRestrictions(defaultPositionRestrictions(state, basicSettings), value);
+	};
+}
+
+export function withDefaultAreaPositionRestrictions<Settings extends CropperSettings>(
+	areaPositionRestrictions:
+		| AreaPositionRestrictions
+		| ((state: CropperState, settings: Settings) => AreaPositionRestrictions),
+) {
+	return (state: CropperState, basicSettings: DefaultSettings & Settings) => {
+		const value = isFunction(areaPositionRestrictions)
+			? areaPositionRestrictions(state, basicSettings)
+			: areaPositionRestrictions;
+
+		return mergePositionRestrictions(defaultAreaPositionRestrictions(state, basicSettings), value);
+	};
+}
+
+export function withDefaultAreaSizeRestrictions<Settings extends CropperSettings>(
+	areaSizeRestrictions:
+		| AreaSizeRestrictions
+		| ((state: CropperState, settings: CropperSettings) => AreaSizeRestrictions),
+) {
+	return (state: CropperState, basicSettings: DefaultSettings & Settings) => {
+		const value = isFunction(areaSizeRestrictions)
+			? areaSizeRestrictions(state, basicSettings)
+			: areaSizeRestrictions;
+
+		return mergeSizeRestrictions(defaultAreaSizeRestrictions(state, basicSettings), value);
+	};
+}
+
+export function withDefaults<Settings extends DefaultSettings>(settings: WithDefaultsSettings<Settings>) {
 	return {
 		...settings,
-		sizeRestrictions: (state: CropperState, basicSettings: DefaultSettings) => {
+		sizeRestrictions: (state: CropperState, basicSettings: Settings) => {
 			let restrictions;
 			if (settings.sizeRestrictions) {
 				restrictions = isFunction(settings.sizeRestrictions)
@@ -83,24 +120,9 @@ export function withDefaults(settings: ExtendedCropperSettings) {
 			} else {
 				restrictions = pixelsRestrictions(state, basicSettings);
 			}
-
-			if (basicSettings.stencilSize && state.visibleArea) {
-				const stencilSize = getFixedStencilSize(state, {
-					...basicSettings,
-					stencilSize: basicSettings.stencilSize,
-				});
-
-				const areaRestrictions = getAreaSizeRestrictions(state, basicSettings);
-
-				restrictions = mergeSizeRestrictions(restrictions, {
-					maxWidth: (areaRestrictions.maxWidth * stencilSize.width) / state.boundary.width,
-					maxHeight: (areaRestrictions.maxHeight * stencilSize.height) / state.boundary.height,
-				});
-			}
-
 			return restrictions;
 		},
-		areaPositionRestrictions: (state: CropperState, basicSettings: DefaultSettings) => {
+		areaPositionRestrictions: (state: CropperState, basicSettings: Settings) => {
 			if (settings.areaPositionRestrictions) {
 				return isFunction(settings.areaPositionRestrictions)
 					? settings.areaPositionRestrictions(state, basicSettings)
@@ -109,7 +131,7 @@ export function withDefaults(settings: ExtendedCropperSettings) {
 				return defaultAreaPositionRestrictions(state, basicSettings);
 			}
 		},
-		areaSizeRestrictions: (state: CropperState, basicSettings: DefaultSettings) => {
+		areaSizeRestrictions: (state: CropperState, basicSettings: Settings) => {
 			if (settings.areaSizeRestrictions) {
 				return isFunction(settings.areaSizeRestrictions)
 					? settings.areaSizeRestrictions(state, basicSettings)
@@ -118,7 +140,7 @@ export function withDefaults(settings: ExtendedCropperSettings) {
 				return defaultAreaSizeRestrictions(state, basicSettings);
 			}
 		},
-		positionRestrictions: (state: CropperState, basicSettings: DefaultSettings) => {
+		positionRestrictions: (state: CropperState, basicSettings: Settings) => {
 			if (settings.positionRestrictions) {
 				return isFunction(settings.positionRestrictions)
 					? settings.positionRestrictions(state, basicSettings)
@@ -127,7 +149,7 @@ export function withDefaults(settings: ExtendedCropperSettings) {
 				return defaultPositionRestrictions(state, basicSettings);
 			}
 		},
-		defaultCoordinates: (state: CropperState, basicSettings: DefaultSettings) => {
+		defaultCoordinates: (state: CropperState, basicSettings: Settings) => {
 			if (settings.defaultCoordinates) {
 				return isFunction(settings.defaultCoordinates)
 					? settings.defaultCoordinates(state, basicSettings)
@@ -135,11 +157,7 @@ export function withDefaults(settings: ExtendedCropperSettings) {
 			} else {
 				let defaultSizeAlgorithm = settings.defaultSize;
 				if (!defaultSizeAlgorithm) {
-					if (settings.stencilSize) {
-						defaultSizeAlgorithm = fixedDefaultSize as DefaultSize;
-					} else {
-						defaultSizeAlgorithm = defaultSize as DefaultSize;
-					}
+					defaultSizeAlgorithm = defaultSize;
 				}
 
 				const size = isFunction(defaultSizeAlgorithm)
@@ -158,7 +176,7 @@ export function withDefaults(settings: ExtendedCropperSettings) {
 				];
 			}
 		},
-		defaultVisibleArea: (state: CropperState, basicSettings: DefaultSettings) => {
+		defaultVisibleArea: (state: CropperState, basicSettings: Settings) => {
 			if (settings.defaultVisibleArea) {
 				return isFunction(settings.defaultVisibleArea)
 					? settings.defaultVisibleArea(state, basicSettings)
@@ -167,7 +185,7 @@ export function withDefaults(settings: ExtendedCropperSettings) {
 				return defaultVisibleArea(state, basicSettings);
 			}
 		},
-		aspectRatio: (state: CropperState, basicSettings: DefaultSettings) => {
+		aspectRatio: (state: CropperState, basicSettings: Settings) => {
 			let minimum = 0;
 			let maximum = Infinity;
 			if (settings.aspectRatio) {
@@ -181,20 +199,12 @@ export function withDefaults(settings: ExtendedCropperSettings) {
 					maximum = value.maximum;
 				}
 			}
-			if (settings.stencilSize) {
-				const stencilSize = getFixedStencilSize(state, { ...basicSettings, stencilSize: settings.stencilSize });
-				minimum = maximum = ratio(stencilSize);
-			}
 			return {
 				minimum,
 				maximum,
 			};
 		},
-		scaleImage: {
-			adjustStencil: settings.scaleImage?.adjustStencil && !settings.stencilSize,
-			enabled: settings.scaleImage?.enabled,
-		},
-	};
+	} as DefaultSettings;
 }
 
 export function defaultSettings() {
@@ -203,7 +213,6 @@ export function defaultSettings() {
 
 export const defaultPostprocess = autoZoom;
 
-export * from './helpers';
 export * from './defaultAreaPositionRestrictions';
 export * from './defaultPosition';
 export * from './defaultSize';

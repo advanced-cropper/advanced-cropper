@@ -10,6 +10,7 @@ export default {
 		'src/service/index.ts',
 		'src/state/index.ts',
 		'src/defaults/index.ts',
+		'src/extensions/stencilSize.ts',
 		'src/animation.ts',
 		'src/canvas.ts',
 		'src/transforms.ts',
