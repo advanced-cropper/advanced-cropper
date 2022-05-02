@@ -1,4 +1,4 @@
-import { TimingFunction } from './animation';
+export type TimingFunction = string;
 
 export interface Coordinates {
 	width: number;

@@ -12,7 +12,6 @@ export default {
 		'src/defaults/index.ts',
 		'src/extensions/stencilSize.ts',
 		'src/extensions/constraints.ts',
-		'src/animation.ts',
 		'src/canvas.ts',
 		'src/transforms.ts',
 		'src/image.ts',

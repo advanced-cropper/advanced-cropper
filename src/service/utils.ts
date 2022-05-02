@@ -1,6 +1,7 @@
 import {
 	AspectRatio,
 	Coordinates,
+	CropperTransitions,
 	Diff,
 	Intersections,
 	MoveDirections,
@@ -322,4 +323,8 @@ export function calculateAspectRatio(
 		minimum: minimum || 0,
 		maximum: maximum || Infinity,
 	};
+}
+
+export function getTransitionStyle(transitions: CropperTransitions | undefined) {
+	return transitions ? `${transitions.timingFunction} ${transitions.active ? transitions.duration : 0}ms` : 'none';
 }
