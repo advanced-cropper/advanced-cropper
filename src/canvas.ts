@@ -8,10 +8,14 @@ interface UpdateOptions {
 	fillColor?: string;
 }
 
-export function prepareSource(canvas: HTMLCanvasElement, image: HTMLImageElement, { rotate, flip }: Transforms) {
+export function prepareSource(
+	canvas: HTMLCanvasElement,
+	image: HTMLImageElement | HTMLCanvasElement,
+	{ rotate, flip }: Transforms,
+) {
 	const originalSize = {
-		width: image.naturalWidth,
-		height: image.naturalHeight,
+		width: 'naturalWidth' in image ? image.naturalWidth : image.width,
+		height: 'naturalHeight' in image ? image.naturalHeight : image.height,
 	};
 
 	const transformedSize = rotateSize(originalSize, rotate);
@@ -106,7 +110,7 @@ export interface DrawOptions extends UpdateOptions {
 }
 export function drawCroppedArea(
 	state: CropperState,
-	image: HTMLImageElement,
+	image: HTMLImageElement | HTMLCanvasElement,
 	resultCanvas: HTMLCanvasElement,
 	spareCanvas: HTMLCanvasElement,
 	options: DrawOptions,

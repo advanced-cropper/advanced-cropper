@@ -1,4 +1,4 @@
-import { CropperSettings, ImageRestriction, InitializedCropperState } from '../types';
+import { CoreSettings, ImageRestriction, InitializedCropperState } from '../types';
 import { DefaultSettings } from '../defaults';
 import { StencilSize } from './stencilSize';
 import { getMinimumSize, getSizeRestrictions, ratio } from '../service';
@@ -60,7 +60,7 @@ function getMinimumVisibleAreaSize(
 
 function getMaximumVisibleAreaSize(
 	state: InitializedCropperState,
-	settings: CropperSettings & {
+	settings: CoreSettings & {
 		imageRestriction?: ImageRestriction;
 		stencilSize?: StencilSize;
 		minWidth?: number;
@@ -143,7 +143,7 @@ function getMaximumVisibleAreaSize(
 
 export function getAbsoluteZoom(
 	state: InitializedCropperState,
-	settings: CropperSettings & {
+	settings: CoreSettings & {
 		imageRestriction?: ImageRestriction;
 		stencilSize?: StencilSize;
 		minWidth?: number;
@@ -166,7 +166,7 @@ export function getAbsoluteZoom(
 	return Math.min(1, Math.max(0, 1 - (size - minSize) / (maxSize - minSize)));
 }
 
-export function getVisibleAreaSize(state: InitializedCropperState, settings: CropperSettings, absoluteZoom: number) {
+export function getVisibleAreaSize(state: InitializedCropperState, settings: CoreSettings, absoluteZoom: number) {
 	const minSize = getMinimumVisibleAreaSize(state, settings);
 	const maxSize = getMaximumVisibleAreaSize(state, settings);
 

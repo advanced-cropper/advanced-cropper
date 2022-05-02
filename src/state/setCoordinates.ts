@@ -1,4 +1,4 @@
-import { Coordinates, CropperSettings, CropperState, CoordinatesTransform, Point, Size } from '../types';
+import { Coordinates, CoreSettings, CropperState, CoordinatesTransform, Point, Size } from '../types';
 import {
 	getAspectRatio,
 	getPositionRestrictions,
@@ -11,16 +11,16 @@ import { moveCoordinatesAlgorithm } from '../algorithms';
 import { emptyCoordinates, isUndefined } from '../utils';
 import { copyState } from './copyState';
 
-export type SetCoordinatesAlgorithm = (
+export type SetCoordinatesAlgorithm<Settings extends CoreSettings = CoreSettings> = (
 	state: CropperState,
-	settings: CropperSettings,
+	settings: Settings,
 	transforms: CoordinatesTransform | CoordinatesTransform[],
 	safe?: boolean,
 ) => CropperState;
 
 export function setCoordinates(
 	state: CropperState,
-	settings: CropperSettings,
+	settings: CoreSettings,
 	transform: CoordinatesTransform | CoordinatesTransform[],
 	// If you set safe to `false`, the coordinates can leave the visible area
 	safe = true,
@@ -81,18 +81,19 @@ export function setCoordinates(
 	const transforms = Array.isArray(transform) ? transform : [transform];
 
 	transforms.forEach((transform) => {
-		let changes: Partial<Coordinates>;
+		let changes: Partial<Coordinates> | null;
 		if (typeof transform === 'function') {
 			changes = transform({ ...state, coordinates }, settings);
 		} else {
 			changes = transform;
 		}
-
-		if (!isUndefined(changes.width) || !isUndefined(changes.height)) {
-			coordinates = resize(coordinates, { ...coordinates, ...changes });
-		}
-		if (!isUndefined(changes.left) || !isUndefined(changes.top)) {
-			coordinates = move(coordinates, { ...coordinates, ...changes });
+		if (changes) {
+			if (!isUndefined(changes.width) || !isUndefined(changes.height)) {
+				coordinates = resize(coordinates, { ...coordinates, ...changes });
+			}
+			if (!isUndefined(changes.left) || !isUndefined(changes.top)) {
+				coordinates = move(coordinates, { ...coordinates, ...changes });
+			}
 		}
 	});
 

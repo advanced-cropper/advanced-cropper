@@ -1,19 +1,19 @@
-import { CropperSettings, CropperState, Size } from '../types';
+import { CoreSettings, CropperState, Size } from '../types';
 import {
 	ratio,
 	positionToSizeRestrictions,
 	getPositionRestrictions,
 	getSizeRestrictions,
 	approximateSize,
+	getAspectRatio,
 } from '../service';
-import { isFunction } from '../utils';
 
-export function defaultSize(state: CropperState, settings: CropperSettings): Size {
+export function defaultSize(state: CropperState, settings: CoreSettings): Size {
 	const { imageSize, visibleArea } = state;
 
 	const sizeRestrictions = getSizeRestrictions(state, settings);
 
-	const aspectRatio = isFunction(settings.aspectRatio) ? settings.aspectRatio(state, settings) : settings.aspectRatio;
+	const aspectRatio = getAspectRatio(state, settings);
 
 	let area;
 	if (visibleArea) {

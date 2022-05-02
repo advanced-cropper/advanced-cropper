@@ -7,12 +7,13 @@ import {
 	MoveDirections,
 	Point,
 	PositionRestrictions,
+	RawAspectRatio,
 	ResizeDirections,
 	Size,
 	SizeRestrictions,
 } from '../types';
 import { ALL_DIRECTIONS } from '../constants';
-import { isUndefined } from '../utils';
+import { isNumber, isNumeric, isUndefined } from '../utils';
 
 export function diff(firstObject: Point, secondObject: Point): Diff {
 	return {
@@ -301,28 +302,31 @@ export function moveToPositionRestrictions(coordinates: Coordinates, positionRes
 	return applyMove(coordinates, fitToPositionRestrictions(coordinates, positionRestrictions));
 }
 
-export function calculateAspectRatio(
-	local: AspectRatio = {},
-	global: {
-		minAspectRatio?: number;
-		maxAspectRatio?: number;
-		aspectRatio?: number;
-	} = {},
-): Required<AspectRatio> {
-	const { minAspectRatio, maxAspectRatio, aspectRatio } = global;
-
-	let { minimum, maximum } = local;
-
-	if (isUndefined(minimum)) {
-		minimum = !isUndefined(aspectRatio) ? aspectRatio : minAspectRatio;
+export function aspectRatioIntersection(main?: AspectRatio, subset?: AspectRatio) {
+	if (!subset) {
+		return main;
+	} else if (!main) {
+		return subset;
+	} else {
+		return {
+			minimum: Math.min(main.maximum, Math.max(main.minimum, subset.minimum)),
+			maximum: Math.max(main.minimum, Math.min(main.maximum, subset.maximum)),
+		};
 	}
-	if (isUndefined(maximum)) {
-		maximum = !isUndefined(aspectRatio) ? aspectRatio : maxAspectRatio;
+}
+
+export function createAspectRatio(aspectRatio: RawAspectRatio = {}): AspectRatio {
+	if (isNumber(aspectRatio)) {
+		return {
+			minimum: aspectRatio,
+			maximum: aspectRatio,
+		};
+	} else {
+		return {
+			minimum: isNumeric(aspectRatio.minimum) ? aspectRatio.minimum : 0,
+			maximum: isNumeric(aspectRatio.maximum) ? aspectRatio.maximum : Infinity,
+		};
 	}
-	return {
-		minimum: minimum || 0,
-		maximum: maximum || Infinity,
-	};
 }
 
 export function getTransitionStyle(transitions: CropperTransitions | undefined) {

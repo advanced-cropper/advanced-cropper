@@ -61,9 +61,11 @@ export interface Intersections {
 }
 
 export interface AspectRatio {
-	minimum?: number;
-	maximum?: number;
+	minimum: number;
+	maximum: number;
 }
+
+export type RawAspectRatio = Partial<AspectRatio> | number;
 
 export interface CropperEvent {
 	type: string;
@@ -149,8 +151,9 @@ export interface ImageTransform {
 }
 
 export type CoordinatesTransform =
-	| ((state: CropperState, settings: CropperSettings) => Partial<Coordinates>)
-	| Partial<Coordinates>;
+	| ((state: CropperState, settings: CoreSettings) => Partial<Coordinates> | null)
+	| Partial<Coordinates>
+	| null;
 
 export interface CropperState {
 	boundary: Boundary;
@@ -170,34 +173,54 @@ export interface InitializedCropperState {
 
 export type BoundarySizeAlgorithm = ({ boundary, size }: { boundary: HTMLElement; size: Size }) => Boundary;
 
-export type DefaultSize<Settings = CropperSettings> = Size | ((state: CropperState, props: Settings) => Size);
+export type DefaultSize<Settings = CoreSettings> =
+	| Size
+	| BivarianceConstraint<(state: CropperState, props: Settings) => Size>;
 
-export type DefaultPosition<Settings = CropperSettings> =
+export type DefaultPosition<Settings = CoreSettings> =
 	| Position
-	| ((state: CropperState, props: Settings) => Position);
+	| BivarianceConstraint<(state: CropperState, props: Settings) => Position>;
 
-export type DefaultVisibleArea<Settings = CropperSettings> =
+export type DefaultVisibleArea<Settings = CoreSettings> =
 	| VisibleArea
-	| ((state: CropperState, props: Settings) => VisibleArea);
+	| BivarianceConstraint<(state: CropperState, props: Settings) => VisibleArea>;
 
-export type DefaultCoordinates<Settings = CropperSettings> =
+export type DefaultCoordinates<Settings = CoreSettings> =
 	| (CoordinatesTransform | CoordinatesTransform[])
-	| ((state: CropperState, settings: Settings) => CoordinatesTransform | CoordinatesTransform[]);
+	| BivarianceConstraint<(state: CropperState, settings: Settings) => CoordinatesTransform | CoordinatesTransform[]>;
 
-export interface CropperSettings {
-	defaultCoordinates: DefaultCoordinates;
-	defaultVisibleArea: DefaultVisibleArea;
+// There is the issue with recursive typing. I can't use `this` instead of `Settings`, so there
+export interface CoreSettings {
+	defaultCoordinates: DefaultCoordinates<this>;
+	defaultVisibleArea: DefaultVisibleArea<this>;
 	areaPositionRestrictions:
 		| AreaPositionRestrictions
-		| ((state: CropperState, settings: CropperSettings) => AreaPositionRestrictions);
+		| BivarianceConstraint<(state: CropperState, settings: this) => AreaPositionRestrictions>;
 	areaSizeRestrictions:
 		| AreaSizeRestrictions
-		| ((state: CropperState, settings: CropperSettings) => AreaSizeRestrictions);
-	sizeRestrictions: SizeRestrictions | ((state: CropperState, settings: CropperSettings) => SizeRestrictions);
+		| BivarianceConstraint<(state: CropperState, settings: this) => AreaSizeRestrictions>;
+	sizeRestrictions:
+		| SizeRestrictions
+		| BivarianceConstraint<(state: CropperState, settings: this) => SizeRestrictions>;
 	positionRestrictions:
 		| PositionRestrictions
-		| ((state: CropperState, settings: CropperSettings) => PositionRestrictions);
-	aspectRatio: AspectRatio | ((state: CropperState, setting: CropperSettings) => AspectRatio);
+		| BivarianceConstraint<(state: CropperState, settings: this) => PositionRestrictions>;
+	aspectRatio: AspectRatio | BivarianceConstraint<(state: CropperState, settings: this) => RawAspectRatio>;
+}
+
+// The hacky way to enable bivariance instead of contravariance,
+// that is default when strictFunctionTypes is on
+// https://www.typescriptlang.org/tsconfig#strictFunctionTypes
+export type BivarianceConstraint<T extends (...args: any) => any> = {
+	method(...args: Parameters<T>): ReturnType<T>;
+}['method'];
+
+export interface ModifiersSettings {
+	transformImage?: {
+		adjustStencil?: boolean;
+	};
+	moveCoordinates?: {};
+	resizeCoordinates?: {};
 }
 
 export interface CropperImage {
@@ -230,16 +253,10 @@ export interface PostprocessAction {
 	transitions?: boolean;
 }
 
-export type PostprocessFunction<Settings = CropperSettings, State = CropperState> = (
+export type PostprocessFunction<Settings = CoreSettings, State = CropperState> = (
 	state: State,
 	settings: Settings,
 	action: PostprocessAction,
 ) => State;
 
-export type CropperBehaviorSettings = Partial<{
-	transformImage: {
-		adjustStencil?: boolean;
-	};
-	moveCoordinates: {};
-	resizeCoordinates: {};
-}>;
+export type ExtensionOf<A, B> = Omit<A, keyof B>;

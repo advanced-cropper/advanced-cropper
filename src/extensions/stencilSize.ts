@@ -1,13 +1,16 @@
-import { CropperSettings, CropperState, PostprocessAction, Size } from '../types';
+import { BivarianceConstraint, CoreSettings, CropperState, PostprocessAction, RawAspectRatio, Size } from '../types';
 import {
 	applyMove,
 	applyScale,
 	approximateSize,
+	aspectRatioIntersection,
 	coordinatesToPositionRestrictions,
+	createAspectRatio,
 	diff,
 	fitToSizeRestrictions,
 	getAreaPositionRestrictions,
 	getAreaSizeRestrictions,
+	getAspectRatio,
 	getCenter,
 	getSizeRestrictions,
 	isInitializedState,
@@ -17,10 +20,44 @@ import {
 } from '../service';
 import { isFunction } from '../utils';
 import { copyState } from '../state';
+import { defaultStencilConstraints } from '../defaults';
 
-export type StencilSize<Settings = CropperSettings> = Size | ((state: CropperState, props: Settings) => Size);
+export type StencilSize<Settings = CoreSettings> =
+	| Size
+	| BivarianceConstraint<(state: CropperState, props: Settings) => Size>;
 
-export function getStencilSize(state: CropperState, settings: CropperSettings & { stencilSize: StencilSize }) {
+export interface FixedStencilSettings extends CoreSettings {
+	stencilSize: StencilSize<this>;
+}
+
+export function fixedStencilConstraints(
+	rawSettings: {
+		stencilSize: StencilSize<FixedStencilSettings>;
+	},
+	stencilOptions: {
+		aspectRatio?: (() => RawAspectRatio) | RawAspectRatio;
+	},
+) {
+	const defaultConstraints = defaultStencilConstraints({}, stencilOptions);
+
+	return {
+		stencilSize(state: CropperState, settings: FixedStencilSettings) {
+			const previousSize = isFunction(rawSettings.stencilSize)
+				? rawSettings.stencilSize(state, settings)
+				: rawSettings.stencilSize;
+
+			return approximateSize({
+				...previousSize,
+				aspectRatio: aspectRatioIntersection(
+					defaultConstraints.aspectRatio,
+					createAspectRatio(ratio(previousSize)),
+				),
+			});
+		},
+	};
+}
+
+export function getStencilSize(state: CropperState, settings: FixedStencilSettings) {
 	const { boundary } = state;
 
 	let size = isFunction(settings.stencilSize) ? settings.stencilSize(state, settings) : settings.stencilSize;
@@ -45,7 +82,7 @@ export function getStencilSize(state: CropperState, settings: CropperSettings & 
 	return size;
 }
 
-export function sizeRestrictions(state: CropperState, settings: CropperSettings & { stencilSize: StencilSize }) {
+export function sizeRestrictions(state: CropperState, settings: FixedStencilSettings) {
 	const stencilSize = getStencilSize(state, {
 		...settings,
 		stencilSize: settings.stencilSize,
@@ -61,14 +98,14 @@ export function sizeRestrictions(state: CropperState, settings: CropperSettings 
 	};
 }
 
-export function defaultSize(state: CropperState, settings: CropperSettings & { stencilSize: StencilSize }): Size {
+export function defaultSize(state: CropperState, settings: FixedStencilSettings): Size {
 	const { imageSize, visibleArea, boundary } = state;
 
 	const sizeRestrictions = getSizeRestrictions(state, settings);
 
-	const stencilSize = isFunction(settings.stencilSize) ? settings.stencilSize(state, settings) : settings.stencilSize;
+	const aspectRatio = getAspectRatio(state, settings);
 
-	const aspectRatio = isFunction(settings.aspectRatio) ? settings.aspectRatio(state, settings) : settings.aspectRatio;
+	const stencilSize = isFunction(settings.stencilSize) ? settings.stencilSize(state, settings) : settings.stencilSize;
 
 	const area = (visibleArea || imageSize) as Size;
 
@@ -89,7 +126,7 @@ export function defaultSize(state: CropperState, settings: CropperSettings & { s
 	});
 }
 
-export function aspectRatio(state: CropperState, settings: CropperSettings & { stencilSize: StencilSize }) {
+export function aspectRatio(state: CropperState, settings: FixedStencilSettings) {
 	const value = ratio(getStencilSize(state, settings));
 	return {
 		minimum: value,
@@ -97,10 +134,7 @@ export function aspectRatio(state: CropperState, settings: CropperSettings & { s
 	};
 }
 
-export function fixedStencilAlgorithm(
-	state: CropperState,
-	settings: CropperSettings & { stencilSize: StencilSize },
-): CropperState {
+export function fixedStencilAlgorithm(state: CropperState, settings: FixedStencilSettings): CropperState {
 	if (isInitializedState(state)) {
 		const result = copyState(state);
 
@@ -144,7 +178,7 @@ export function fixedStencilAlgorithm(
 
 export function fixedStencil(
 	state: CropperState,
-	settings: CropperSettings & { stencilSize: StencilSize },
+	settings: FixedStencilSettings,
 	action?: PostprocessAction,
 ): CropperState {
 	if (action && action.immediately) {

@@ -1,9 +1,9 @@
-import { CropperSettings, CropperState, ImageRestriction, PositionRestrictions } from '../types';
+import { CoreSettings, CropperState, ImageRestriction, PositionRestrictions } from '../types';
 import { getTransformedImageSize, ratio } from '../service';
 
 export function defaultAreaPositionRestrictions(
 	state: CropperState,
-	settings: CropperSettings & { imageRestriction?: ImageRestriction },
+	settings: CoreSettings & { imageRestriction?: ImageRestriction },
 ): PositionRestrictions {
 	const { visibleArea, boundary } = state;
 	const { imageRestriction } = settings;

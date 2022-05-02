@@ -1,3 +1,5 @@
+import { isArrayBufferLike, isObject } from '../utils';
+
 const imageMimes = [
 	{
 		format: 'image/png',
@@ -32,10 +34,17 @@ const imageMimes = [
 	},
 ];
 
-export function getMimeType(arrayBuffer: ArrayBuffer, fallback = null) {
-	const byteArray = new Uint8Array(arrayBuffer).subarray(0, 4);
+export function getMimeType(data: ArrayBuffer | string | null | undefined, fallback: string | null = null) {
+	let mimeType = fallback;
+	if (isArrayBufferLike(data)) {
+		const byteArray = new Uint8Array(data).subarray(0, 4);
+		const candidate = imageMimes.find((el) => el.pattern.every((p, i) => !p || byteArray[i] === p));
+		if (candidate) {
+			mimeType = candidate.format;
+		}
+	}
 
-	const candidate = imageMimes.find((el) => el.pattern.every((p, i) => !p || byteArray[i] === p));
-
-	return candidate ? candidate.format : fallback;
+	if (mimeType) {
+		return mimeType;
+	}
 }

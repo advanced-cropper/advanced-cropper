@@ -1,4 +1,4 @@
-import { Boundary, CropperSettings, CropperState } from '../types';
+import { Boundary, CoreSettings, CropperState } from '../types';
 import {
 	applyMove,
 	applyScale,
@@ -15,9 +15,13 @@ import {
 } from '../service';
 import { copyState } from './copyState';
 
-export type SetBoundaryAlgorithm = (state: CropperState, settings: CropperSettings, boundary: Boundary) => CropperState;
+export type SetBoundaryAlgorithm<Settings extends CoreSettings = CoreSettings> = (
+	state: CropperState,
+	settings: Settings,
+	boundary: Boundary,
+) => CropperState;
 
-export function setBoundary(state: CropperState, settings: CropperSettings, boundary: Boundary) {
+export function setBoundary(state: CropperState, settings: CoreSettings, boundary: Boundary) {
 	let result = {
 		...copyState(state),
 		boundary,

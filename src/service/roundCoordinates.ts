@@ -1,8 +1,8 @@
-import { Coordinates, CropperSettings, CropperState } from '../types';
+import { Coordinates, CoreSettings, CropperState } from '../types';
 import { moveToPositionRestrictions } from './utils';
 import { getPositionRestrictions, getSizeRestrictions, isInitializedState } from './helpers';
 
-export function roundCoordinates(state: CropperState, settings: CropperSettings): Coordinates | null {
+export function roundCoordinates(state: CropperState, settings: CoreSettings): Coordinates | null {
 	if (isInitializedState(state)) {
 		const sizeRestrictions = getSizeRestrictions(state, settings);
 

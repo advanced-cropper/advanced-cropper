@@ -1,4 +1,4 @@
-import { CropperSettings, CropperState, PostprocessAction } from '../types';
+import { CoreSettings, CropperState, PostprocessAction } from '../types';
 import {
 	applyScale,
 	fitCoordinates,
@@ -13,9 +13,9 @@ import {
 } from '../service';
 import { copyState } from '../state';
 
-export function setCoordinatesSafety(
+export function defaultPostprocess(
 	state: CropperState,
-	settings: CropperSettings,
+	settings: CoreSettings,
 	action: PostprocessAction,
 ): CropperState {
 	if (action && action.name === 'setCoordinates' && isInitializedState(state)) {
@@ -49,7 +49,7 @@ export function setCoordinatesSafety(
 	return state;
 }
 
-export function preventZoom(state: CropperState, settings: CropperSettings, action: PostprocessAction): CropperState {
+export function preventZoom(state: CropperState, settings: CoreSettings, action: PostprocessAction): CropperState {
 	if (action && action.immediately && isInitializedState(state)) {
 		const result = copyState(state);
 

@@ -1,27 +1,27 @@
-import { CropperSettings, CropperState, InitializedCropperState } from '../types';
+import { CoreSettings, CropperState, InitializedCropperState } from '../types';
 import { emptyCoordinates, isFunction, isNumeric } from '../utils';
-import { rotateSize } from './utils';
+import { createAspectRatio, rotateSize } from './utils';
 import { calculateSizeRestrictions, calculateAreaSizeRestrictions } from './sizeRestrictions';
 
 export function isInitializedState(state: CropperState | null): state is InitializedCropperState {
 	return Boolean(state && state.visibleArea && state.coordinates);
 }
 
-export function getAreaSizeRestrictions(state: CropperState, settings: CropperSettings) {
+export function getAreaSizeRestrictions(state: CropperState, settings: CoreSettings) {
 	return calculateAreaSizeRestrictions(state, settings);
 }
 
-export function getAreaPositionRestrictions(state: CropperState, settings: CropperSettings) {
+export function getAreaPositionRestrictions(state: CropperState, settings: CoreSettings) {
 	return isFunction(settings.areaPositionRestrictions)
 		? settings.areaPositionRestrictions(state, settings)
 		: settings.areaPositionRestrictions;
 }
 
-export function getSizeRestrictions(state: CropperState, settings: CropperSettings) {
+export function getSizeRestrictions(state: CropperState, settings: CoreSettings) {
 	return calculateSizeRestrictions(state, settings);
 }
 
-export function getPositionRestrictions(state: CropperState, settings: CropperSettings) {
+export function getPositionRestrictions(state: CropperState, settings: CoreSettings) {
 	return isFunction(settings.positionRestrictions)
 		? settings.positionRestrictions(state, settings)
 		: settings.positionRestrictions;
@@ -46,21 +46,19 @@ export function getStencilCoordinates(state: CropperState | null) {
 	}
 }
 
-export function getAspectRatio(state: CropperState, settings: CropperSettings) {
-	const result = isFunction(settings.aspectRatio) ? settings.aspectRatio(state, settings) : settings.aspectRatio;
-	return {
-		minimum: isNumeric(result.minimum) ? result.minimum : 0,
-		maximum: isNumeric(result.maximum) ? result.maximum : Infinity,
-	};
+export function getAspectRatio(state: CropperState, settings: CoreSettings) {
+	return createAspectRatio(
+		isFunction(settings.aspectRatio) ? settings.aspectRatio(state, settings) : settings.aspectRatio,
+	);
 }
 
-export function getDefaultCoordinates(state: CropperState, settings: CropperSettings) {
+export function getDefaultCoordinates(state: CropperState, settings: CoreSettings) {
 	return isFunction(settings.defaultCoordinates)
 		? settings.defaultCoordinates(state, settings)
 		: settings.defaultCoordinates;
 }
 
-export function getDefaultVisibleArea(state: CropperState, settings: CropperSettings) {
+export function getDefaultVisibleArea(state: CropperState, settings: CoreSettings) {
 	return isFunction(settings.defaultVisibleArea)
 		? settings.defaultVisibleArea(state, settings)
 		: settings.defaultVisibleArea;

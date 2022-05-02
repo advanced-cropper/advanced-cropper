@@ -1,4 +1,4 @@
-import { CropperSettings, CropperState, SizeRestrictions } from '../types';
+import { CoreSettings, CropperState, SizeRestrictions } from '../types';
 import { isFunction, isNumeric, parseNumber } from '../utils';
 import { getPositionRestrictions } from './helpers';
 import { ratio } from './utils';
@@ -36,7 +36,7 @@ export function mergeSizeRestrictions(a: SizeRestrictions, b: Partial<SizeRestri
 	});
 }
 
-export function calculateSizeRestrictions(state: CropperState, settings: CropperSettings) {
+export function calculateSizeRestrictions(state: CropperState, settings: CoreSettings) {
 	const sizeRestrictions = isFunction(settings.sizeRestrictions)
 		? settings.sizeRestrictions(state, settings)
 		: settings.sizeRestrictions;
@@ -65,7 +65,7 @@ export function calculateSizeRestrictions(state: CropperState, settings: Cropper
 	return validateSizeRestrictions(restrictions);
 }
 
-export function calculateAreaSizeRestrictions(state: CropperState, settings: CropperSettings) {
+export function calculateAreaSizeRestrictions(state: CropperState, settings: CoreSettings) {
 	const sizeRestrictions = isFunction(settings.areaSizeRestrictions)
 		? settings.areaSizeRestrictions(state, settings)
 		: settings.areaSizeRestrictions;

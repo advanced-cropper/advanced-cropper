@@ -1,4 +1,4 @@
-import { CropperSettings, CropperState, PositionRestrictions } from '../types';
+import { CoreSettings, CropperState, PositionRestrictions } from '../types';
 import { getAreaSizeRestrictions, getTransformedImageSize } from '../service';
 import {
 	getIntersections,
@@ -8,7 +8,7 @@ import {
 	coordinatesToPositionRestrictions,
 } from '../service';
 
-export function defaultVisibleArea(state: CropperState, settings: CropperSettings) {
+export function defaultVisibleArea(state: CropperState, settings: CoreSettings) {
 	const { coordinates, boundary } = state;
 
 	const imageSize = getTransformedImageSize(state);

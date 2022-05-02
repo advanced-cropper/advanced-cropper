@@ -258,6 +258,10 @@ interface LoadImageSettings {
 	parse?: boolean;
 }
 
+interface CreateImageSettings {
+	crossOrigin?: string | boolean;
+}
+
 function parseImage(src: string, settings: LoadImageSettings = {}) {
 	const { checkOrientation, parse } = settings;
 	return new Promise<ParseResult>((resolve) => {
@@ -283,44 +287,51 @@ function parseImage(src: string, settings: LoadImageSettings = {}) {
 	});
 }
 
+export function createImage(src: string, settings: CreateImageSettings = {}) {
+	return new Promise<HTMLImageElement>((resolve, reject) => {
+		const image = document.createElement('img');
+
+		if (settings.crossOrigin) {
+			image.crossOrigin = settings.crossOrigin !== true ? settings.crossOrigin : 'anonymous';
+		}
+
+		image.src = src;
+		image.style.visibility = 'hidden';
+		image.style.position = 'fixed';
+
+		document.body.appendChild(image);
+
+		if (image.complete) {
+			resolve(image);
+			document.body.removeChild(image);
+		} else {
+			image.addEventListener('load', () => {
+				resolve(image);
+				document.body.removeChild(image);
+			});
+
+			image.addEventListener('error', () => {
+				reject(null);
+				document.body.removeChild(image);
+			});
+		}
+	});
+}
+
 export function loadImage(src: string, settings: LoadImageSettings = {}): Promise<CropperImage> {
 	return parseImage(src, settings).then((options) => {
 		return new Promise<CropperImage>((resolve, reject) => {
-			const image = document.createElement('img');
-
-			if (settings.crossOrigin) {
-				image.crossOrigin = settings.crossOrigin !== true ? settings.crossOrigin : 'anonymous';
-			}
-
-			image.src = options.src;
-
-			image.style.visibility = 'hidden';
-			image.style.position = 'fixed';
-
-			document.body.appendChild(image);
-
-			if (image.complete) {
-				resolve({
-					...options,
-					width: image.naturalWidth,
-					height: image.naturalHeight,
-				});
-				document.body.removeChild(image);
-			} else {
-				image.addEventListener('load', () => {
+			createImage(options.src, settings)
+				.then((image) => {
 					resolve({
 						...options,
 						width: image.naturalWidth,
 						height: image.naturalHeight,
 					});
-					document.body.removeChild(image);
-				});
-
-				image.addEventListener('error', () => {
+				})
+				.catch(() => {
 					reject(null);
-					document.body.removeChild(image);
 				});
-			}
 		});
 	});
 }

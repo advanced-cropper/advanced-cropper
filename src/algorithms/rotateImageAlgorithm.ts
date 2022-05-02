@@ -15,17 +15,17 @@ import {
 	isInitializedState,
 } from '../service';
 import { copyState } from '../state';
-import { CropperSettings, CropperState, Rotate } from '../types';
+import { CoreSettings, CropperState, Rotate } from '../types';
 import { mergeSizeRestrictions } from '../service';
 import { isNumber } from '../utils';
 
 export type RotateImageAlgorithm = (
 	state: CropperState,
-	settings: CropperSettings,
+	settings: CoreSettings,
 	rotate: number | Rotate,
 ) => CropperState;
 
-export function rotateImageAlgorithm(state: CropperState, settings: CropperSettings, rotate: number | Rotate) {
+export function rotateImageAlgorithm(state: CropperState, settings: CoreSettings, rotate: number | Rotate) {
 	if (isInitializedState(state)) {
 		const result = copyState(state);
 

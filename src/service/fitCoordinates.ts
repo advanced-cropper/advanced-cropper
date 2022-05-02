@@ -6,12 +6,12 @@ import {
 	moveToPositionRestrictions,
 	coordinatesToPositionRestrictions,
 } from './utils';
-import { CropperSettings, CropperState } from '../types';
+import { CoreSettings, CropperState } from '../types';
 import { getAspectRatio, getPositionRestrictions, getSizeRestrictions } from './helpers';
 import { copyState } from '../state';
 import { approximateSize } from './approximateSize';
 
-export function fitCoordinates(state: CropperState, settings: CropperSettings) {
+export function fitCoordinates(state: CropperState, settings: CoreSettings) {
 	if (state.coordinates) {
 		const result = copyState(state);
 

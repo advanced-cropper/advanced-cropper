@@ -29,10 +29,17 @@ function validateSize(params: {
 export function approximateSize(params: {
 	width: number;
 	height: number;
-	sizeRestrictions: SizeRestrictions;
+	sizeRestrictions?: SizeRestrictions;
 	aspectRatio?: AspectRatio;
 }): Size {
-	const { width, height, sizeRestrictions } = params;
+	const { width, height } = params;
+
+	const sizeRestrictions = params.sizeRestrictions || {
+		minWidth: 0,
+		minHeight: 0,
+		maxWidth: Infinity,
+		maxHeight: Infinity,
+	};
 
 	const aspectRatio = {
 		minimum: (params.aspectRatio && params.aspectRatio.minimum) || 0,

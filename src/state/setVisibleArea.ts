@@ -1,16 +1,16 @@
-import { CropperSettings, CropperState, VisibleArea } from '../types';
+import { CoreSettings, CropperState, VisibleArea } from '../types';
 import { copyState } from './copyState';
 import { fitCoordinates, fitVisibleArea } from '../service';
 
-export type SetVisibleAreaAlgorithm = (
+export type SetVisibleAreaAlgorithm<Settings extends CoreSettings = CoreSettings> = (
 	state: CropperState,
-	settings: CropperSettings,
+	settings: Settings,
 	visibleArea: VisibleArea,
 ) => CropperState;
 
 export function setVisibleArea(
 	state: CropperState,
-	settings: CropperSettings,
+	settings: CoreSettings,
 	visibleArea: VisibleArea,
 	// If you set safe to `false`, the coordinates can leave the visible area
 	safe = true,

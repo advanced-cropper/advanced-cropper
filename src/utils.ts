@@ -85,9 +85,11 @@ export function isUndefined(obj: unknown): obj is undefined {
 	return obj === undefined;
 }
 
-export function isObject(obj: unknown) {
-	return typeof obj === 'object' && obj !== null;
-}
+export const isObject = <T extends object, U>(
+	term: T | U,
+): term is NonNullable<T> => {
+	return term !== null && typeof term === 'object';
+};
 
 // TODO: add the typing
 export function getOptions(options: any, defaultScheme: any, falseScheme: any = {}) {
@@ -162,6 +164,10 @@ export function isLower(a: number, b: number, tolerance?: number): boolean {
 	return isRoughlyEqual(a, b, tolerance) ? false : a < b;
 }
 
+export function isArrayBufferLike(value: unknown): value is ArrayBufferLike {
+	return value instanceof ArrayBuffer;
+}
+
 export function sign(value: number) {
 	const number = +value;
 	if (number === 0 || isNaN(number)) {
@@ -220,3 +226,28 @@ export function isOrdinalDirection(value: unknown): value is OrdinalDirection {
 		value === 'eastSouth'
 	);
 }
+
+export function pick<T, K extends keyof T>(value: T, ...keys: K[]): Pick<T, K> {
+	const result: any = {};
+	keys.forEach((key) => {
+		result[key] = value[key];
+	});
+	return result;
+}
+
+interface Omit {
+	<T extends object, K extends string[]>(obj: T, keys: K): Pick<T, Exclude<keyof T, K[number]>>;
+}
+
+export const omit: Omit = (obj, keys) => {
+	const result = {} as {
+		[K in keyof typeof obj]: typeof obj[K];
+	};
+	let key: keyof typeof obj;
+	for (key in obj) {
+		if (!keys.includes(key as any)) {
+			result[key] = obj[key];
+		}
+	}
+	return result;
+};

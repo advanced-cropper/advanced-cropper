@@ -1,4 +1,4 @@
-import { CropperSettings, CropperState } from '../types';
+import { CoreSettings, CropperState } from '../types';
 import {
 	applyMove,
 	diff,
@@ -13,7 +13,7 @@ import { copyState } from '../state';
 
 export function flipImageAlgorithm(
 	state: CropperState,
-	settings: CropperSettings,
+	settings: CoreSettings,
 	horizontal?: boolean,
 	vertical?: boolean,
 ) {

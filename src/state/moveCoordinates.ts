@@ -1,4 +1,4 @@
-import { CropperSettings, CropperState, MoveDirections } from '../types';
+import { CoreSettings, CropperState, MoveDirections } from '../types';
 import { copyState } from './copyState';
 import {
 	applyMove,
@@ -9,13 +9,17 @@ import {
 	isInitializedState,
 } from '../service';
 
-export type MoveAlgorithm = (
+export type MoveAlgorithm<Settings extends CoreSettings = CoreSettings> = (
 	state: CropperState,
-	settings: CropperSettings,
+	settings: Settings,
 	directions: MoveDirections,
 ) => CropperState;
 
-export function moveCoordinates(state: CropperState, settings: CropperSettings, directions: MoveDirections) {
+export function moveCoordinates<Settings extends CoreSettings>(
+	state: CropperState,
+	settings: Settings,
+	directions: MoveDirections,
+) {
 	if (isInitializedState(state)) {
 		const result = copyState(state);
 

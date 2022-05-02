@@ -1,4 +1,4 @@
-import { CropperSettings, CropperState, ResizeDirections } from '../types';
+import { CoreSettings, CropperState, ResizeDirections } from '../types';
 import { copyState } from './copyState';
 import {
 	getAspectRatio,
@@ -23,16 +23,16 @@ export interface ResizeOptions {
 	respectDirection?: 'width' | 'height';
 }
 
-export type ResizeAlgorithm = (
+export type ResizeAlgorithm<Settings extends CoreSettings = CoreSettings> = (
 	state: CropperState,
-	settings: CropperSettings,
+	settings: Settings,
 	directions: ResizeDirections,
 	options: ResizeOptions,
 ) => CropperState;
 
 export function resizeCoordinates(
 	state: CropperState,
-	settings: CropperSettings,
+	settings: CoreSettings,
 	directions: ResizeDirections,
 	options: ResizeOptions,
 ) {

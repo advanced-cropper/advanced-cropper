@@ -1,4 +1,4 @@
-import { Boundary, CropperSettings, CropperState, ImageSize, PartialTransforms, Priority } from '../types';
+import { Boundary, CoreSettings, CropperState, ImageSize, PartialTransforms, Priority } from '../types';
 import { setCoordinates } from './setCoordinates';
 import { getDefaultCoordinates, getDefaultVisibleArea } from '../service';
 import { setVisibleArea } from './setVisibleArea';
@@ -10,9 +10,12 @@ export interface CreateStateOptions {
 	priority?: Priority;
 }
 
-export type CreateStateAlgorithm = (options: CreateStateOptions, settings: CropperSettings) => CropperState;
+export type CreateStateAlgorithm<Settings extends CoreSettings = CoreSettings> = (
+	options: CreateStateOptions,
+	settings: Settings,
+) => CropperState;
 
-export function createState(options: CreateStateOptions, settings: CropperSettings): CropperState {
+export function createState(options: CreateStateOptions, settings: CoreSettings): CropperState {
 	const { boundary, imageSize, transforms, priority } = options;
 	let state: CropperState = {
 		boundary: {

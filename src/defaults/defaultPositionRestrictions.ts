@@ -1,9 +1,9 @@
-import { CropperSettings, CropperState, ImageRestriction } from '../types';
+import { CoreSettings, CropperState, ImageRestriction } from '../types';
 import { getTransformedImageSize } from '../service';
 
 export function defaultPositionRestrictions(
 	state: CropperState,
-	settings: CropperSettings & { imageRestriction?: ImageRestriction },
+	settings: CoreSettings & { imageRestriction?: ImageRestriction },
 ) {
 	const imageSize = getTransformedImageSize(state);
 
