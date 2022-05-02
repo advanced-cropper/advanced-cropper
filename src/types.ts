@@ -233,5 +233,13 @@ export interface PostprocessAction {
 export type PostprocessFunction<Settings = CropperSettings, State = CropperState> = (
 	state: State,
 	settings: Settings,
-	action?: PostprocessAction,
+	action: PostprocessAction,
 ) => State;
+
+export type CropperBehaviorSettings = Partial<{
+	transformImage: {
+		adjustStencil?: boolean;
+	};
+	moveCoordinates: {};
+	resizeCoordinates: {};
+}>;

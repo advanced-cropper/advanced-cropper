@@ -1,4 +1,10 @@
-import { CropperState, CropperSettings, ImageTransform, InitializedCropperState } from '../types';
+import {
+	CropperState,
+	CropperSettings,
+	ImageTransform,
+	InitializedCropperState,
+	CropperBehaviorSettings,
+} from '../types';
 import {
 	applyMove,
 	applyScale,
@@ -19,19 +25,13 @@ import {
 } from '../service';
 import { copyState } from '../state';
 import { isNumber, isRoughlyEqual } from '../utils';
-import { ScaleImageOptions } from '../defaults';
 
 export function transformImageAlgorithm(
 	state: CropperState,
-	settings: CropperSettings,
+	settings: CropperSettings & CropperBehaviorSettings,
 	transform: ImageTransform,
-	options: {
-		adjustStencil?: boolean;
-	} = {},
 ): CropperState {
 	const { scale = 1, move = {} } = transform;
-
-	const { adjustStencil } = options;
 
 	if (isInitializedState(state)) {
 		const result = copyState(state) as InitializedCropperState;
@@ -150,7 +150,7 @@ export function transformImageAlgorithm(
 		);
 
 		// Resize only area if stencil can't be resized and stencil resize is disabled
-		if (isAllowedScale && scaleFactor && adjustStencil) {
+		if (isAllowedScale && scaleFactor && settings.transformImage?.adjustStencil) {
 			if (scaleFactor > 1) {
 				areaScale = Math.min(scaleRestrictions.area.maximum, scaleFactor) / stencilScale;
 			} else if (scaleFactor < 1) {

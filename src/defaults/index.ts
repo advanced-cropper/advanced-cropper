@@ -21,8 +21,6 @@ import { defaultPosition } from './defaultPosition';
 import { defaultAreaPositionRestrictions } from './defaultAreaPositionRestrictions';
 import { defaultAreaSizeRestrictions } from './defaultAreaSizeRestrictions';
 import { isFunction } from '../utils';
-import { autoZoom } from './postProcess/autoZoom';
-import { Settings } from 'http2';
 
 export type ScaleImageOptions = {
 	enabled?: boolean;
@@ -211,8 +209,6 @@ export function defaultSettings() {
 	return withDefaults({});
 }
 
-export const defaultPostprocess = autoZoom;
-
 export * from './defaultAreaPositionRestrictions';
 export * from './defaultPosition';
 export * from './defaultSize';
@@ -221,4 +217,3 @@ export * from './defaultVisibleArea';
 export * from './defaultBoundary';
 export * from './defaultPositionRestrictions';
 export * from './defaultSizeRestrictions';
-export * from './postProcess/autoZoom/index';
