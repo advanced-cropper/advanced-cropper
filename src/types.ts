@@ -238,6 +238,11 @@ export interface CropperTransitions {
 	active: boolean;
 }
 
+export interface CropperTransitionsSettings {
+	timingFunction?: string;
+	duration?: number;
+}
+
 export interface Stencil {
 	aspectRatio: () => AspectRatio;
 }
@@ -259,4 +264,8 @@ export type PostprocessFunction<Settings = CoreSettings, State = CropperState> =
 	action: PostprocessAction,
 ) => State;
 
+export type Nullable<T> = T | null | undefined;
+
 export type ExtensionOf<A, B> = Omit<A, keyof B>;
+
+export type DefaultTransforms = PartialTransforms | ((image: CropperImage) => PartialTransforms);

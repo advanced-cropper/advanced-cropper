@@ -85,9 +85,7 @@ export function isUndefined(obj: unknown): obj is undefined {
 	return obj === undefined;
 }
 
-export const isObject = <T extends object, U>(
-	term: T | U,
-): term is NonNullable<T> => {
+export const isObject = <T extends object, U>(term: T | U): term is NonNullable<T> => {
 	return term !== null && typeof term === 'object';
 };
 
@@ -251,3 +249,22 @@ export const omit: Omit = (obj, keys) => {
 	}
 	return result;
 };
+
+export function debounce(callback: () => void, delay: number | (() => number)) {
+	let timestamp: number;
+
+	function later() {
+		const last = Date.now() - timestamp;
+
+		if (last < delay && last >= 0) {
+			setTimeout(later, (isFunction(delay) ? delay() : delay) - last);
+		} else {
+			callback();
+		}
+	}
+
+	return () => {
+		timestamp = Date.now();
+		setTimeout(later, isFunction(delay) ? delay() : delay);
+	};
+}

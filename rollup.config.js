@@ -10,6 +10,7 @@ export default {
 		'src/service/index.ts',
 		'src/state/index.ts',
 		'src/defaults/index.ts',
+		'src/instance/index.ts',
 		'src/extensions/stencilSize.ts',
 		'src/extensions/constraints.ts',
 		'src/extensions/mimes.ts',
