@@ -1,4 +1,4 @@
-import { CropperState, CoreSettings, ImageTransform, InitializedCropperState, ModifiersSettings } from '../types';
+import { CropperState, CoreSettings, ImageTransform, InitializedCropperState, ModifierSettings } from '../types';
 import {
 	applyMove,
 	applyScale,
@@ -22,7 +22,7 @@ import { isNumber, isRoughlyEqual } from '../utils';
 
 export function transformImageAlgorithm(
 	state: CropperState,
-	settings: CoreSettings & ModifiersSettings,
+	settings: CoreSettings & ModifierSettings,
 	transform: ImageTransform,
 ): CropperState {
 	const { scale = 1, move = {} } = transform;

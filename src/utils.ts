@@ -255,9 +255,10 @@ export function debounce(callback: () => void, delay: number | (() => number)) {
 
 	function later() {
 		const last = Date.now() - timestamp;
+		const delayValue = isFunction(delay) ? delay() : delay;
 
-		if (last < delay && last >= 0) {
-			setTimeout(later, (isFunction(delay) ? delay() : delay) - last);
+		if (last < delayValue && last >= 0) {
+			setTimeout(later, delayValue - last);
 		} else {
 			callback();
 		}

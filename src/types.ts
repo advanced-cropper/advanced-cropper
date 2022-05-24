@@ -215,7 +215,7 @@ export type BivarianceConstraint<T extends (...args: any) => any> = {
 	method(...args: Parameters<T>): ReturnType<T>;
 }['method'];
 
-export interface ModifiersSettings {
+export interface ModifierSettings {
 	transformImage?: {
 		adjustStencil?: boolean;
 	};

@@ -1,13 +1,13 @@
-import { CropperState, CoreSettings, ImageTransform, ModifiersSettings } from '../types';
+import { CropperState, CoreSettings, ImageTransform, ModifierSettings } from '../types';
 import { flipImageAlgorithm, transformImageAlgorithm, rotateImageAlgorithm } from '../algorithms';
 
 export type TransformImageAlgorithm<
-	Settings extends CoreSettings & ModifiersSettings = CoreSettings & ModifiersSettings
+	Settings extends CoreSettings & ModifierSettings = CoreSettings & ModifierSettings
 > = (state: CropperState, settings: Settings, transform: ImageTransform) => CropperState;
 
 export function transformImage(
 	state: CropperState,
-	settings: CoreSettings & ModifiersSettings,
+	settings: CoreSettings & ModifierSettings,
 	transform: ImageTransform,
 ): CropperState {
 	if (transform.rotate) {

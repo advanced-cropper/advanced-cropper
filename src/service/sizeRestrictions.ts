@@ -3,7 +3,7 @@ import { isFunction, isNumeric, parseNumber } from '../utils';
 import { getPositionRestrictions } from './helpers';
 import { ratio } from './utils';
 
-export function validateSizeRestrictions(sizeRestrictions: SizeRestrictions) {
+export function reconcileSizeRestrictions(sizeRestrictions: SizeRestrictions) {
 	const restrictions = { ...sizeRestrictions };
 
 	// Process the border cases when minimum height / width larger than maximum height / width
@@ -28,7 +28,7 @@ export function mergeSizeRestrictions(a: SizeRestrictions, b: Partial<SizeRestri
 		...b,
 	};
 
-	return validateSizeRestrictions({
+	return reconcileSizeRestrictions({
 		maxHeight: Math.min(first.maxHeight, second.maxHeight),
 		minHeight: Math.max(first.minHeight, second.minHeight),
 		maxWidth: Math.min(first.maxWidth, second.maxWidth),
@@ -62,7 +62,7 @@ export function calculateSizeRestrictions(state: CropperState, settings: CoreSet
 		);
 	}
 
-	return validateSizeRestrictions(restrictions);
+	return reconcileSizeRestrictions(restrictions);
 }
 
 export function calculateAreaSizeRestrictions(state: CropperState, settings: CoreSettings) {
@@ -78,5 +78,5 @@ export function calculateAreaSizeRestrictions(state: CropperState, settings: Cor
 		}
 	}
 
-	return validateSizeRestrictions(sizeRestrictions);
+	return reconcileSizeRestrictions(sizeRestrictions);
 }

@@ -7,7 +7,7 @@ import {
 	CropperTransitionsSettings,
 	DefaultTransforms,
 	ImageTransform,
-	ModifiersSettings,
+	ModifierSettings,
 	MoveDirections,
 	Nullable,
 	PartialTransforms,
@@ -23,6 +23,7 @@ import {
 	copyState,
 	createState,
 	CreateStateAlgorithm,
+	isConsistentState,
 	MoveAlgorithm,
 	moveCoordinates,
 	reconcileState,
@@ -75,7 +76,7 @@ export interface AbstractCropperMethodOptions {
 	normalize?: boolean;
 }
 
-export type AbstractCropperSettings = CoreSettings & ModifiersSettings;
+export type AbstractCropperSettings = CoreSettings & ModifierSettings;
 
 export type AbstractCropperProps<Settings extends AbstractCropperSettings, Instance> = AbstractCropperParameters<
 	Settings
@@ -144,9 +145,12 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		resizeCoordinates: false,
 		transformImage: false,
 	};
-	protected abstract getData(): AbstractCropperData;
-	protected abstract getProps(): AbstractCropperProps<Settings, Instance>;
+
 	protected abstract setData(data: AbstractCropperData): void;
+
+	public abstract getData(): AbstractCropperData;
+
+	public abstract getProps(): AbstractCropperProps<Settings, Instance>;
 
 	public getTransitions = () => {
 		const data = this.getData();
@@ -209,8 +213,8 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 				state: copyState(state),
 				transitions,
 			};
-			this.setData(currentData);
 		}
+		this.setData(currentData);
 
 		if (currentData.transitions && !previousData.transitions) {
 			runCallback(onTransitionsStart, getInstance);
@@ -285,20 +289,42 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		this.updateState(null);
 	};
 
-	public reconcileState = () => {
+	public reconcileState = (options: TransitionOptions = {}) => {
 		const { reconcileStateAlgorithm, settings } = this.getProps();
 		const { state } = this.getData();
-		this.updateState(
-			state &&
-				this.applyPostProcess(
+		const { transitions = true } = options;
+
+		if (state && !isConsistentState(state, settings)) {
+			let reconciledState = (reconcileStateAlgorithm || reconcileState)(state, settings);
+
+			if (isConsistentState(reconciledState, settings)) {
+				reconciledState = this.applyPostProcess(
 					{
 						name: 'reconcile',
 						immediately: true,
-						transitions: false,
+						transitions,
 					},
-					(reconcileStateAlgorithm || reconcileState)(state, settings),
-				),
-		);
+					reconciledState,
+				);
+				if (isConsistentState(reconciledState, settings)) {
+					this.updateState(reconciledState, {
+						transitions,
+					});
+				} else {
+					if (process.env.NODE_ENV !== '1production') {
+						console.error(
+							"Reconcile error: can't reconcile state. The postprocess function breaks some restrictions that was satisfied before by `reconcileStateAlgorithm`",
+						);
+					}
+				}
+			} else {
+				if (process.env.NODE_ENV !== '1production') {
+					console.error(
+						"Reconcile error: can't reconcile state. Perhaps, the restrictions are contradictory.",
+					);
+				}
+			}
+		}
 	};
 
 	public transformImage = (
@@ -656,4 +682,10 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 					},
 			  };
 	};
+	public isConsistent() {
+		const { state } = this.getData();
+		const { settings } = this.getProps();
+
+		return state ? isConsistentState(state, settings) : true;
+	}
 }

@@ -1,5 +1,5 @@
 import { AbstractCropper, AbstractCropperData, AbstractCropperProps, AbstractCropperSettings } from './AbstractCropper';
-import { CoreSettings, ModifiersSettings } from '../types';
+import { CoreSettings, ModifierSettings } from '../types';
 
 export interface CropperInstanceProps<Settings extends AbstractCropperSettings, Instance> {
 	getProps: () => AbstractCropperProps<Settings, Instance>;
@@ -8,7 +8,7 @@ export interface CropperInstanceProps<Settings extends AbstractCropperSettings, 
 }
 
 export class CropperInstance<
-	Settings extends CoreSettings & ModifiersSettings,
+	Settings extends CoreSettings & ModifierSettings,
 	Instance = unknown
 > extends AbstractCropper<Settings, Instance> {
 	data?: AbstractCropperData;
@@ -33,10 +33,6 @@ export class CropperInstance<
 		return Boolean(this.props.getData);
 	}
 
-	protected getProps(): AbstractCropperProps<Settings, Instance> {
-		return this.props.getProps();
-	}
-
 	protected setData(data: AbstractCropperData) {
 		if (!this.isControlled()) {
 			this.data = data;
@@ -44,7 +40,11 @@ export class CropperInstance<
 		this.props.setData?.(data);
 	}
 
-	protected getData(): AbstractCropperData {
+	public getProps(): AbstractCropperProps<Settings, Instance> {
+		return this.props.getProps();
+	}
+
+	public getData(): AbstractCropperData {
 		return (this.isControlled() ? this.props.getData?.() : this.data) as AbstractCropperData;
 	}
 }

@@ -13,7 +13,7 @@ import {
 	SizeRestrictions,
 } from '../types';
 import { ALL_DIRECTIONS } from '../constants';
-import { isNumber, isNumeric, isUndefined } from '../utils';
+import { isGreater, isLower, isNumber, isNumeric, isUndefined } from '../utils';
 
 export function diff(firstObject: Point, secondObject: Point): Diff {
 	return {
@@ -129,9 +129,9 @@ export function minScale(size: Size, restrictions: SizeRestrictions): number {
 
 export function getBrokenRatio(currentAspectRatio: number, aspectRatio: AspectRatio): number | undefined {
 	let ratioBroken;
-	if (aspectRatio.minimum && currentAspectRatio < aspectRatio.minimum) {
+	if (aspectRatio.minimum && isLower(currentAspectRatio, aspectRatio.minimum)) {
 		ratioBroken = aspectRatio.minimum;
-	} else if (aspectRatio.maximum && currentAspectRatio > aspectRatio.maximum) {
+	} else if (aspectRatio.maximum && isGreater(currentAspectRatio,  aspectRatio.maximum)) {
 		ratioBroken = aspectRatio.maximum;
 	}
 	return ratioBroken;
@@ -331,4 +331,22 @@ export function createAspectRatio(aspectRatio: RawAspectRatio = {}): AspectRatio
 
 export function getTransitionStyle(transitions: CropperTransitions | undefined) {
 	return transitions ? `${transitions.timingFunction} ${transitions.active ? transitions.duration : 0}ms` : 'none';
+}
+
+export function isConsistentSize(size: Size, restrictions: SizeRestrictions) {
+	return (
+		!isGreater(size.width, restrictions.maxWidth) &&
+		!isGreater(size.height, restrictions.maxHeight) &&
+		!isLower(size.height, restrictions.minHeight) &&
+		!isLower(size.width, restrictions.minWidth)
+	);
+}
+
+export function isConsistentPosition(coordinates: Coordinates, restrictions: PositionRestrictions) {
+	return (
+		(isUndefined(restrictions.left) || !isLower(coordinates.left, restrictions.left)) &&
+		(isUndefined(restrictions.top) || !isLower(coordinates.top, restrictions.top)) &&
+		(isUndefined(restrictions.right) || !isGreater(coordinates.left + coordinates.width, restrictions.right)) &&
+		(isUndefined(restrictions.bottom) || !isGreater(coordinates.top + coordinates.height, restrictions.bottom))
+	);
 }
