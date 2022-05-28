@@ -1,4 +1,4 @@
-import { BivarianceConstraint, CoreSettings, CropperState, PostprocessAction, RawAspectRatio, Size } from '../types';
+import { BivarianceConstraint, CoreSettings, CropperState, PostprocessAction, RawAspectRatio, Size } from '../../types';
 import {
 	applyMove,
 	applyScale,
@@ -17,10 +17,10 @@ import {
 	mergePositionRestrictions,
 	moveToPositionRestrictions,
 	ratio,
-} from '../service';
-import { isFunction } from '../utils';
-import { copyState } from '../state';
-import { defaultStencilConstraints } from '../defaults';
+} from '../../service';
+import { isFunction } from '../../utils';
+import { copyState } from '../../state';
+import { defaultStencilConstraints } from '../../defaults';
 
 export type StencilSize<Settings = CoreSettings> =
 	| Size

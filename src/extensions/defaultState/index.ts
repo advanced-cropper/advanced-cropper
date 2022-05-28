@@ -1,5 +1,5 @@
-import { Boundary, CoreSettings, CropperImage, CropperState, Priority } from '../types';
-import { createState, CreateStateAlgorithm } from '../state';
+import { Boundary, CoreSettings, CropperImage, CropperState, Priority } from '../../types';
+import { createState, CreateStateAlgorithm } from '../../state';
 
 interface GetDefaultStateOptions {
 	algorithm?: CreateStateAlgorithm;

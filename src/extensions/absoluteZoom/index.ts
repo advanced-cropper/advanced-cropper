@@ -1,16 +1,12 @@
-import { CoreSettings, ImageRestriction, InitializedCropperState } from '../types';
-import { DefaultSettings } from '../defaults';
-import { StencilSize } from './stencilSize';
-import { getMinimumSize, getSizeRestrictions, ratio } from '../service';
-import { isGreater } from '../utils';
+import { CoreSettings, CropperState, ImageRestriction, InitializedCropperState } from '../../types';
+import { DefaultSettings } from '../../defaults';
+import { getMinimumSize, getSizeRestrictions, isInitializedState, ratio } from '../../service';
+import { isGreater } from '../../utils';
+import { StencilSize } from '../stencilSize';
 
 function getMinimumVisibleAreaSize(
 	state: InitializedCropperState,
 	settings: DefaultSettings & {
-		imageRestriction?: ImageRestriction;
-		stencilSize?: StencilSize;
-		minWidth?: number;
-		minHeight?: number;
 		transformImage?: {
 			adjustStencil?: boolean;
 		};
@@ -26,8 +22,6 @@ function getMinimumVisibleAreaSize(
 	};
 
 	const { coordinates, visibleArea } = state;
-
-	const stencilSize = settings;
 
 	const adjustStencil = settings?.transformImage?.adjustStencil;
 
@@ -51,28 +45,22 @@ function getMinimumVisibleAreaSize(
 		? sizeRestrictions.minHeight
 		: sizeRestrictions.minWidth;
 
-	if (!adjustStencil || stencilSize) {
+	if (!adjustStencil) {
 		minSize = minSize * viewRatio;
 	}
 
-	return minSize;
+	return Math.max(minSize, 1);
 }
 
 function getMaximumVisibleAreaSize(
 	state: InitializedCropperState,
 	settings: CoreSettings & {
-		imageRestriction?: ImageRestriction;
-		stencilSize?: StencilSize;
-		minWidth?: number;
-		minHeight?: number;
 		transformImage?: {
 			adjustStencil?: boolean;
 		};
 	},
 ) {
 	const { imageSize, boundary, coordinates, visibleArea } = state;
-
-	const { imageRestriction, stencilSize } = settings;
 
 	const adjustStencil = settings?.transformImage?.adjustStencil;
 
@@ -86,6 +74,14 @@ function getMaximumVisibleAreaSize(
 		} else {
 			sizeRestrictions.maxHeight = sizeRestrictions.maxWidth / aspectRatio;
 		}
+	} else {
+		if (isGreater(ratio(imageSize), ratio(boundary))) {
+			sizeRestrictions.maxWidth = imageSize.width;
+			sizeRestrictions.maxHeight = sizeRestrictions.maxWidth / ratio(imageSize);
+		} else {
+			sizeRestrictions.maxHeight = imageSize.height;
+			sizeRestrictions.maxWidth = sizeRestrictions.maxHeight * ratio(imageSize);
+		}
 	}
 
 	const maximumVisibleAreaSize = {
@@ -97,37 +93,19 @@ function getMaximumVisibleAreaSize(
 		? visibleArea.height / coordinates.height
 		: visibleArea.width / coordinates.width;
 
-	if (imageRestriction === 'fillArea') {
-		if (isGreater(ratio(imageSize), ratio(boundary))) {
-			maximumVisibleAreaSize.height = imageSize.height;
-			maximumVisibleAreaSize.width = maximumVisibleAreaSize.height * ratio(boundary);
-		} else {
-			maximumVisibleAreaSize.width = imageSize.width;
-			maximumVisibleAreaSize.height = maximumVisibleAreaSize.width / ratio(boundary);
-		}
-	} else if (imageRestriction === 'fitArea') {
-		if (isGreater(ratio(imageSize), ratio(boundary))) {
-			maximumVisibleAreaSize.width = imageSize.width;
-			maximumVisibleAreaSize.height = maximumVisibleAreaSize.width / ratio(imageSize);
-		} else {
-			maximumVisibleAreaSize.height = imageSize.height;
-			maximumVisibleAreaSize.width = maximumVisibleAreaSize.height * ratio(imageSize);
-		}
+	if (isGreater(ratio(imageSize), ratio(coordinates))) {
+		maximumVisibleAreaSize.height = sizeRestrictions.maxHeight * viewRatio;
+		maximumVisibleAreaSize.width = maximumVisibleAreaSize.height * ratio(imageSize);
 	} else {
-		if (isGreater(ratio(imageSize), ratio(coordinates))) {
-			maximumVisibleAreaSize.height = sizeRestrictions.maxHeight * viewRatio;
-			maximumVisibleAreaSize.width = maximumVisibleAreaSize.height * ratio(imageSize);
-		} else {
-			maximumVisibleAreaSize.width = sizeRestrictions.maxWidth * viewRatio;
-			maximumVisibleAreaSize.height = maximumVisibleAreaSize.width / ratio(imageSize);
-		}
+		maximumVisibleAreaSize.width = sizeRestrictions.maxWidth * viewRatio;
+		maximumVisibleAreaSize.height = maximumVisibleAreaSize.width / ratio(imageSize);
 	}
 
 	let maxSize = isGreater(ratio(visibleArea), sizeRestrictions.maxWidth / sizeRestrictions.maxHeight)
 		? sizeRestrictions.maxHeight
 		: sizeRestrictions.maxWidth;
 
-	if (!adjustStencil || stencilSize) {
+	if (!adjustStencil) {
 		maxSize = maxSize * viewRatio;
 	}
 
@@ -141,8 +119,15 @@ function getMaximumVisibleAreaSize(
 	return maxSize;
 }
 
+function getVisibleAreaSize(state: InitializedCropperState, settings: CoreSettings, absoluteZoom: number) {
+	const minSize = getMinimumVisibleAreaSize(state, settings);
+	const maxSize = getMaximumVisibleAreaSize(state, settings);
+
+	return maxSize - absoluteZoom * (maxSize - minSize);
+}
+
 export function getAbsoluteZoom(
-	state: InitializedCropperState,
+	state: CropperState | null,
 	settings: CoreSettings & {
 		imageRestriction?: ImageRestriction;
 		stencilSize?: StencilSize;
@@ -152,23 +137,34 @@ export function getAbsoluteZoom(
 			adjustStencil?: boolean;
 		};
 	},
+	normalized = true,
 ) {
-	const { coordinates, visibleArea } = state;
+	if (isInitializedState(state)) {
+		const { coordinates, visibleArea } = state;
 
-	const size = ratio(visibleArea) > ratio(coordinates) ? visibleArea.height : visibleArea.width;
+		const size = ratio(visibleArea) > ratio(coordinates) ? visibleArea.height : visibleArea.width;
 
-	const minSize = getMinimumVisibleAreaSize(state, settings);
-	const maxSize = getMaximumVisibleAreaSize(state, settings);
+		const minSize = getMinimumVisibleAreaSize(state, settings);
+		const maxSize = getMaximumVisibleAreaSize(state, settings);
 
-	// This simple linear formula defines that absolute zoom is equal:
-	// - 0 when `size` is equal to `maxSize`
-	// - 1 when `size` is equal to `minSize`
-	return Math.min(1, Math.max(0, 1 - (size - minSize) / (maxSize - minSize)));
+		// This simple linear formula defines that absolute zoom is equal:
+		// - 0 when `size` is equal to `maxSize`
+		// - 1 when `size` is equal to `minSize`
+		const value = 1 - (size - minSize) / (maxSize - minSize);
+		return normalized ? Math.min(1, Math.max(0, value)) : value;
+	} else {
+		return 0;
+	}
 }
 
-export function getVisibleAreaSize(state: InitializedCropperState, settings: CoreSettings, absoluteZoom: number) {
-	const minSize = getMinimumVisibleAreaSize(state, settings);
-	const maxSize = getMaximumVisibleAreaSize(state, settings);
+export function getZoomFactor(state: CropperState | null, settings: CoreSettings, absoluteZoom: number) {
+	if (isInitializedState(state)) {
+		const currentAbsoluteZoom = getAbsoluteZoom(state, settings, false);
 
-	return maxSize - absoluteZoom * (maxSize - minSize);
+		return (
+			getVisibleAreaSize(state, settings, currentAbsoluteZoom) / getVisibleAreaSize(state, settings, absoluteZoom)
+		);
+	} else {
+		return 1;
+	}
 }
