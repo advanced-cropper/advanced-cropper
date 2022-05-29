@@ -1,62 +1,30 @@
-import { CropperState, Scale, Size } from '../../types';
-import { isInitializedState, rotateSize } from '../../service';
+import { Size } from '../../types';
+import { rotateSize } from '../../service';
 import { isFunction } from '../../utils';
-import { ArbitraryRotateSettings } from './index';
 
-export enum BoundingBox {
+export enum BoundingBoxTypes {
 	Circle = 'circle',
 	Rectangle = 'rectangle',
 }
 
-export type BoundingBoxFunction = (state: CropperState, settings: ArbitraryRotateSettings) => Size | null;
+export type BoundingBoxFunction = (size: Size, angle: number) => Size;
 
-export function circleBoundingBox(state: CropperState, settings: ArbitraryRotateSettings) {
-	if (isInitializedState(state)) {
-		return {
-			width: state.coordinates.width,
-			height: state.coordinates.height,
-		};
-	}
-	return null;
+export type BoundingBox = BoundingBoxTypes | BoundingBoxFunction;
+
+export function circleBoundingBox(size: Size, angle: number): Size {
+	return size;
 }
 
-export function rectangleBoundingBox(state: CropperState, settings: ArbitraryRotateSettings) {
-	if (isInitializedState(state)) {
-		const size = {
-			width: state.coordinates.width,
-			height: state.coordinates.height,
-		};
-		return rotateSize(size, state.transforms.rotate);
-	}
-	return null;
+export function rectangleBoundingBox(size: Size, angle: number): Size {
+	return rotateSize(size, angle);
 }
 
-export function toBoundingBox(state: CropperState, settings: ArbitraryRotateSettings) {
-	if (isFunction(settings.boundingBox)) {
-		return settings.boundingBox(state, settings);
-	} else if (settings.boundingBox === BoundingBox.Circle) {
-		return circleBoundingBox(state, settings);
+export function getBoundingBox(size: Size, angle: number, algorithm?: BoundingBox) {
+	if (isFunction(algorithm)) {
+		return algorithm(size, angle);
+	} else if (algorithm === BoundingBoxTypes.Circle) {
+		return circleBoundingBox(size, angle);
 	} else {
-		return rectangleBoundingBox(state, settings);
+		return rectangleBoundingBox(size, angle);
 	}
 }
-
-export function fromBoundingBox(state: CropperState, settings: ArbitraryRotateSettings, boundingBox: Size) {}
-
-export const rectangle = {
-	to(size: Size, angle: number) {
-		return rotateSize(size, angle);
-	},
-	from(size: Size, angle: number) {
-		const radians = (angle * Math.PI) / 180;
-
-		return {
-			width:
-				(Math.abs(size.width * Math.cos(radians)) - Math.abs(size.height * Math.sin(radians))) /
-				(Math.pow(Math.cos(radians), 2) - Math.pow(Math.sin(radians), 2)),
-			height:
-				(Math.abs(size.height * Math.cos(radians)) - Math.abs(size.width * Math.sin(radians))) /
-				(Math.pow(Math.cos(radians), 2) - Math.pow(Math.sin(radians), 2)),
-		};
-	},
-};

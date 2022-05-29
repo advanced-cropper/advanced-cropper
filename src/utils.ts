@@ -225,31 +225,6 @@ export function isOrdinalDirection(value: unknown): value is OrdinalDirection {
 	);
 }
 
-export function pick<T, K extends keyof T>(value: T, ...keys: K[]): Pick<T, K> {
-	const result: any = {};
-	keys.forEach((key) => {
-		result[key] = value[key];
-	});
-	return result;
-}
-
-interface Omit {
-	<T extends object, K extends string[]>(obj: T, keys: K): Pick<T, Exclude<keyof T, K[number]>>;
-}
-
-export const omit: Omit = (obj, keys) => {
-	const result = {} as {
-		[K in keyof typeof obj]: typeof obj[K];
-	};
-	let key: keyof typeof obj;
-	for (key in obj) {
-		if (!keys.includes(key as any)) {
-			result[key] = obj[key];
-		}
-	}
-	return result;
-};
-
 export function debounce(callback: () => void, delay: number | (() => number)) {
 	let timestamp: number;
 

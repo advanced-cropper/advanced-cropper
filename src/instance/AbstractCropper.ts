@@ -101,6 +101,7 @@ export interface AbstractCropperCallbacks<Instance = unknown> {
 	onInteractionStart?: AbstractCropperCallback<Instance>;
 	onInteractionEnd?: AbstractCropperCallback<Instance>;
 }
+
 export interface AbstractCropperParameters<Settings extends CoreSettings> {
 	transitions?: CropperTransitionsSettings | boolean;
 	postProcess?: PostprocessFunction<Settings> | PostprocessFunction<Settings>[];
@@ -115,6 +116,7 @@ export interface AbstractCropperParameters<Settings extends CoreSettings> {
 	defaultTransforms?: DefaultTransforms;
 	priority?: Priority;
 }
+
 function runCallback<Instance>(callback?: AbstractCropperCallback<Instance>, getInstance?: () => Nullable<Instance>) {
 	if (callback && getInstance) {
 		const instance = getInstance();

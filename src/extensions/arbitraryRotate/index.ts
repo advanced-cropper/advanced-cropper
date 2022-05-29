@@ -1,9 +1,9 @@
-import { fitCircleToImage, fitRectangleToImage } from './position';
-import { fittedCircleSize, fittedRectangleSize } from './size';
+import { fitPositionToImage } from './position';
+import { fittedToImageSize } from './size';
 import { resizeCoordinatesAlgorithm } from '../../algorithms';
 import {
 	applyMove,
-	applyScale, approximateSize,
+	applyScale,
 	coordinatesToPositionRestrictions,
 	diff,
 	getAspectRatio,
@@ -17,7 +17,7 @@ import {
 } from '../../service';
 import { CoreSettings, CropperState, ImageTransform, PostprocessAction, ResizeDirections, Size } from '../../types';
 import { copyState, ResizeOptions, transformImage } from '../../state';
-import { BoundingBox, BoundingBoxFunction, toBoundingBox } from './boundingBox';
+import { BoundingBox, BoundingBoxFunction, BoundingBoxTypes } from './boundingBox';
 
 export interface ArbitraryRotateSettings extends CoreSettings {
 	boundingBox?: BoundingBox | BoundingBoxFunction;
@@ -106,34 +106,25 @@ export function getDefaultSize(state: CropperState) {
 
 export function mobileAutoZoom(
 	state: CropperState,
-	settings: CoreSettings & { boundingBox: BoundingBox | BoundingBoxFunction },
+	settings: CoreSettings & { boundingBox?: BoundingBox },
 	action: PostprocessAction,
 ) {
 	if (action.immediately && isInitializedState(state)) {
 		const result = copyState(state);
-		const boundingBox = toBoundingBox(state, settings);
 
-		if (boundingBox) {
-			const angle = state.transforms.rotate;
+		const { boundingBox = BoundingBoxTypes.Rectangle } = settings;
 
-			const aspectRatio = getAspectRatio(result, settings);
-
-			const boundingBoxAspectRatio = {
-				minimum:
-					(aspectRatio.minimum * Math.cos(angle) + Math.sin(angle)) /
-					(aspectRatio.minimum * Math.sin(angle) + Math.cos(angle)),
-				maximum:
-					(aspectRatio.maximum * Math.cos(angle) + Math.sin(angle)) /
-					(aspectRatio.maximum * Math.sin(angle) + Math.cos(angle)),
-			};
-
-			const size = approximateSize({
-				width: boundingBox.width,
-				height: boundingBox.height,
-				aspectRatio: boundingBoxAspectRatio,
-				sizeRestrictions: getSizeRestrictions(result, settings),
-			};
-		})
+		const size = fittedToImageSize({
+			width: result.coordinates.width,
+			height: result.coordinates.height,
+			image: {
+				...state.imageSize,
+				angle: state.transforms.rotate,
+			},
+			aspectRatio: getAspectRatio(result, settings),
+			sizeRestrictions: getSizeRestrictions(result, settings),
+			boundingBox,
+		});
 
 		const previousCenter = getCenter(result.coordinates);
 
@@ -154,10 +145,14 @@ export function mobileAutoZoom(
 		// Move to fit image
 		result.coordinates = applyMove(
 			result.coordinates,
-			(stencilType === 'circle' ? fitCircleToImage : fitRectangleToImage)(result.coordinates, {
-				...state.imageSize,
-				angle: state.transforms.rotate,
-			}),
+			fitPositionToImage(
+				result.coordinates,
+				{
+					...state.imageSize,
+					angle: state.transforms.rotate,
+				},
+				boundingBox,
+			),
 		);
 
 		// Auto size

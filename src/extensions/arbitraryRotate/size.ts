@@ -8,19 +8,21 @@ import {
 } from '../../service';
 import { AspectRatio, Size, SizeRestrictions } from '../../types';
 import { isGreater, isLower } from '../../utils';
+import { BoundingBox, BoundingBoxFunction, BoundingBoxTypes, getBoundingBox } from './boundingBox';
 
 interface Image {
 	width: number;
 	height: number;
 	angle: number;
 }
-export function imageToSizeRestrictions(image: Image, aspectRatio?: number): SizeRestrictions {
-	const wrapper = rotateSize(
+export function imageToSizeRestrictions(image: Image, aspectRatio: number, boundingBox: BoundingBox): SizeRestrictions {
+	const wrapper = getBoundingBox(
 		{
 			width: aspectRatio,
 			height: 1,
 		},
 		image.angle,
+		boundingBox,
 	);
 
 	if (image.width / image.height >= wrapper.width / wrapper.height) {
@@ -45,13 +47,14 @@ function validateSize(params: {
 	aspectRatio: AspectRatio;
 	sizeRestrictions: SizeRestrictions;
 	image: Image;
+	boundingBox: BoundingBox;
 	ignoreMinimum?: boolean;
 }) {
-	const { size, aspectRatio, ignoreMinimum, image } = params;
+	const { size, aspectRatio, ignoreMinimum, image, boundingBox } = params;
 
 	const sizeRestrictions =
 		size.width > 0 && size.height > 0
-			? mergeSizeRestrictions(params.sizeRestrictions, imageToSizeRestrictions(image, ratio(size)))
+			? mergeSizeRestrictions(params.sizeRestrictions, imageToSizeRestrictions(image, ratio(size), boundingBox))
 			: params.sizeRestrictions;
 
 	return (
@@ -65,15 +68,17 @@ function validateSize(params: {
 	);
 }
 
-export function fittedRectangleSize(params: {
+export function fittedToImageSize(params: {
 	width: number;
 	height: number;
 	image: Image;
 	sizeRestrictions: SizeRestrictions;
 	aspectRatio?: AspectRatio;
+	boundingBox?: BoundingBox;
 }): Size {
-	const { width, height, image } = params;
+	const { width, height, image, boundingBox = BoundingBoxTypes.Rectangle } = params;
 
+	// непонятно зачем так сделано
 	const rotatedImageSize = rotateSize(image, image.angle);
 
 	const sizeRestrictions = mergeSizeRestrictions(params.sizeRestrictions, {
@@ -81,24 +86,22 @@ export function fittedRectangleSize(params: {
 		maxWidth: rotatedImageSize.width,
 	});
 
+	// просто нормализация aspect ratio
 	const aspectRatio = {
 		minimum: (params.aspectRatio && params.aspectRatio.minimum) || 0,
 		maximum: (params.aspectRatio && params.aspectRatio.maximum) || Infinity,
 	};
 
+	// пробуем разместить указанные координаты с попавкой на минимальное значение
 	const coordinates = {
 		width: Math.max(sizeRestrictions.minWidth, width),
 		height: Math.max(sizeRestrictions.minHeight, height),
 	};
 
+	// просто функция отбора кандидатов
 	function findBestCandidate(candidates: Size[], ignoreMinimum = false): Size | null {
 		return candidates.reduce<Size | null>((minimum: Size | null, size: Size) => {
-			const sizeRestrictions = mergeSizeRestrictions(
-				params.sizeRestrictions,
-				imageToSizeRestrictions(image, ratio(size)),
-			);
-
-			if (validateSize({ size, aspectRatio, sizeRestrictions, image, ignoreMinimum })) {
+			if (validateSize({ size, aspectRatio, sizeRestrictions, image, ignoreMinimum, boundingBox })) {
 				return !minimum || sizeDistance(size, { width, height }) < sizeDistance(minimum, { width, height })
 					? size
 					: minimum;
@@ -108,11 +111,14 @@ export function fittedRectangleSize(params: {
 		}, null);
 	}
 
+	// Bounding box ограничений для текущих координат
 	const angleRestrictions = imageToSizeRestrictions(
 		image,
 		Math.min(aspectRatio.maximum, Math.max(aspectRatio.minimum, ratio(coordinates))),
+		boundingBox,
 	);
 
+	// Рассматриваем как теущий размер, так и обрубленный максимальным bounding box:
 	let candidates: Size[] = [
 		coordinates,
 		{
@@ -121,12 +127,13 @@ export function fittedRectangleSize(params: {
 		},
 	];
 
+	// Если есть ограничения на соотношения сторон
 	if (aspectRatio) {
 		[aspectRatio.minimum, aspectRatio.maximum].forEach((ratio) => {
 			if (ratio && ratio !== Infinity) {
 				const fittedSizeRestrictions = mergeSizeRestrictions(
 					sizeRestrictions,
-					imageToSizeRestrictions(image, ratio),
+					imageToSizeRestrictions(image, ratio, boundingBox),
 				);
 
 				const width = Math.min(coordinates.width, fittedSizeRestrictions.maxWidth);
@@ -141,7 +148,7 @@ export function fittedRectangleSize(params: {
 	candidates = candidates.map((candidate) => {
 		const coefficient = fitToSizeRestrictions(
 			candidate,
-			mergeSizeRestrictions(imageToSizeRestrictions(image, ratio(candidate)), sizeRestrictions),
+			mergeSizeRestrictions(imageToSizeRestrictions(image, ratio(candidate), boundingBox), sizeRestrictions),
 		);
 
 		return {
@@ -153,12 +160,10 @@ export function fittedRectangleSize(params: {
 
 	const candidate = findBestCandidate(candidates) || findBestCandidate(candidates, true);
 
-	return (
-		candidate && {
-			width: candidate.width,
-			height: candidate.height,
-		}
-	);
+	return (candidate && {
+		width: candidate.width,
+		height: candidate.height,
+	}) as Size;
 }
 
 export function fittedCircleSize(params: {

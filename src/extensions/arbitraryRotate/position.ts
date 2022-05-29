@@ -1,6 +1,9 @@
-import { Point, rotatePoint, rotateSize, isUndefined, isNumber, Coordinates } from 'react-advanced-cropper';
+import { BoundingBox, getBoundingBox } from './boundingBox';
+import { fitToPositionRestrictions, getCenter, rotatePoint, rotateSize } from '../../service';
+import { isNumber, isUndefined } from '../../utils';
+import { Point, Coordinates } from '../../types';
 
-interface Image {
+interface RotatedImage {
 	width: number;
 	height: number;
 	angle: number;
@@ -13,6 +16,8 @@ function min<T>(array: T[]) {
 		} else {
 			return result;
 		}
+		// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+		// @ts-ignore
 	}, undefined);
 }
 
@@ -23,10 +28,12 @@ function max<T>(array: T[]) {
 		} else {
 			return result;
 		}
+		// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+		// @ts-ignore
 	}, undefined);
 }
 
-export function fitPolygonToImage(points: Point[], image: Image) {
+export function fitPolygonToImage(points: Point[], image: RotatedImage) {
 	const size = rotateSize(image, image.angle);
 
 	const center = {
@@ -82,7 +89,7 @@ export function fitPolygonToImage(points: Point[], image: Image) {
 	};
 }
 
-export function fitRectangleToImage(coordinates: Coordinates, image: Image) {
+export function fitRectangleToImage(coordinates: Coordinates, image: RotatedImage) {
 	const size = rotateSize(image, image.angle);
 
 	const center = {
@@ -90,7 +97,7 @@ export function fitRectangleToImage(coordinates: Coordinates, image: Image) {
 		top: size.height / 2,
 	};
 
-	let points = [
+	const points = [
 		{ left: coordinates.left, top: coordinates.top },
 		{ left: coordinates.left + coordinates.width, top: coordinates.top },
 		{ left: coordinates.left + coordinates.width, top: coordinates.top + coordinates.height },
@@ -100,7 +107,7 @@ export function fitRectangleToImage(coordinates: Coordinates, image: Image) {
 	return fitPolygonToImage(points, image);
 }
 
-export function fitCircleToImage(coordinates: Coordinates, image: Image) {
+export function fitCircleToImage(coordinates: Coordinates, image: RotatedImage) {
 	const size = rotateSize(image, image.angle);
 
 	const imageCenter = {
@@ -117,7 +124,7 @@ export function fitCircleToImage(coordinates: Coordinates, image: Image) {
 		imageCenter,
 	);
 
-	let points = [
+	const points = [
 		{ left: center.left - coordinates.width / 2, top: center.top - coordinates.height / 2 },
 		{ left: center.left + coordinates.width / 2, top: center.top - coordinates.height / 2 },
 		{ left: center.left + coordinates.width / 2, top: center.top + coordinates.height / 2 },
@@ -125,4 +132,33 @@ export function fitCircleToImage(coordinates: Coordinates, image: Image) {
 	];
 
 	return fitPolygonToImage(points, image);
+}
+
+export function fitPositionToImage(coordinates: Coordinates, image: RotatedImage, boundingBox: BoundingBox) {
+	const center = getCenter(coordinates);
+
+	const boundingBoxSize = getBoundingBox(coordinates, image.angle, boundingBox);
+
+	const boundingBoxCoordinates = {
+		left: center.left - boundingBoxSize.width / 2,
+		top: center.top - boundingBoxSize.height / 2,
+		...boundingBoxSize,
+	};
+
+	const vector = fitToPositionRestrictions(boundingBoxCoordinates, {
+		left: 0,
+		top: 0,
+		right: image.width,
+		bottom: image.height,
+	});
+
+	const leftVector = rotatePoint({ left: vector.left, top: 0 }, image.angle);
+
+	const topVector = rotatePoint({ left: 0, top: vector.top }, image.angle);
+
+	return {
+		...coordinates,
+		left: leftVector.left + topVector.left,
+		top: leftVector.top + topVector.top,
+	};
 }
