@@ -1,4 +1,4 @@
-import { CoreSettings, CropperState, ImageRestriction, InitializedCropperState } from '../../types';
+import { CoreSettings, CropperState, ImageRestriction, InitializedCropperState, ModifierSettings } from '../../types';
 import { DefaultSettings } from '../../defaults';
 import { getMinimumSize, getSizeRestrictions, isInitializedState, ratio } from '../../service';
 import { isGreater } from '../../utils';
@@ -6,11 +6,7 @@ import { StencilSize } from '../stencilSize';
 
 function getMinimumVisibleAreaSize(
 	state: InitializedCropperState,
-	settings: DefaultSettings & {
-		transformImage?: {
-			adjustStencil?: boolean;
-		};
-	},
+	settings: CoreSettings & DefaultSettings & ModifierSettings,
 ) {
 	const minimumSize = getMinimumSize(state);
 

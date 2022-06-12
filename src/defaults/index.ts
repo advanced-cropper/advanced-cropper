@@ -22,12 +22,7 @@ import { defaultAreaPositionRestrictions } from './defaultAreaPositionRestrictio
 import { defaultAreaSizeRestrictions } from './defaultAreaSizeRestrictions';
 import { isFunction } from '../utils';
 
-export type ScaleImageOptions = {
-	enabled?: boolean;
-	adjustStencil?: boolean;
-};
-
-export interface DefaultSettingsParams<Settings extends DefaultSettings> {
+export interface DefaultSettingsParams<Settings extends CoreSettings & DefaultSettings> {
 	minWidth?: number;
 	minHeight?: number;
 	maxWidth?: number;
@@ -46,7 +41,7 @@ export interface DefaultSettingsParams<Settings extends DefaultSettings> {
 	positionRestrictions?: PositionRestrictions | ((state: CropperState, settings: Settings) => PositionRestrictions);
 }
 
-export interface DefaultSettings extends CoreSettings {
+export interface DefaultSettings {
 	minWidth?: number;
 	minHeight?: number;
 	maxWidth?: number;
@@ -56,7 +51,7 @@ export interface DefaultSettings extends CoreSettings {
 	imageRestriction?: ImageRestriction;
 }
 
-export function withDefaultSizeRestrictions<Settings extends DefaultSettings>(
+export function withDefaultSizeRestrictions<Settings extends CoreSettings & DefaultSettings>(
 	sizeRestrictions: SizeRestrictions | ((state: CropperState, settings: Settings) => SizeRestrictions),
 ) {
 	return (state: CropperState, basicSettings: Settings) => {
@@ -70,7 +65,7 @@ export function withDefaultPositionRestrictions(
 		| PositionRestrictions
 		| ((state: CropperState, settings: CoreSettings) => PositionRestrictions),
 ) {
-	return (state: CropperState, basicSettings: DefaultSettings) => {
+	return (state: CropperState, basicSettings: CoreSettings & DefaultSettings) => {
 		const value = isFunction(positionRestrictions)
 			? positionRestrictions(state, basicSettings)
 			: positionRestrictions;
@@ -83,7 +78,7 @@ export function withDefaultAreaPositionRestrictions(
 		| AreaPositionRestrictions
 		| ((state: CropperState, settings: CoreSettings) => AreaPositionRestrictions),
 ) {
-	return (state: CropperState, basicSettings: DefaultSettings) => {
+	return (state: CropperState, basicSettings: CoreSettings & DefaultSettings) => {
 		const value = isFunction(areaPositionRestrictions)
 			? areaPositionRestrictions(state, basicSettings)
 			: areaPositionRestrictions;
@@ -97,7 +92,7 @@ export function withDefaultAreaSizeRestrictions(
 		| AreaSizeRestrictions
 		| ((state: CropperState, settings: CoreSettings) => AreaSizeRestrictions),
 ) {
-	return (state: CropperState, basicSettings: DefaultSettings) => {
+	return (state: CropperState, basicSettings: CoreSettings & DefaultSettings) => {
 		const value = isFunction(areaSizeRestrictions)
 			? areaSizeRestrictions(state, basicSettings)
 			: areaSizeRestrictions;
@@ -106,7 +101,9 @@ export function withDefaultAreaSizeRestrictions(
 	};
 }
 
-export function createDefaultSettings<Settings extends DefaultSettings>(params: DefaultSettingsParams<Settings>) {
+export function createDefaultSettings<Settings extends CoreSettings & DefaultSettings>(
+	params: DefaultSettingsParams<Settings>,
+) {
 	return {
 		...params,
 		sizeRestrictions: (state: CropperState, basicSettings: Settings) => {
