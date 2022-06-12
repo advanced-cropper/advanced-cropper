@@ -39,7 +39,7 @@ import {
 	transformImage,
 	TransformImageAlgorithm,
 } from '../state';
-import { debounce, getOptions, isArray, isFunction } from '../utils';
+import { debounce, deepClone, getOptions, isArray, isFunction } from '../utils';
 import {
 	fillMoveDirections,
 	fillResizeDirections,
@@ -62,6 +62,20 @@ export interface ImmediatelyOptions {
 export interface NormalizeOptions {
 	normalize?: boolean;
 }
+
+export type AbstractCropperPostprocess =
+	| 'interactionEnd'
+	| 'createState'
+	| 'reconcileState'
+	| 'transformImage'
+	| 'transformImageEnd'
+	| 'setCoordinates'
+	| 'setVisibleArea'
+	| 'setBoundary'
+	| 'moveCoordinates'
+	| 'moveCoordinatesEnd'
+	| 'resizeCoordinates'
+	| 'resizeCoordinatesEnd';
 
 export interface AbstractCropperData {
 	transitions: boolean;
@@ -270,7 +284,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		this.updateState(
 			this.applyPostProcess(
 				{
-					name: 'create',
+					name: 'createState',
 					immediately: true,
 					transitions: false,
 				},
@@ -294,7 +308,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 	public reconcileState = (options: TransitionOptions = {}) => {
 		const { reconcileStateAlgorithm, settings } = this.getProps();
 		const { state } = this.getData();
-		const { transitions = true } = options;
+		const { transitions = false } = options;
 
 		if (state && !isConsistentState(state, settings)) {
 			let reconciledState = (reconcileStateAlgorithm || reconcileState)(state, settings);
@@ -302,7 +316,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 			if (isConsistentState(reconciledState, settings)) {
 				reconciledState = this.applyPostProcess(
 					{
-						name: 'reconcile',
+						name: 'reconcileState',
 						immediately: true,
 						transitions,
 					},
@@ -313,14 +327,14 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 						transitions,
 					});
 				} else {
-					if (process.env.NODE_ENV !== '1production') {
+					if (process.env.NODE_ENV !== 'production') {
 						console.error(
 							"Reconcile error: can't reconcile state. The postprocess function breaks some restrictions that was satisfied before by `reconcileStateAlgorithm`",
 						);
 					}
 				}
 			} else {
-				if (process.env.NODE_ENV !== '1production') {
+				if (process.env.NODE_ENV !== 'production') {
 					console.error(
 						"Reconcile error: can't reconcile state. Perhaps, the restrictions are contradictory.",
 					);
@@ -670,12 +684,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		const { state } = this.getData();
 
 		return state
-			? {
-					...state.transforms,
-					flip: {
-						...state.transforms.flip,
-					},
-			  }
+			? deepClone(state.transforms)
 			: {
 					rotate: 0,
 					flip: {

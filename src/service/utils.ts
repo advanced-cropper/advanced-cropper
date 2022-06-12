@@ -13,7 +13,8 @@ import {
 	SizeRestrictions,
 } from '../types';
 import { ALL_DIRECTIONS } from '../constants';
-import { isGreater, isLower, isNumber, isNumeric, isUndefined } from '../utils';
+import { isFunction, isGreater, isLower, isNumber, isNumeric, isUndefined } from '../utils';
+import { aspectRatio } from '../extensions/stencilSize';
 
 export function diff(firstObject: Point, secondObject: Point): Diff {
 	return {
@@ -131,7 +132,7 @@ export function getBrokenRatio(currentAspectRatio: number, aspectRatio: AspectRa
 	let ratioBroken;
 	if (aspectRatio.minimum && isLower(currentAspectRatio, aspectRatio.minimum)) {
 		ratioBroken = aspectRatio.minimum;
-	} else if (aspectRatio.maximum && isGreater(currentAspectRatio,  aspectRatio.maximum)) {
+	} else if (aspectRatio.maximum && isGreater(currentAspectRatio, aspectRatio.maximum)) {
 		ratioBroken = aspectRatio.maximum;
 	}
 	return ratioBroken;
@@ -333,12 +334,12 @@ export function getTransitionStyle(transitions: CropperTransitions | undefined) 
 	return transitions ? `${transitions.timingFunction} ${transitions.active ? transitions.duration : 0}ms` : 'none';
 }
 
-export function isConsistentSize(size: Size, restrictions: SizeRestrictions) {
+export function isConsistentSize(size: Size, restrictions: Partial<SizeRestrictions>) {
 	return (
-		!isGreater(size.width, restrictions.maxWidth) &&
-		!isGreater(size.height, restrictions.maxHeight) &&
-		!isLower(size.height, restrictions.minHeight) &&
-		!isLower(size.width, restrictions.minWidth)
+		(isUndefined(restrictions.maxWidth) || !isGreater(size.width, restrictions.maxWidth)) &&
+		(isUndefined(restrictions.maxHeight) || !isGreater(size.height, restrictions.maxHeight)) &&
+		(isUndefined(restrictions.minHeight) || !isLower(size.height, restrictions.minHeight)) &&
+		(isUndefined(restrictions.minWidth) || !isLower(size.width, restrictions.minWidth))
 	);
 }
 
@@ -349,4 +350,38 @@ export function isConsistentPosition(coordinates: Coordinates, restrictions: Pos
 		(isUndefined(restrictions.right) || !isGreater(coordinates.left + coordinates.width, restrictions.right)) &&
 		(isUndefined(restrictions.bottom) || !isGreater(coordinates.top + coordinates.height, restrictions.bottom))
 	);
+}
+
+export function getCloserSize(
+	candidates: Size[],
+	reference: Size,
+	sizeRestrictions: Partial<SizeRestrictions> | ((size: Size) => Partial<SizeRestrictions>),
+	aspectRatio: RawAspectRatio | ((size: Size) => RawAspectRatio),
+): Size | null {
+	const traverse = (ignoreMinimum?: boolean) => {
+		return candidates.reduce<Size | null>((minimum: Size | null, size: Size) => {
+			const { maxHeight, maxWidth, minWidth, minHeight } = isFunction(sizeRestrictions)
+				? sizeRestrictions(size)
+				: sizeRestrictions;
+
+			const preparedAspectRatio = createAspectRatio(isFunction(aspectRatio) ? aspectRatio(size) : aspectRatio);
+
+			const preparedSizeRestrictions = ignoreMinimum
+				? { maxWidth, maxHeight }
+				: { maxWidth, maxHeight, minWidth, minHeight };
+
+			if (
+				isConsistentSize(size, preparedSizeRestrictions) &&
+				!getBrokenRatio(ratio(size), preparedAspectRatio) &&
+				size.width &&
+				size.height
+			) {
+				return !minimum || sizeDistance(size, reference) < sizeDistance(minimum, reference) ? size : minimum;
+			} else {
+				return minimum;
+			}
+		}, null);
+	};
+
+	return traverse() || traverse(true);
 }

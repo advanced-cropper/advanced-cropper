@@ -1,24 +1,19 @@
-import { rectangle } from '../../../src/extensions/arbitraryRotate/boundingBox';
+import { fitToImage } from '../../../src/extensions/fitToImage/position';
+import { BoundingBoxType } from '../../../src/extensions/fitToImage/boundingBox';
 
-describe('rectange', () => {
-	it('should correctly define aspectRatio', () => {
-		const box = {
-			width: 150,
-			height: 50,
+describe('fitPositionToImage', () => {
+	it('should correctly fit coordinates ot image', () => {
+		const image = {
+			width: 9,
+			height: 15,
+			angle: 26.3,
 		};
-		const angle = 180;
-
-		for (let i = 0; i < 100; i++) {
-			const box = {
-				width: Math.random() * 1000,
-				height: Math.random() * 1000,
-			};
-			const angle = Math.random() * 360;
-
-			const to = rectangle.to(box, angle);
-			const from = rectangle.from(to, angle);
-			expect(box.width).toBeCloseTo(from.width);
-			expect(box.height).toBeCloseTo(from.height);
-		}
+		const coordinates = {
+			left: 4,
+			top: 4,
+			width: 3,
+			height: 4,
+		};
+		const result = fitToImage(coordinates, image, BoundingBoxType.Rectangle);
 	});
 });

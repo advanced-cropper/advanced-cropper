@@ -1,9 +1,11 @@
 import { applyMove, diff, moveToPositionRestrictions, getCenter, ratio, applyScale, maxScale } from './utils';
-import { CoreSettings, CropperState } from '../types';
+import { CoreSettings, CropperState, InitializedCropperState } from '../types';
 import { getAreaPositionRestrictions, getAreaSizeRestrictions } from './helpers';
 import { copyState } from '../state';
 import { approximateSize } from './approximateSize';
 
+export function fitVisibleArea(state: InitializedCropperState, settings: CoreSettings): InitializedCropperState;
+export function fitVisibleArea(state: CropperState, settings: CoreSettings): CropperState;
 export function fitVisibleArea(state: CropperState, settings: CoreSettings) {
 	const result = copyState(state);
 

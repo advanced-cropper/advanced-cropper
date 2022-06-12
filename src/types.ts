@@ -252,17 +252,15 @@ export interface SimpleTouch {
 	clientY: number;
 }
 
-export interface PostprocessAction {
-	name?: string;
+export interface PostprocessAction<Name extends string = string> {
+	name?: Name;
 	immediately?: boolean;
 	transitions?: boolean;
 }
 
-export type PostprocessFunction<Settings = CoreSettings, State = CropperState> = (
-	state: State,
-	settings: Settings,
-	action: PostprocessAction,
-) => State;
+export type PostprocessFunction<Settings = CoreSettings, State = CropperState> = BivarianceConstraint<
+	(state: State, settings: Settings, action: PostprocessAction) => State
+>;
 
 export type Nullable<T> = T | null | undefined;
 
