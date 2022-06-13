@@ -275,22 +275,29 @@ export function isOrdinalDirection(value: unknown): value is OrdinalDirection {
 	);
 }
 
-export function debounce(callback: () => void, delay: number | (() => number)) {
+export function debounce(callback: () => void, delay?: number | (() => number)) {
 	let timestamp: number;
+	let timeout: ReturnType<typeof setTimeout>;
 
 	function later() {
 		const last = Date.now() - timestamp;
-		const delayValue = isFunction(delay) ? delay() : delay;
+		const delayValue = isFunction(delay) ? delay() : delay || 0;
 
 		if (last < delayValue && last >= 0) {
-			setTimeout(later, delayValue - last);
+			timeout = setTimeout(later, delayValue - last);
 		} else {
 			callback();
 		}
 	}
 
-	return () => {
+	const result = () => {
 		timestamp = Date.now();
 		setTimeout(later, isFunction(delay) ? delay() : delay);
 	};
+
+	result.clear = () => {
+		clearTimeout(timeout);
+	};
+
+	return result;
 }
