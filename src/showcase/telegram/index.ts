@@ -15,12 +15,12 @@ import {
 	coordinatesToPositionRestrictions,
 	diff,
 	fitToPositionRestrictions,
-	fitVisibleArea,
 	getAspectRatio,
 	getCenter,
 	getMinimumSize,
 	getPositionRestrictions,
 	getSizeRestrictions,
+	getTransformedImageSize,
 	inverseMove,
 	isInitializedState,
 	mergePositionRestrictions,
@@ -96,9 +96,11 @@ export function resizeCoordinates(
 	options: ResizeOptions,
 ) {
 	if (isInitializedState(state)) {
-		let result = copyState(state);
+		const result = copyState(state);
 
 		const minimumSize = getMinimumSize(result);
+
+		const imageSize = getTransformedImageSize(result);
 
 		const sizeRestrictions = getSizeRestrictions(result, settings);
 
@@ -108,8 +110,8 @@ export function resizeCoordinates(
 				coordinatesToPositionRestrictions(result.visibleArea),
 			),
 			sizeRestrictions: {
-				maxWidth: Math.min(sizeRestrictions.maxWidth, result.visibleArea.width),
-				maxHeight: Math.min(sizeRestrictions.maxHeight, result.visibleArea.height),
+				maxWidth: Math.min(sizeRestrictions.maxWidth, imageSize.width, result.visibleArea.width),
+				maxHeight: Math.min(sizeRestrictions.maxHeight, imageSize.height, result.visibleArea.height),
 				minWidth: Math.max(Math.min(sizeRestrictions.minWidth, result.visibleArea.width), minimumSize),
 				minHeight: Math.max(Math.min(sizeRestrictions.minHeight, result.visibleArea.height), minimumSize),
 			},
@@ -118,16 +120,19 @@ export function resizeCoordinates(
 
 		const resizedCoordinates = { ...result.coordinates };
 
+		const approximatedSize = approximateSizeInsideImage({
+			width: result.coordinates.width,
+			height: result.coordinates.height,
+			image: getRotatedImage(result),
+			boundingBox: settings.stencilBoundingBox,
+			aspectRatio: getAspectRatio(result, settings),
+			sizeRestrictions: getSizeRestrictions(result, settings),
+		});
+
 		result.coordinates = {
-			...result.coordinates,
-			...approximateSizeInsideImage({
-				width: result.coordinates.width,
-				height: result.coordinates.height,
-				image: getRotatedImage(result),
-				boundingBox: settings.stencilBoundingBox,
-				aspectRatio: getAspectRatio(result, settings),
-				sizeRestrictions: getSizeRestrictions(result, settings),
-			}),
+			left: getCenter(resizedCoordinates).left - approximatedSize.width / 2,
+			top: getCenter(resizedCoordinates).top - approximatedSize.height / 2,
+			...approximatedSize,
 		};
 
 		if (isGreater(Math.abs(resizedCoordinates.height - result.coordinates.height), 0)) {
@@ -136,7 +141,6 @@ export function resizeCoordinates(
 				result.visibleArea.height /
 					(result.visibleArea.height + resizedCoordinates.height - result.coordinates.height),
 			);
-			result = fitVisibleArea(result, settings);
 		}
 
 		const fitDirections = fitToImage(result.coordinates, getRotatedImage(result), settings.stencilBoundingBox);
