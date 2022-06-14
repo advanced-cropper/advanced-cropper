@@ -1,15 +1,10 @@
 import { CoreSettings, CropperState, PostprocessAction } from '../types';
 import {
 	applyScale,
-	fitCoordinates,
 	fitVisibleArea,
-	getAreaPositionRestrictions,
 	getAreaSizeRestrictions,
-	getTransformedImageSize,
 	isInitializedState,
 	maxScale,
-	moveToPositionRestrictions,
-	ratio,
 } from '../service';
 import { copyState } from '../state';
 

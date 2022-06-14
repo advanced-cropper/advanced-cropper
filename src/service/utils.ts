@@ -14,7 +14,6 @@ import {
 } from '../types';
 import { ALL_DIRECTIONS } from '../constants';
 import { isFunction, isGreater, isLower, isNumber, isNumeric, isUndefined } from '../utils';
-import { aspectRatio } from '../extensions/stencilSize';
 
 export function diff(firstObject: Point, secondObject: Point): Diff {
 	return {

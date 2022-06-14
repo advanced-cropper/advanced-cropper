@@ -1,4 +1,4 @@
-import { applyMove, diff, moveToPositionRestrictions, getCenter, ratio, applyScale, maxScale } from './utils';
+import { applyMove, diff, moveToPositionRestrictions, getCenter, ratio } from './utils';
 import { CoreSettings, CropperState, InitializedCropperState } from '../types';
 import { getAreaPositionRestrictions, getAreaSizeRestrictions } from './helpers';
 import { copyState } from '../state';

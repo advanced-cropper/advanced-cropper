@@ -1,8 +1,7 @@
 // This function returns the approximation size to width / height with respect to
 // restrictions and aspect ratio
-import { AspectRatio, RawAspectRatio, Size, SizeRestrictions } from '../types';
-import { createAspectRatio, getCloserSize, ratio, resizeToSizeRestrictions, sizeDistance } from './utils';
-import { isGreater, isLower } from '../utils';
+import { RawAspectRatio, Size, SizeRestrictions } from '../types';
+import { createAspectRatio, getCloserSize, resizeToSizeRestrictions } from './utils';
 
 // Limitations:
 // 1. Assume that maximum width and height always larger than minimum width and height

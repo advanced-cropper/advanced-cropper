@@ -20,7 +20,6 @@ import {
 	ratio,
 } from '../service';
 import { copyState } from './copyState';
-import { isGreater } from '../utils';
 
 export type ReconcileStateAlgorithm<Settings extends CoreSettings = CoreSettings> = (
 	state: CropperState,

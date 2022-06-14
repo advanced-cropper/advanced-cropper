@@ -1,6 +1,5 @@
 import { Size } from '../../types';
 import { rotateSize } from '../../service';
-import { isFunction } from '../../utils';
 import { BoundingBox, BoundingBoxType } from './types';
 
 export function circleBoundingBox(size: Size, angle: number): Size {

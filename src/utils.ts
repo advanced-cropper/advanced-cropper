@@ -232,14 +232,6 @@ export function deepCompare(a: any, b: any) {
 	return a !== a && b !== b;
 }
 
-export function mapObject<T extends object, V>(obj: T, callback: <K extends keyof T>(value: T[K], key: K) => V) {
-	const result = {} as { [K in keyof T]: V };
-	(Object.keys(obj) as Array<keyof T>).forEach((name) => {
-		result[name] = callback(obj[name], name);
-	});
-	return result;
-}
-
 export function isWheelEvent(event: Event): event is WheelEvent {
 	return 'deltaX' in event;
 }

@@ -1,5 +1,5 @@
 import { CoreSettings, CropperState, InitializedCropperState } from '../types';
-import { emptyCoordinates, isFunction, isNumeric } from '../utils';
+import { emptyCoordinates, isFunction } from '../utils';
 import { createAspectRatio, rotateSize } from './utils';
 import { calculateSizeRestrictions, calculateAreaSizeRestrictions } from './sizeRestrictions';
 
