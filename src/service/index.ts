@@ -7,4 +7,4 @@ export * from './sizeRestrictions';
 export * from './utils';
 export * from './approximateSize';
 export * from './isEqualStates';
-export * from './mimes';
+export * from '../images';
