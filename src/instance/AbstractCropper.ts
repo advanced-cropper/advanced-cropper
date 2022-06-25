@@ -221,13 +221,13 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 
 		let currentData = previousData;
 		if (changed) {
-			if (transitions) {
+			if (transitions && changed) {
 				this.disableTransitions();
 			}
 
 			currentData = {
 				state: copyState(state),
-				transitions,
+				transitions: transitions && changed,
 			};
 		}
 		this.setData(currentData);

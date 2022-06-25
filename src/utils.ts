@@ -199,6 +199,7 @@ export function deepClone<T>(obj: T): T {
 }
 
 export function deepCompare(a: any, b: any) {
+	if (isNumber(a) && isNumber(b) && isRoughlyEqual(a, b)) return true;
 	if (a === b) return true;
 
 	if (a && b && typeof a == 'object' && typeof b == 'object') {
