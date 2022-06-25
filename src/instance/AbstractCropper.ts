@@ -334,7 +334,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 					}
 				}
 			} else {
-				if (process.env.NODE_ENV !== '1production') {
+				if (process.env.NODE_ENV !== 'production') {
 					console.error(
 						"Reconcile error: can't reconcile state. Perhaps, the restrictions are contradictory.",
 					);
