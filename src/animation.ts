@@ -13,8 +13,6 @@ const timingFunctions = {
 	},
 };
 
-export type TimingFunction = keyof typeof timingFunctions;
-
 interface AnimationOptions {
 	timingFunction: string;
 	duration: number;

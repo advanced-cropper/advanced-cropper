@@ -1,6 +1,6 @@
 {
 	"name": "advanced-cropper",
-	"version": "0.7.0",
+	"version": "0.8.1",
 	"description": "The core of the advanced cropper libraries family",
 	"author": "Norserium",
 	"license": "MIT",
@@ -29,13 +29,11 @@
 		"publish:dist": "npm run prepare:dist && npm publish dist"
 	},
 	"dependencies": {
-		"tslib": "^2.0.1"
+		"tslib": "^2.4.0"
 	},
 	"devDependencies": {
 		"@rollup/plugin-commonjs": "^13.0.0",
-		"@rollup/plugin-multi-entry": "^4.0.0",
 		"@rollup/plugin-node-resolve": "^9.0.0",
-		"@rollup/plugin-replace": "^2.3.3",
 		"@types/jest": "^27.0.2",
 		"@typescript-eslint/eslint-plugin": "^2.34.0",
 		"@typescript-eslint/parser": "^2.34.0",
@@ -75,5 +73,6 @@
 			"pre-commit": "lint-staged"
 		}
 	},
-	"main": "./index.js"
+	"main": "./index.js",
+	"module": "./index.js"
 }

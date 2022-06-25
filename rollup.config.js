@@ -1,5 +1,4 @@
 import commonjs from '@rollup/plugin-commonjs';
-import replace from '@rollup/plugin-replace';
 import resolve from '@rollup/plugin-node-resolve';
 import typescript from '@wessberg/rollup-plugin-ts';
 
@@ -23,21 +22,15 @@ export default {
 		'src/image.ts',
 		'src/types.ts',
 		'src/utils.ts',
+		'src/index.ts',
 	],
 	preserveModules: true,
 	output: [
 		{
 			dir: 'dist',
-			format: 'esm',
+			format: 'es',
 		},
 	],
-	plugins: [
-		resolve(),
-		commonjs(),
-		typescript(),
-		replace({
-			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-		}),
-	],
+	plugins: [resolve(), commonjs(), typescript()],
 	external: ['tslib'],
 };
