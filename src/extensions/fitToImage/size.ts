@@ -59,14 +59,14 @@ export function approximateSizeInsideImage(params: {
 		height: Math.max(sizeRestrictions.minHeight, height),
 	};
 
-	// Bounding box ограничений для текущих координат
+	// Bounding box for the current coordinates
 	const angleRestrictions = imageToSizeRestrictions(
 		image,
 		Math.min(aspectRatio.maximum, Math.max(aspectRatio.minimum, ratio(coordinates))),
 		boundingBox,
 	);
 
-	// Рассматриваем как теущий размер, так и обрубленный максимальным bounding box:
+	// Consider the current size and the cropped by maximum bounding box size
 	let candidates: Size[] = [
 		coordinates,
 		{
@@ -75,22 +75,20 @@ export function approximateSizeInsideImage(params: {
 		},
 	];
 
-	// Если есть ограничения на соотношения сторон
-	if (aspectRatio) {
-		[aspectRatio.minimum, aspectRatio.maximum].forEach((ratio) => {
-			if (ratio && ratio !== Infinity) {
-				const fittedSizeRestrictions = mergeSizeRestrictions(
-					sizeRestrictions,
-					imageToSizeRestrictions(image, ratio, boundingBox),
-				);
+	// If we have some aspect ratio
+	[aspectRatio.minimum, aspectRatio.maximum].forEach((ratio) => {
+		if (ratio && ratio !== Infinity) {
+			const fittedSizeRestrictions = mergeSizeRestrictions(
+				sizeRestrictions,
+				imageToSizeRestrictions(image, ratio, boundingBox),
+			);
 
-				const width = Math.min(coordinates.width, fittedSizeRestrictions.maxWidth);
-				const height = Math.min(coordinates.height, fittedSizeRestrictions.maxHeight);
+			const width = Math.min(coordinates.width, fittedSizeRestrictions.maxWidth);
+			const height = Math.min(coordinates.height, fittedSizeRestrictions.maxHeight);
 
-				candidates.push({ width, height: width / ratio }, { width: height * ratio, height });
-			}
-		});
-	}
+			candidates.push({ width, height: width / ratio }, { width: height * ratio, height });
+		}
+	});
 
 	// Resize the candidates as much as possible to prevent breaking minimum size
 	candidates = candidates.map((candidate) =>
