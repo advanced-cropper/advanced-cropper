@@ -9,12 +9,6 @@
 **Advanced Cropper** is the core library for the family of the croppers for different component frameworks. Remember, it's not the independent library, like, for example,
 [`vue-advanced-cropper`](https://github.com/Norserium/vue-advanced-cropper), it's the service library that used under the hood.
 
----
-
-:warning: Perhaps you wouldn't use this library in your project. Consult with [Norserium](https://github.com/Norserium) if you clearly sure that you would.
-
----
-
 ## Install
 
 ```bash
