@@ -1,11 +1,5 @@
 import { CoreSettings, CropperState, PostprocessAction } from '../types';
-import {
-	applyScale,
-	fitVisibleArea,
-	getAreaSizeRestrictions,
-	isInitializedState,
-	maxScale,
-} from '../service';
+import { applyScale, fitVisibleArea, getAreaSizeRestrictions, isInitializedState, maxScale } from '../service';
 import { copyState } from '../state';
 
 export function defaultPostprocess(

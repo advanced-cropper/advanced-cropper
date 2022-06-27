@@ -1,6 +1,14 @@
-import { CoreSettings, CropperState, InitializedCropperState } from '../types';
+import { Coordinates, CoreSettings, CropperState, InitializedCropperState } from '../types';
 import { emptyCoordinates, isFunction } from '../utils';
-import { createAspectRatio, rotateSize } from './utils';
+import {
+	createAspectRatio,
+	getBrokenRatio,
+	isConsistentPosition,
+	isConsistentSize,
+	moveToPositionRestrictions,
+	ratio,
+	rotateSize,
+} from './utils';
 import { calculateSizeRestrictions, calculateAreaSizeRestrictions } from './sizeRestrictions';
 
 export function isInitializedState(state: CropperState | null): state is InitializedCropperState {
@@ -81,4 +89,47 @@ export function getMinimumSize(state: CropperState) {
 	return state.coordinates
 		? Math.min(state.coordinates.width, state.coordinates.height, 20 * getCoefficient(state))
 		: 1;
+}
+export function getRoundedCoordinates(state: CropperState, settings: CoreSettings): Coordinates | null {
+	if (isInitializedState(state)) {
+		const sizeRestrictions = getSizeRestrictions(state, settings);
+
+		const positionRestrictions = getPositionRestrictions(state, settings);
+
+		const roundCoordinates = {
+			width: Math.round(state.coordinates.width),
+			height: Math.round(state.coordinates.height),
+			left: Math.round(state.coordinates.left),
+			top: Math.round(state.coordinates.top),
+		};
+
+		if (roundCoordinates.width > sizeRestrictions.maxWidth) {
+			roundCoordinates.width = Math.floor(state.coordinates.width);
+		} else if (roundCoordinates.width < sizeRestrictions.minWidth) {
+			roundCoordinates.width = Math.ceil(state.coordinates.width);
+		}
+		if (roundCoordinates.height > sizeRestrictions.maxHeight) {
+			roundCoordinates.height = Math.floor(state.coordinates.height);
+		} else if (roundCoordinates.height < sizeRestrictions.minHeight) {
+			roundCoordinates.height = Math.ceil(state.coordinates.height);
+		}
+
+		return moveToPositionRestrictions(roundCoordinates, positionRestrictions);
+	} else {
+		return null;
+	}
+}
+
+export function isConsistentState(state: CropperState, settings: CoreSettings) {
+	if (isInitializedState(state)) {
+		return (
+			!getBrokenRatio(ratio(state.coordinates), getAspectRatio(state, settings)) &&
+			isConsistentSize(state.visibleArea, getAreaSizeRestrictions(state, settings)) &&
+			isConsistentSize(state.coordinates, getSizeRestrictions(state, settings)) &&
+			isConsistentPosition(state.visibleArea, getAreaPositionRestrictions(state, settings)) &&
+			isConsistentPosition(state.coordinates, getPositionRestrictions(state, settings))
+		);
+	} else {
+		return true;
+	}
 }

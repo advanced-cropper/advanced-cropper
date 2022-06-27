@@ -43,7 +43,7 @@ export function calculateSizeRestrictions(state: CropperState, settings: CoreSet
 
 	const positionRestrictions = getPositionRestrictions(state, settings);
 
-	// User can forget to set some of restrictions, so we should init them by default values
+	// User can forget to set some of restrictions, so we should initialize them by default values
 	const restrictions = {
 		minWidth: isNumeric(sizeRestrictions.minWidth) ? parseNumber(sizeRestrictions.minWidth) : 0,
 		minHeight: isNumeric(sizeRestrictions.minHeight) ? parseNumber(sizeRestrictions.minHeight) : 0,

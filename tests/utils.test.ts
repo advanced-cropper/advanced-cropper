@@ -1,4 +1,4 @@
-import { getOptions } from './utils';
+import { getOptions } from '../src/utils';
 
 test('Should correctly get options', () => {
 	const defaultScheme = {

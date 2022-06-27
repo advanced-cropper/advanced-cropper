@@ -12,7 +12,7 @@ export function setVisibleArea(
 	state: CropperState,
 	settings: CoreSettings,
 	visibleArea: VisibleArea,
-	// If you set safe to `false`, the coordinates can leave the visible area
+	// If you set safe to `false`, the coordinates will be able to leave the visible area
 	safe = true,
 ) {
 	let result: CropperState = { ...copyState(state), visibleArea };

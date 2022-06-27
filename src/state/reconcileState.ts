@@ -7,12 +7,9 @@ import {
 	getAreaPositionRestrictions,
 	getAreaSizeRestrictions,
 	getAspectRatio,
-	getBrokenRatio,
 	getCenter,
 	getPositionRestrictions,
 	getSizeRestrictions,
-	isConsistentPosition,
-	isConsistentSize,
 	isInitializedState,
 	mergePositionRestrictions,
 	mergeSizeRestrictions,
@@ -96,18 +93,4 @@ export function reconcileState(state: CropperState, settings: CoreSettings) {
 	}
 
 	return state;
-}
-
-export function isConsistentState(state: CropperState, settings: CoreSettings) {
-	if (isInitializedState(state)) {
-		return (
-			!getBrokenRatio(ratio(state.coordinates), getAspectRatio(state, settings)) &&
-			isConsistentSize(state.visibleArea, getAreaSizeRestrictions(state, settings)) &&
-			isConsistentSize(state.coordinates, getSizeRestrictions(state, settings)) &&
-			isConsistentPosition(state.visibleArea, getAreaPositionRestrictions(state, settings)) &&
-			isConsistentPosition(state.coordinates, getPositionRestrictions(state, settings))
-		);
-	} else {
-		return true;
-	}
 }

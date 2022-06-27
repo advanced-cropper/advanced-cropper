@@ -23,7 +23,6 @@ import {
 	copyState,
 	createState,
 	CreateStateAlgorithm,
-	isConsistentState,
 	MoveAlgorithm,
 	moveCoordinates,
 	reconcileState,
@@ -43,12 +42,13 @@ import { debounce, deepClone, getOptions, isArray, isFunction } from '../utils';
 import {
 	fillMoveDirections,
 	fillResizeDirections,
+	getRoundedCoordinates,
 	getStencilCoordinates,
+	isConsistentState,
 	isEqualStates,
 	normalizeImageTransform,
 	normalizeMoveDirections,
 	normalizeResizeDirections,
-	roundCoordinates,
 } from '../service';
 
 export interface TransitionOptions {
@@ -629,7 +629,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		if (state && state.coordinates) {
 			const { round = true } = options;
 			if (round) {
-				return roundCoordinates(state, settings);
+				return getRoundedCoordinates(state, settings);
 			} else {
 				return { ...state.coordinates };
 			}

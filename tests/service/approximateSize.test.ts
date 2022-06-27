@@ -1,4 +1,4 @@
-import { approximateSize } from './approximateSize';
+import { approximateSize } from '../../src/service/approximateSize';
 
 const tests = [
 	{

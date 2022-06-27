@@ -153,9 +153,10 @@ export function resizeCoordinates(
 }
 
 export function defaultSize(state: CropperState, settings: CoreSettings) {
+	const imageSize = getTransformedImageSize(state);
 	return {
-		width: state.visibleArea ? state.visibleArea.width : state.imageSize.width,
-		height: state.visibleArea ? state.visibleArea.height : state.imageSize.height,
+		width: state.visibleArea ? state.visibleArea.width : imageSize.width,
+		height: state.visibleArea ? state.visibleArea.height : imageSize.height,
 	};
 }
 
