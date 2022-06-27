@@ -13,7 +13,6 @@ export default {
 		'src/extensions/absoluteZoom/index.ts',
 		'src/extensions/stencilSize/index.ts',
 		'src/extensions/preventZoom/index.ts',
-		'src/extensions/defaultState/index.ts',
 		'src/extensions/fitToImage/index.ts',
 		'src/showcase/telegram/index.ts',
 		'src/animation.ts',

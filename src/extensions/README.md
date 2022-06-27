@@ -18,7 +18,3 @@ The postprocess function that prevents image zoom in different occasions.
 ### Stencil Size
 
 The couple of functions that give the developer possibility to set fixed stencil size in pixels.
-
-### Default State
-
-The function that returns the default state for the current image and settings.

@@ -166,6 +166,18 @@ export function isArrayBufferLike(value: unknown): value is ArrayBufferLike {
 	return value instanceof ArrayBuffer;
 }
 
+export function getCloserAngle(reference: number, angle: number) {
+	const turnsCount = Math.floor(reference / 360);
+	const firstCandidate = turnsCount * 360 + angle;
+	const secondCandidate = (turnsCount + 1) * 360 + angle;
+
+	if (Math.abs(firstCandidate - reference) < Math.abs(secondCandidate - reference)) {
+		return firstCandidate;
+	} else {
+		return secondCandidate;
+	}
+}
+
 export function sign(value: number) {
 	const number = +value;
 	if (number === 0 || isNaN(number)) {

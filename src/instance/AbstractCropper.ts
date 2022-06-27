@@ -274,31 +274,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 	};
 
 	public resetState = (boundary: Boundary, image: CropperImage) => {
-		const { defaultTransforms, createStateAlgorithm, priority, settings } = this.getProps();
-
-		let transforms: PartialTransforms = image.transforms;
-		if (defaultTransforms) {
-			transforms = isFunction(defaultTransforms) ? defaultTransforms(image) : defaultTransforms;
-		}
-
-		this.updateState(
-			this.applyPostProcess(
-				{
-					name: 'createState',
-					immediately: true,
-					transitions: false,
-				},
-				(createStateAlgorithm || createState)(
-					{
-						boundary,
-						imageSize: { width: image.width, height: image.height },
-						transforms,
-						priority,
-					},
-					settings,
-				),
-			),
-		);
+		this.updateState(this.getDefaultState(boundary, image));
 	};
 
 	public clear = () => {
@@ -475,7 +451,8 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 			transitions,
 		});
 	};
-	setCoordinates = (
+
+	public setCoordinates = (
 		transforms: CoordinatesTransform | CoordinatesTransform[],
 		options: ImmediatelyOptions & TransitionOptions = {},
 	) => {
@@ -693,10 +670,37 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 					},
 			  };
 	};
-	public isConsistent() {
+
+	public getDefaultState = (boundary: Boundary, image: CropperImage) => {
+		const { defaultTransforms, createStateAlgorithm, priority, settings } = this.getProps();
+
+		let transforms: PartialTransforms = image.transforms;
+		if (defaultTransforms) {
+			transforms = isFunction(defaultTransforms) ? defaultTransforms(image) : defaultTransforms;
+		}
+
+		return this.applyPostProcess(
+			{
+				name: 'createState',
+				immediately: true,
+				transitions: false,
+			},
+			(createStateAlgorithm || createState)(
+				{
+					boundary,
+					imageSize: { width: image.width, height: image.height },
+					transforms,
+					priority,
+				},
+				settings,
+			),
+		);
+	};
+
+	public isConsistent = () => {
 		const { state } = this.getData();
 		const { settings } = this.getProps();
 
 		return state ? isConsistentState(state, settings) : true;
-	}
+	};
 }
