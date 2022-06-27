@@ -295,10 +295,10 @@ export function debounce(callback: () => void, delay?: number | (() => number)) 
 		}
 	}
 
-	const result = () => {
+	function result() {
 		timestamp = Date.now();
-		setTimeout(later, isFunction(delay) ? delay() : delay);
-	};
+		timeout = setTimeout(later, isFunction(delay) ? delay() : delay || 0);
+	}
 
 	result.clear = () => {
 		clearTimeout(timeout);
