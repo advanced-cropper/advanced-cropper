@@ -17,7 +17,7 @@ export default {
 		'src/extensions/fitToImage/index.ts',
 		'src/showcase/telegram/index.ts',
 		'src/animation.ts',
-		'src/images/index.ts',
+		'src/upload.ts',
 		'src/canvas.ts',
 		'src/transforms.ts',
 		'src/image.ts',

@@ -1,4 +1,4 @@
-import { isArrayBufferLike } from '../utils';
+import { isArrayBufferLike } from './utils';
 
 const imageMimes = [
 	{
