@@ -24,27 +24,31 @@ interface AnimationOptions {
 export class Animation {
 	endTime?: number;
 	startTime?: number;
-	timingFunction: string;
-	duration: number;
 	active: boolean;
+	id?: number;
+
 	onStart?: () => void;
 	onProgress?: (progress: number) => void;
 	onStop?: () => void;
-	id?: number;
-	constructor(options: AnimationOptions) {
-		this.timingFunction = options.timingFunction;
-		this.duration = options.duration;
-		this.onStart = options.onStart;
-		this.onProgress = options.onProgress;
-		this.onStop = options.onStop;
+	timingFunction?: string;
+
+	constructor() {
 		this.active = false;
 	}
-	start() {
-		this.startTime = performance.now();
-		this.endTime = this.startTime + this.duration;
-		if (this.onStart) {
-			this.onStart();
+	start(animation: AnimationOptions) {
+		this.onStart = animation.onStart;
+		this.onProgress = animation.onProgress;
+		this.onStop = animation.onStop;
+
+		if (!this.active) {
+			this.onStart?.();
 		}
+		if (this.id) {
+			window.cancelAnimationFrame(this.id);
+		}
+		this.startTime = performance.now();
+		this.timingFunction = animation.timingFunction;
+		this.endTime = this.startTime + animation.duration;
 		this.active = true;
 		this.animate();
 	}
