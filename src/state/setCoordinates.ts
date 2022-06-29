@@ -6,29 +6,44 @@ import {
 	mergePositionRestrictions,
 	coordinatesToPositionRestrictions,
 	approximateSize,
+	getAreaSizeRestrictions,
+	applyScale,
+	maxScale,
+	applyMove,
+	inverseMove,
+	fitToPositionRestrictions,
+	fitVisibleArea,
 } from '../service';
 import { moveCoordinatesAlgorithm } from '../algorithms';
 import { emptyCoordinates, isUndefined } from '../utils';
 import { copyState } from './copyState';
 
+export enum SetCoordinatesMode {
+	limit = 'limit',
+	zoom = 'zoom',
+	unsafe = 'unsafe',
+}
+
 export type SetCoordinatesAlgorithm<Settings extends CoreSettings = CoreSettings> = (
 	state: CropperState,
 	settings: Settings,
 	transforms: CoordinatesTransform | CoordinatesTransform[],
-	safe?: boolean,
+	safe?: boolean | SetCoordinatesMode,
 ) => CropperState;
 
 export function setCoordinates(
 	state: CropperState,
 	settings: CoreSettings,
 	transform: CoordinatesTransform | CoordinatesTransform[],
-	// If you set safe to `false`, the coordinates can leave the visible area
-	safe = true,
+	// If you set mode to `false`, the coordinates can leave the visible area
+	mode: boolean | SetCoordinatesMode = true,
 ) {
+	const currentMode = mode === false ? SetCoordinatesMode.unsafe : mode === true ? SetCoordinatesMode.zoom : mode;
+
 	const aspectRatio = getAspectRatio(state, settings);
 
 	let sizeRestrictions = getSizeRestrictions(state, settings);
-	if (state.visibleArea && safe) {
+	if (state.visibleArea && currentMode === SetCoordinatesMode.limit) {
 		sizeRestrictions = {
 			...sizeRestrictions,
 			minWidth: Math.min(state.visibleArea.width, sizeRestrictions.minWidth),
@@ -39,7 +54,7 @@ export function setCoordinates(
 	}
 
 	let positionRestrictions = getPositionRestrictions(state, settings);
-	if (state.visibleArea && safe) {
+	if (state.visibleArea && currentMode === SetCoordinatesMode.limit) {
 		positionRestrictions = mergePositionRestrictions(
 			positionRestrictions,
 			coordinatesToPositionRestrictions(state.visibleArea),
@@ -97,8 +112,38 @@ export function setCoordinates(
 		}
 	});
 
-	return {
+	const result = {
 		...copyState(state),
 		coordinates,
 	};
+
+	if (result.visibleArea && currentMode === SetCoordinatesMode.zoom) {
+		const widthIntersections = Math.max(0, result.coordinates.width - result.visibleArea.width);
+		const heightIntersections = Math.max(0, result.coordinates.height - result.visibleArea.height);
+
+		const areaSizeRestrictions = getAreaSizeRestrictions(state, settings);
+
+		const scale =
+			widthIntersections > heightIntersections
+				? result.coordinates.width / result.visibleArea.width
+				: result.coordinates.height / result.visibleArea.height;
+
+		if (scale > 1) {
+			result.visibleArea = applyScale(
+				result.visibleArea,
+				Math.min(scale, maxScale(result.visibleArea, areaSizeRestrictions)),
+			);
+		}
+
+		result.visibleArea = applyMove(
+			result.visibleArea,
+			inverseMove(
+				fitToPositionRestrictions(result.coordinates, coordinatesToPositionRestrictions(result.visibleArea)),
+			),
+		);
+
+		return fitVisibleArea(result, settings);
+	} else {
+		return result;
+	}
 }

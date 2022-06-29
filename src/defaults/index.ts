@@ -197,4 +197,3 @@ export * from './defaultBoundary';
 export * from './defaultPositionRestrictions';
 export * from './defaultSizeRestrictions';
 export * from './defaultStencilConstraints';
-export * from './defaultPostProcess';

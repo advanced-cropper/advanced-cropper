@@ -1,5 +1,5 @@
 import { Boundary, CoreSettings, CropperState, ImageSize, PartialTransforms, Priority } from '../types';
-import { setCoordinates } from './setCoordinates';
+import { setCoordinates, SetCoordinatesMode } from './setCoordinates';
 import { getDefaultCoordinates, getDefaultVisibleArea } from '../service';
 import { setVisibleArea } from './setVisibleArea';
 
@@ -39,9 +39,9 @@ export function createState(options: CreateStateOptions, settings: CoreSettings)
 
 	if (priority === Priority.visibleArea) {
 		state = setVisibleArea(state, settings, getDefaultVisibleArea(state, settings), false);
-		state = setCoordinates(state, settings, getDefaultCoordinates(state, settings), true);
+		state = setCoordinates(state, settings, getDefaultCoordinates(state, settings), SetCoordinatesMode.limit);
 	} else {
-		state = setCoordinates(state, settings, getDefaultCoordinates(state, settings), false);
+		state = setCoordinates(state, settings, getDefaultCoordinates(state, settings), SetCoordinatesMode.unsafe);
 		state = setVisibleArea(state, settings, getDefaultVisibleArea(state, settings), true);
 	}
 
