@@ -46,7 +46,7 @@ import {
 	getRoundedCoordinates,
 	getStencilCoordinates,
 	isConsistentState,
-	isEqualStates,
+	isEqualState,
 	normalizeImageTransform,
 	normalizeMoveDirections,
 	normalizeResizeDirections,
@@ -218,7 +218,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		const previousData = this.getData();
 
 		const state = isFunction(modifier) ? modifier(previousData.state, settings) : modifier;
-		const changed = !isEqualStates(previousData.state, state);
+		const changed = !isEqualState(previousData.state, state);
 
 		let currentData = previousData;
 		if (changed) {
