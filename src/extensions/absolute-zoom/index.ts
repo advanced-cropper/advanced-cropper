@@ -2,7 +2,7 @@ import { CoreSettings, CropperState, ImageRestriction, InitializedCropperState, 
 import { DefaultSettings } from '../../defaults';
 import { getMinimumSize, getSizeRestrictions, isInitializedState, ratio } from '../../service';
 import { isGreater } from '../../utils';
-import { StencilSize } from '../stencilSize';
+import { StencilSize } from '../stencil-size';
 
 function getMinimumVisibleAreaSize(
 	state: InitializedCropperState,

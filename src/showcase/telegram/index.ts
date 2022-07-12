@@ -33,8 +33,8 @@ import {
 	fitToImage,
 	FitToImageSettings,
 	moveToImage,
-} from '../../extensions/fitToImage';
-import { getRotatedImage } from '../../extensions/fitToImage/utils';
+} from '../../extensions/fit-to-image';
+import { getRotatedImage } from '../../extensions/fit-to-image/utils';
 import { AbstractCropperPostprocess } from '../../instance';
 import { resizeCoordinatesAlgorithm } from '../../algorithms';
 import { deepCompare, isGreater } from '../../utils';

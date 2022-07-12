@@ -1,5 +1,5 @@
-import { fitToImage } from '../../../src/extensions/fitToImage/position';
-import { BoundingBoxType } from '../../../src/extensions/fitToImage/boundingBox';
+import { fitToImage } from '../../../src/extensions/fit-to-image/position';
+import { BoundingBoxType } from '../../../src/extensions/fit-to-image/boundingBox';
 
 describe('fitPositionToImage', () => {
 	it('should correctly fit coordinates ot image', () => {
