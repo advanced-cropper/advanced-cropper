@@ -105,7 +105,7 @@ export function transformImageAlgorithm(
 				state.visibleArea.height + state.visibleArea.top - (state.coordinates.height + state.coordinates.top),
 		};
 
-		// Move the area to fit to coordinates limits:
+		// Move the area to fit to the coordinates limits:
 		result.visibleArea = moveToPositionRestrictions(result.visibleArea, {
 			left:
 				positionRestrictions.left !== undefined

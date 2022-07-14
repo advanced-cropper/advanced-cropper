@@ -9,7 +9,7 @@ Some of them can be included in default functional later.
 
 ### Absolute Zoom
 
-The functions that gives you possibility to get the current absolute zoom and to set the absolute zoom value.
+The functions that give you possibility to get the current absolute zoom and to set the absolute zoom value.
 
 ### Prevent Zoom
 
