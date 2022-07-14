@@ -67,10 +67,6 @@ export interface AspectRatio {
 
 export type RawAspectRatio = Partial<AspectRatio> | number;
 
-export interface CropperEvent {
-	type: string;
-}
-
 export interface Diff {
 	left: number;
 	top: number;
@@ -243,10 +239,6 @@ export interface CropperTransitionsSettings {
 	duration?: number;
 }
 
-export interface Stencil {
-	aspectRatio: () => AspectRatio;
-}
-
 export interface SimpleTouch {
 	clientX: number;
 	clientY: number;
@@ -264,6 +256,6 @@ export type PostprocessFunction<Settings = CoreSettings, State = CropperState> =
 
 export type Nullable<T> = T | null | undefined;
 
-export type ExtensionOf<A, B> = Omit<A, keyof B>;
-
 export type DefaultTransforms = PartialTransforms | ((image: CropperImage) => PartialTransforms);
+
+export type DebouncedFunction<T extends (...args: any[]) => any> = T & { clear: () => void };
