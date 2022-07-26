@@ -36,7 +36,10 @@ export default {
 		commonjs(),
 		typescript(),
 		copy({
-			targets: [{ src: 'src/styles/**/*', dest: 'dist/styles' }],
+			targets: [
+				{ src: 'src/styles/**/*', dest: 'dist/styles' },
+				{ src: 'src/themes/**/*', dest: 'dist/themes' },
+			],
 		}),
 	],
 	external: ['tslib'],
