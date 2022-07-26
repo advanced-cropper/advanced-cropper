@@ -1,12 +1,12 @@
-import { Size } from '../types';
+import { Size } from './types';
 
-export interface StretchParams {
+export interface BoundaryStretchParams {
 	boundary: HTMLElement;
 	stretcher: HTMLElement;
 	size: Size;
 }
 
-export function updateStretcher({ boundary, stretcher, size }: StretchParams): void {
+export function stretchBoundary({ boundary, stretcher, size }: BoundaryStretchParams): void {
 	// Reset stretcher
 	stretcher.style.width = `0px`;
 	stretcher.style.height = `0px`;
@@ -21,4 +21,4 @@ export function updateStretcher({ boundary, stretcher, size }: StretchParams): v
 	stretcher.style.width = `${stretcher.clientHeight * ratio}px`;
 }
 
-export type StretchAlgorithm = typeof updateStretcher;
+export type BoundaryStretchAlgorithm = typeof stretchBoundary;

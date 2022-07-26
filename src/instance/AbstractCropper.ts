@@ -165,9 +165,9 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 
 	protected abstract setData(data: AbstractCropperData): void;
 
-	public abstract getData(): AbstractCropperData;
+	protected abstract getData(): AbstractCropperData;
 
-	public abstract getProps(): AbstractCropperProps<Settings, Instance>;
+	protected abstract getProps(): AbstractCropperProps<Settings, Instance>;
 
 	public getTransitions = () => {
 		const data = this.getData();

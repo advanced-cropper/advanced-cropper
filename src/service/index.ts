@@ -5,4 +5,5 @@ export * from './normalize';
 export * from './sizeRestrictions';
 export * from './utils';
 export * from './approximateSize';
+export * from './imageTransforms';
 export * from './isEqualState';

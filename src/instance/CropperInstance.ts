@@ -20,8 +20,7 @@ export class CropperInstance<
 
 		this.props = props;
 
-		// If it's not controlled:
-		if (!props.getData) {
+		if (!this.isControlled()) {
 			this.data = {
 				state: null,
 				transitions: false,
@@ -40,11 +39,11 @@ export class CropperInstance<
 		this.props.setData?.(data);
 	}
 
-	public getProps(): AbstractCropperProps<Settings, Instance> {
+	protected getProps(): AbstractCropperProps<Settings, Instance> {
 		return this.props.getProps();
 	}
 
-	public getData(): AbstractCropperData {
+	protected getData(): AbstractCropperData {
 		return (this.isControlled() ? this.props.getData?.() : this.data) as AbstractCropperData;
 	}
 }

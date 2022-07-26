@@ -1,10 +1,10 @@
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import typescript from '@wessberg/rollup-plugin-ts';
+import copy from 'rollup-plugin-copy';
 
 export default {
 	input: [
-		'src/html/index.ts',
 		'src/algorithms/index.ts',
 		'src/service/index.ts',
 		'src/state/index.ts',
@@ -14,11 +14,11 @@ export default {
 		'src/extensions/stencil-size/index.ts',
 		'src/extensions/prevent-zoom/index.ts',
 		'src/extensions/fit-to-image/index.ts',
+		'src/extensions/mimes/index.ts',
 		'src/showcase/telegram/index.ts',
 		'src/animation.ts',
-		'src/upload.ts',
 		'src/canvas.ts',
-		'src/transforms.ts',
+		'src/boundary.ts',
 		'src/image.ts',
 		'src/types.ts',
 		'src/utils.ts',
@@ -31,6 +31,13 @@ export default {
 			format: 'es',
 		},
 	],
-	plugins: [resolve(), commonjs(), typescript()],
+	plugins: [
+		resolve(),
+		commonjs(),
+		typescript(),
+		copy({
+			targets: [{ src: 'src/styles/**/*', dest: 'dist/styles' }],
+		}),
+	],
 	external: ['tslib'],
 };

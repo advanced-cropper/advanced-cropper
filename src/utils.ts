@@ -131,9 +131,9 @@ export function isNumber(value: unknown): value is number {
 	return typeof value === 'number';
 }
 
-export const isString = <T>(value: string | T): value is string => {
+export function isString<T>(value: string | T): value is string {
 	return typeof value === 'string';
-};
+}
 
 export function isNaN(value: unknown) {
 	return value !== value;
@@ -194,7 +194,7 @@ export function promiseTimeout(timeout: number) {
 	});
 }
 
-// Not performant, small function to reduce code amount
+// Not performant, small function to reduce the code amount
 export function deepClone<T>(obj: T): T {
 	if (!isObject(obj)) {
 		return obj;

@@ -1,6 +1,6 @@
 import { Coordinates, CropperImage, CropperState, CropperTransitions, Transforms } from './types';
 import { getCoefficient, getTransformedImageSize } from './service';
-import { isBlob, isLocal } from './utils';
+import { isBlob, isCrossOriginURL, isLocal } from './utils';
 
 const XHR_DONE = 4;
 
@@ -319,21 +319,23 @@ export function createImage(src: string, settings: CreateImageSettings = {}) {
 }
 
 export function loadImage(src: string, settings: LoadImageSettings = {}): Promise<CropperImage> {
-	return parseImage(src, settings).then((options) => {
-		return new Promise<CropperImage>((resolve, reject) => {
-			createImage(options.src, settings)
-				.then((image) => {
-					resolve({
-						...options,
-						width: image.naturalWidth,
-						height: image.naturalHeight,
+	return parseImage(src, { ...settings, crossOrigin: isCrossOriginURL(src) && settings.crossOrigin }).then(
+		(options) => {
+			return new Promise<CropperImage>((resolve, reject) => {
+				createImage(options.src, settings)
+					.then((image) => {
+						resolve({
+							...options,
+							width: image.naturalWidth,
+							height: image.naturalHeight,
+						});
+					})
+					.catch(() => {
+						reject(null);
 					});
-				})
-				.catch(() => {
-					reject(null);
-				});
-		});
-	});
+			});
+		},
+	);
 }
 
 export function getImageStyle(

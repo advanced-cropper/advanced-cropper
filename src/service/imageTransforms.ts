@@ -1,5 +1,5 @@
-import { distance, isRoughlyEqual, sign } from './utils';
-import { Point, SimpleTouch } from './types';
+import { distance, isRoughlyEqual, sign } from '../utils';
+import { Point, SimpleTouch } from '../types';
 
 interface GeometricProperties {
 	centerMass: Point;
