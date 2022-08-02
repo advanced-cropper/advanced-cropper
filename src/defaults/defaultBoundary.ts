@@ -1,11 +1,6 @@
 import { Boundary, Size } from '../types';
 
-export interface DefaultBoundaryParams {
-	boundary: HTMLElement;
-	size: Size;
-}
-
-export function fitBoundary({ boundary, size }: DefaultBoundaryParams): Boundary {
+export function fitBoundary(boundary: HTMLElement, size: Size): Boundary {
 	const areaHeight = boundary.clientHeight;
 	const areaWidth = boundary.clientWidth;
 
@@ -23,7 +18,7 @@ export function fitBoundary({ boundary, size }: DefaultBoundaryParams): Boundary
 	};
 }
 
-export function fillBoundary({ boundary }: DefaultBoundaryParams): Boundary {
+export function fillBoundary(boundary: HTMLElement): Boundary {
 	return {
 		width: boundary.clientWidth,
 		height: boundary.clientHeight,

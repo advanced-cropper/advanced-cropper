@@ -167,7 +167,7 @@ export interface InitializedCropperState {
 	coordinates: Coordinates;
 }
 
-export type BoundarySizeAlgorithm = ({ boundary, size }: { boundary: HTMLElement; size: Size }) => Boundary;
+export type BoundarySizeAlgorithm = (boundary: HTMLElement, size: Size) => Boundary;
 
 export type DefaultSize<Settings = CoreSettings> =
 	| Size
