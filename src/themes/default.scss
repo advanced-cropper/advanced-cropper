@@ -1,0 +1,33 @@
+$base-color: white !default;
+$handler-color: $base-color !default;
+$line-color: $base-color !default;
+$handler-size: 10px !default;
+
+// Handlers
+.advanced-cropper-simple-handler {
+	background: currentColor;
+	height: $handler-size;
+	width: $handler-size;
+}
+
+// Lines
+.advanced-cropper-simple-line {
+	transition: border 0.5s;
+	border-color: rgba($line-color, 0.3);
+	border-style: solid;
+	&--hover {
+		border-color: $line-color;
+	}
+}
+
+// Stencils
+.advanced-cropper-circle-stencil {
+	&__preview {
+		border: solid 2px rgba($line-color, 0.2);
+	}
+}
+
+// Overlay
+.advanced-cropper-stencil-overlay {
+	color: rgba(black, 0.5);
+}

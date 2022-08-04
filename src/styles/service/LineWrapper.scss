@@ -1,23 +1,15 @@
 .advanced-cropper-line-wrapper {
-	background: none;
-	position: absolute;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-
 	&--north,
 	&--south {
 		height: 12px;
 		width: 100%;
-		left: 0;
-		transform: translateY(-50%);
 	}
+
 	&--north {
-		top: 0;
 		cursor: n-resize;
 	}
+
 	&--south {
-		top: 100%;
 		cursor: s-resize;
 	}
 
@@ -25,18 +17,49 @@
 	&--west {
 		width: 12px;
 		height: 100%;
-		transform: translateX(-50%);
-		top: 0;
 	}
+
 	&--east {
-		left: 100%;
 		cursor: e-resize;
 	}
+
 	&--west {
-		left: 0;
 		cursor: w-resize;
 	}
+
 	&--disabled {
 		cursor: auto;
+	}
+
+	&__content {
+		position: absolute;
+
+		&--east,
+		&--west {
+			height: 100%;
+		}
+
+		&--north,
+		&--south {
+			width: 100%;
+		}
+
+		&--east {
+			left: 50%;
+			transform: translateX(-100%);
+		}
+
+		&--west {
+			right: 50%;
+			transform: translateX(100%);
+		}
+
+		&--north {
+			top: 50%;
+		}
+
+		&--south {
+			bottom: 50%;
+		}
 	}
 }

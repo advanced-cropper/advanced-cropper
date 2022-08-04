@@ -1,0 +1,29 @@
+@mixin grid() {
+	&:after,
+	&:before {
+		content: '';
+		opacity: 0;
+		transition: opacity 0.25s;
+		position: absolute;
+		pointer-events: none;
+		z-index: 1;
+	}
+	&:after {
+		border-left: dotted 1px $grid-color;
+		border-right: dotted 1px $grid-color;
+		width: 33%;
+		height: 100%;
+		transform: translateX(-50%);
+		left: 50%;
+		top: 0;
+	}
+	&:before {
+		border-top: dotted 1px $grid-color;
+		border-bottom: dotted 1px $grid-color;
+		height: 33%;
+		width: 100%;
+		transform: translateY(-50%);
+		top: 50%;
+		left: 0;
+	}
+}

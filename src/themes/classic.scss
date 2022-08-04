@@ -1,10 +1,12 @@
 $base-color: white !default;
+$accent-color: currentColor !default;
 $grid-color: $base-color !default;
-$handler-color: $base-color !default;
+$handler-color: $accent-color !default;
 $line-color: $base-color !default;
 $handler-size: 8px !default;
 $grid: true !default;
 
+// Lines
 .advanced-cropper-simple-line {
 	border-color: rgba($line-color, 0.8);
 	&--hover {
@@ -12,6 +14,7 @@ $grid: true !default;
 	}
 }
 
+// Handlers
 .advanced-cropper-simple-handler {
 	display: block;
 	position: relative;
@@ -28,6 +31,7 @@ $grid: true !default;
 	}
 }
 
+// Stencils
 .advanced-cropper-circle-stencil {
 	&__preview {
 		border: solid 2px rgba($line-color, 0.8);
@@ -49,6 +53,18 @@ $grid: true !default;
 	}
 }
 
+.advanced-cropper-circle-stencil,
+.advanced-cropper-rectangle-stencil {
+	&--moving,
+	&--resizing {
+		.advanced-cropper-simple-handler {
+			opacity: 1;
+		}
+	}
+}
+
+
+// Grid
 @if ($grid) {
 	.advanced-cropper-circle-stencil,
 	.advanced-cropper-rectangle-stencil {
@@ -63,8 +79,8 @@ $grid: true !default;
 				z-index: 1;
 			}
 			&:after {
-				border-left: dashed 1px $grid-color;
-				border-right: dashed 1px $grid-color;
+				border-left: solid 1px $grid-color;
+				border-right: solid 1px $grid-color;
 				width: 33%;
 				height: 100%;
 				transform: translateX(-50%);
@@ -72,8 +88,8 @@ $grid: true !default;
 				top: 0;
 			}
 			&:before {
-				border-top: dashed 1px $grid-color;
-				border-bottom: dashed 1px $grid-color;
+				border-top: solid 1px $grid-color;
+				border-bottom: solid 1px $grid-color;
 				height: 33%;
 				width: 100%;
 				transform: translateY(-50%);
@@ -84,26 +100,15 @@ $grid: true !default;
 
 		&--moving,
 		&--resizing {
-			.advanced-cropper-rectangle-stencil__preview,
-			.advanced-cropper-circle-stencil__preview {
-				&:after,
-				&:before {
-					opacity: 0.7;
+			.advanced-cropper-rectangle-stencil,
+			.advanced-cropper-circle-stencil {
+				&__preview {
+					&:after,
+					&:before {
+						opacity: 0.7;
+					}
 				}
 			}
-			.advanced-cropper-simple-handler {
-				opacity: 1;
-			}
-		}
-	}
-}
-
-.advanced-cropper-circle-stencil,
-.advanced-cropper-rectangle-stencil {
-	&--moving,
-	&--resizing {
-		.advanced-cropper-simple-handler {
-			opacity: 1;
 		}
 	}
 }

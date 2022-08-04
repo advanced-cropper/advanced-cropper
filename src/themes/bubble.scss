@@ -1,34 +1,32 @@
 $base-color: white !default;
+$accent-color: currentColor !default;
 $grid-color: $base-color !default;
 $grid: false !default;
-$handler-color: $base-color !default;
+$handler-color: $accent-color !default;
 $line-color: $base-color !default;
 $handler-size: 14px !default;
 $hover-handler-size: 25px !default;
 
-.advanced-cropper {
-	&__foreground {
-		opacity: 0.5;
-	}
-}
-
+// Handlers
 .advanced-cropper-simple-handler {
-	display: block;
-	background: rgba($handler-color, 0.95);
-	transform: translate3d(0, 0, 0);
-	will-change: height, width;
+	background: $handler-color;
+	opacity: 0.95;
 	height: $handler-size;
 	width: $handler-size;
 	border-radius: 50%;
 	transition-property: width, height;
 	transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 	transition-duration: 0.5s;
+	transform: translate3d(0, 0, 0);
+	will-change: height, width;
 
 	&--hover {
 		width: $hover-handler-size;
 		height: $hover-handler-size;
 	}
 }
+
+// Lines
 .advanced-cropper-simple-line {
 	border-color: rgba($line-color, 0.75);
 	&--hover {
@@ -36,7 +34,18 @@ $hover-handler-size: 25px !default;
 	}
 }
 
+// Stencils
+.advanced-cropper-circle-stencil,
+.advanced-cropper-rectangle-stencil {
+	&--moving,
+	&--resizing {
+		.advanced-cropper-simple-handler {
+			opacity: 1;
+		}
+	}
+}
 
+// Grid
 @if ($grid) {
 	.advanced-cropper-circle-stencil,
 	.advanced-cropper-rectangle-stencil {
@@ -51,8 +60,8 @@ $hover-handler-size: 25px !default;
 				z-index: 1;
 			}
 			&:after {
-				border-left: dotted 1px $grid-color;
-				border-right: dotted 1px $grid-color;
+				border-left: solid 1px $grid-color;
+				border-right: solid 1px $grid-color;
 				width: 33%;
 				height: 100%;
 				transform: translateX(-50%);
@@ -60,8 +69,8 @@ $hover-handler-size: 25px !default;
 				top: 0;
 			}
 			&:before {
-				border-top: dotted 1px $grid-color;
-				border-bottom: dotted 1px $grid-color;
+				border-top: solid 1px $grid-color;
+				border-bottom: solid 1px $grid-color;
 				height: 33%;
 				width: 100%;
 				transform: translateY(-50%);
@@ -72,30 +81,14 @@ $hover-handler-size: 25px !default;
 
 		&--moving,
 		&--resizing {
-			.advanced-cropper-rectangle-stencil__preview,
-			.advanced-cropper-circle-stencil__preview {
-				&:after,
-				&:before {
-					opacity: 0.7;
+			.advanced-cropper-rectangle-stencil,
+			.advanced-cropper-circle-stencil {
+				&__preview {
+					&:after,
+					&:before {
+						opacity: 0.7;
+					}
 				}
-			}
-			.advanced-cropper-simple-handler {
-				opacity: 1;
-			}
-		}
-	}
-}
-
-
-.advanced-cropper-circle-stencil,
-.advanced-cropper-rectangle-stencil {
-	&--moving,
-	&--resizing {
-		.advanced-cropper-rectangle-stencil__preview,
-		.advanced-cropper-circle-stencil__preview {
-			&:after,
-			&:before {
-				opacity: 0.7;
 			}
 		}
 	}

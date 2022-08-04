@@ -1,0 +1,160 @@
+$accent-color: currentColor !default;
+$base-color: white !default;
+$line-color: $base-color !default;
+$line-width: 2px !default;
+$handler-color: $accent-color !default;
+$big-handler-color: $handler-color !default;
+$big-handler-size: 16px !default;
+$big-handler-width: $line-width + 1px !default;
+$small-handler-size: 0px !default;
+$small-handler-color: $handler-color !default;
+$handler-padding: 4px !default;
+$handler-wrapper-size: $big-handler-size + $handler-padding * 2 !default;
+$grid: true !default;
+$grid-color: $base-color !default;
+
+
+// Lines
+.advanced-cropper-simple-line {
+	&--east {
+		border-right-width: $line-width;
+	}
+	&--west {
+		border-left-width: $line-width;
+	}
+	&--south {
+		border-bottom-width: $line-width;
+	}
+	&--north {
+		border-top-width: $line-width;
+	}
+}
+
+// Handlers
+.advanced-cropper-bounding-box {
+	&__handler {
+		width: $handler-wrapper-size;
+		height: $handler-wrapper-size;
+
+		$shift: 1px;
+
+		&--west-north {
+			transform: translate(-$handler-padding - $shift , -$handler-padding - $shift );
+		}
+
+		&--east-south {
+			transform: translate(-$big-handler-size - $handler-padding + $shift , -$big-handler-size - $handler-padding + $shift );
+		}
+
+		&--west-south {
+			transform: translate(-$handler-padding - $shift , -$big-handler-size - $handler-padding + $shift );
+		}
+
+		&--east-north {
+			transform: translate(-$big-handler-size - $handler-padding + $shift , -$handler-padding - $shift );
+		}
+	}
+}
+
+.advanced-cropper-simple-handler {
+	display: block;
+	position: relative;
+	flex-shrink: 0;
+	transition: opacity 0.5s;
+	border: none;
+	background: $accent-color;
+	top: auto;
+	left: auto;
+	height: $small-handler-size;
+	width: $small-handler-size;
+	opacity: 0;
+
+	&--west-north,
+	&--east-south,
+	&--west-south,
+	&--east-north {
+		display: block;
+		height: $big-handler-size;
+		width: $big-handler-size;
+		background: none;
+		opacity: 1;
+	}
+
+	&--west-north {
+		border-left: solid $big-handler-width $accent-color;
+		border-top: solid $big-handler-width $accent-color;
+	}
+
+	&--east-south {
+		border-right: solid $big-handler-width $accent-color;
+		border-bottom: solid $big-handler-width $accent-color;
+	}
+
+	&--west-south {
+		border-left: solid $big-handler-width $accent-color;
+		border-bottom: solid $big-handler-width $accent-color;
+	}
+
+	&--east-north {
+		border-right: solid $big-handler-width $accent-color;
+		border-top: solid $big-handler-width $accent-color;
+	}
+
+	&--hover {
+		opacity: 1;
+	}
+}
+
+// Stencils
+.advanced-cropper-circle-stencil {
+	border-color: rgba($line-color, 0.4);
+}
+
+// Grid
+@if ($grid) {
+	.advanced-cropper-circle-stencil,
+	.advanced-cropper-rectangle-stencil {
+		&__preview {
+			&:after,
+			&:before {
+				content: '';
+				opacity: 0;
+				transition: opacity 0.25s;
+				position: absolute;
+				pointer-events: none;
+				z-index: 1;
+			}
+			&:after {
+				border-left: solid 1px $grid-color;
+				border-right: solid 1px $grid-color;
+				width: 33%;
+				height: 100%;
+				transform: translateX(-50%);
+				left: 50%;
+				top: 0;
+			}
+			&:before {
+				border-top: solid 1px $grid-color;
+				border-bottom: solid 1px $grid-color;
+				height: 33%;
+				width: 100%;
+				transform: translateY(-50%);
+				top: 50%;
+				left: 0;
+			}
+		}
+
+		&--moving,
+		&--resizing {
+			.advanced-cropper-rectangle-stencil,
+			.advanced-cropper-circle-stencil {
+				&__preview {
+					&:after,
+					&:before {
+						opacity: 0.7;
+					}
+				}
+			}
+		}
+	}
+}
