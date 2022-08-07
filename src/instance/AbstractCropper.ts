@@ -3,6 +3,7 @@ import {
 	CoordinatesTransform,
 	CoreSettings,
 	CropperImage,
+	CropperInteractions,
 	CropperState,
 	CropperTransitionsSettings,
 	DefaultTransforms,
@@ -39,7 +40,7 @@ import {
 	transformImage,
 	TransformImageAlgorithm,
 } from '../state';
-import { debounce, deepClone, getOptions, isArray, isFunction } from '../utils';
+import { debounce, deepClone, deepCompare, getOptions, isArray, isFunction } from '../utils';
 import {
 	fillMoveDirections,
 	fillResizeDirections,
@@ -51,6 +52,7 @@ import {
 	normalizeMoveDirections,
 	normalizeResizeDirections,
 } from '../service';
+import { hasInteractions } from '../service/interactions';
 
 export interface TransitionOptions {
 	transitions?: boolean;
@@ -79,17 +81,16 @@ export type AbstractCropperPostprocess =
 	| 'resizeCoordinatesEnd';
 
 export interface AbstractCropperData {
-	transitions: boolean;
 	state: CropperState | null;
+	transitions: boolean;
+	interactions: CropperInteractions;
 }
-
-type StateModifier = (state: CropperState | null, settings: CoreSettings) => CropperState | null;
 
 export interface AbstractCropperMethodOptions {
 	transitions?: boolean;
-	immediately?: boolean;
-	normalize?: boolean;
 }
+
+type StateModifier = (state: CropperState | null, settings: CoreSettings) => CropperState | null;
 
 export type AbstractCropperSettings = CoreSettings & ModifierSettings;
 
@@ -157,12 +158,6 @@ function runCallbacks<Instance>(callbacks: Function[]) {
 }
 
 export abstract class AbstractCropper<Settings extends AbstractCropperSettings, Instance = unknown> {
-	protected actions = {
-		moveCoordinates: false,
-		resizeCoordinates: false,
-		transformImage: false,
-	};
-
 	protected abstract setData(data: AbstractCropperData): void;
 
 	protected abstract getData(): AbstractCropperData;
@@ -181,8 +176,14 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		};
 	};
 
+	public getInteractions = () => {
+		const { interactions } = this.getData();
+		return deepClone(interactions);
+	};
+
 	public hasInteractions = () => {
-		return this.actions.moveCoordinates || this.actions.resizeCoordinates || this.actions.transformImage;
+		const { interactions } = this.getData();
+		return hasInteractions(interactions);
 	};
 
 	protected disableTransitions = debounce(
@@ -227,6 +228,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 			}
 
 			currentData = {
+				...currentData,
 				state: copyState(state),
 				transitions: transitions && changed,
 			};
@@ -242,35 +244,43 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		]);
 	};
 
-	protected startAction = (action: keyof AbstractCropper<Settings, Instance>['actions']) => {
-		const { onInteractionStart, getInstance } = this.getProps();
-		if (!this.hasInteractions()) {
-			runCallback(onInteractionStart, getInstance);
-		}
-		this.actions[action] = true;
-	};
+	protected setInteractions = (interactions: Partial<CropperInteractions>) => {
+		const { onInteractionStart, onInteractionEnd, getInstance } = this.getProps();
+		const previousInteractions = this.getInteractions();
+		const currentInteractions = {
+			...previousInteractions,
+			...interactions,
+		};
 
-	protected endAction = (action: keyof AbstractCropper<Settings, Instance>['actions']) => {
-		this.actions[action] = false;
-		if (!this.actions.moveCoordinates && !this.actions.resizeCoordinates && !this.actions.transformImage) {
-			const { onInteractionEnd } = this.getProps();
-			const { state } = this.getData();
-			this.updateState(
-				() =>
-					state &&
-					this.applyPostProcess(
-						{
-							name: 'interactionEnd',
-							immediately: true,
-							transitions: true,
-						},
-						state,
-					),
-				{
-					transitions: true,
-				},
-				[onInteractionEnd],
-			);
+		if (!deepCompare(previousInteractions, currentInteractions)) {
+			this.setData({
+				...this.getData(),
+				interactions: currentInteractions,
+			});
+		}
+
+		if (hasInteractions(previousInteractions) !== hasInteractions(currentInteractions)) {
+			if (!hasInteractions(previousInteractions)) {
+				runCallback(onInteractionStart, getInstance);
+			} else {
+				const { state } = this.getData();
+				this.updateState(
+					() =>
+						state &&
+						this.applyPostProcess(
+							{
+								name: 'interactionEnd',
+								immediately: true,
+								transitions: true,
+							},
+							state,
+						),
+					{
+						transitions: true,
+					},
+					[onInteractionEnd],
+				);
+			}
 		}
 	};
 
@@ -355,7 +365,14 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 				);
 				callbacks.push(onTransformImageEnd);
 			} else {
-				this.startAction('transformImage');
+				this.setInteractions({
+					transformImage: {
+						rotate: Boolean(transform.rotate),
+						flip: Boolean(transform.flip),
+						scale: Boolean(transform.scale),
+						move: Boolean(transform.move),
+					},
+				});
 			}
 
 			this.updateState(
@@ -379,7 +396,14 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 			},
 			[onTransformImageEnd],
 		);
-		this.endAction('transformImage');
+		this.setInteractions({
+			transformImage: {
+				rotate: false,
+				flip: false,
+				scale: false,
+				move: false,
+			},
+		});
 	};
 	zoomImage = (scale: Scale | number, options: ImmediatelyOptions & NormalizeOptions & TransitionOptions = {}) => {
 		const { immediately = true, transitions = true, normalize = false } = options;
@@ -538,7 +562,9 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 				result = this.applyPostProcess({ name: 'moveCoordinatesEnd', immediately, transitions }, result);
 				callbacks.push(onMoveEnd);
 			} else {
-				this.startAction('moveCoordinates');
+				this.setInteractions({
+					moveCoordinates: true,
+				});
 			}
 
 			this.updateState(
@@ -562,7 +588,9 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 			},
 			[onMoveEnd],
 		);
-		this.endAction('moveCoordinates');
+		this.setInteractions({
+			moveCoordinates: false,
+		});
 	};
 
 	public resizeCoordinates = (
@@ -592,7 +620,9 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 				result = this.applyPostProcess({ name: 'resizeCoordinatesEnd', immediately, transitions }, result);
 				callbacks.push(onResizeEnd);
 			} else {
-				this.startAction('resizeCoordinates');
+				this.setInteractions({
+					resizeCoordinates: true,
+				});
 			}
 
 			this.updateState(
@@ -616,7 +646,9 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 			},
 			[onResizeEnd],
 		);
-		this.endAction('resizeCoordinates');
+		this.setInteractions({
+			resizeCoordinates: false,
+		});
 	};
 
 	public getStencilCoordinates = () => {

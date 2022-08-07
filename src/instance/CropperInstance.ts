@@ -1,5 +1,6 @@
 import { AbstractCropper, AbstractCropperData, AbstractCropperProps, AbstractCropperSettings } from './AbstractCropper';
 import { CoreSettings, ModifierSettings } from '../types';
+import { emptyInteractions } from '../service/interactions';
 
 export interface CropperInstanceProps<Settings extends AbstractCropperSettings, Instance> {
 	getProps: () => AbstractCropperProps<Settings, Instance>;
@@ -24,6 +25,7 @@ export class CropperInstance<
 			this.data = {
 				state: null,
 				transitions: false,
+				interactions: emptyInteractions(),
 			};
 		}
 	}

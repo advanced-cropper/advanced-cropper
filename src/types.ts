@@ -234,6 +234,17 @@ export interface CropperTransitions {
 	active: boolean;
 }
 
+export type CropperInteractions = {
+	moveCoordinates: boolean;
+	resizeCoordinates: boolean;
+	transformImage: {
+		rotate: boolean;
+		move: boolean;
+		scale: boolean;
+		flip: boolean;
+	};
+};
+
 export interface CropperTransitionsSettings {
 	timingFunction?: string;
 	duration?: number;
