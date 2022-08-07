@@ -10,12 +10,13 @@ $small-handler-size: 0px !default;
 $small-handler-color: $handler-color !default;
 $handler-padding: 4px !default;
 $handler-wrapper-size: $big-handler-size + $handler-padding * 2 !default;
-$grid: true !default;
+$grid: false !default;
 $grid-color: $base-color !default;
 
 
 // Lines
 .advanced-cropper-simple-line {
+	border-color: rgba($line-color, 0.7);
 	&--east {
 		border-right-width: $line-width;
 	}
@@ -27,6 +28,9 @@ $grid-color: $base-color !default;
 	}
 	&--north {
 		border-top-width: $line-width;
+	}
+	&--hover {
+		border-color: $line-color;
 	}
 }
 
