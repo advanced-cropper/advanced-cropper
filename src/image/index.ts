@@ -1,6 +1,6 @@
-import { Coordinates, CropperImage, CropperState, CropperTransitions, Transforms } from './types';
-import { getCoefficient, getTransformedImageSize } from './service';
-import { isBlob, isCrossOriginURL, isLocal } from './utils';
+import { Coordinates, CropperImage, CropperState, CropperTransitions, Transforms } from '../types';
+import { getCoefficient, getTransformedImageSize } from '../service';
+import { isBlob, isCrossOriginURL, isLocal } from '../utils';
 
 const XHR_DONE = 4;
 

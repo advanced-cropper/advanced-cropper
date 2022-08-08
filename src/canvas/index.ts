@@ -1,6 +1,6 @@
-import { Coordinates, CropperState, Size, Transforms } from './types';
-import { getCenter, rotatePoint, rotateSize, approximateSize, isInitializedState } from './service';
-import { isNumeric } from './utils';
+import { Coordinates, CropperState, Size, Transforms } from '../types';
+import { getCenter, rotatePoint, rotateSize, approximateSize, isInitializedState } from '../service';
+import { isNumeric } from '../utils';
 
 interface UpdateOptions {
 	imageSmoothingQuality?: 'low' | 'medium' | 'high';

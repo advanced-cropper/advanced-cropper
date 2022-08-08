@@ -1,5 +1,5 @@
-import { Size } from './types';
-import { ratio } from './service';
+import { Size } from '../types';
+import { ratio } from '../service';
 
 export function stretchCropperBoundary(boundary: HTMLElement, stretcher: HTMLElement, size: Size): void {
 	// Reset stretcher

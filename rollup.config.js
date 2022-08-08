@@ -2,6 +2,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import typescript from '@wessberg/rollup-plugin-ts';
 import copy from 'rollup-plugin-copy';
+import del from 'rollup-plugin-delete';
 
 export default {
 	input: [
@@ -16,12 +17,12 @@ export default {
 		'src/extensions/fit-to-image/index.ts',
 		'src/extensions/mimes/index.ts',
 		'src/showcase/telegram/index.ts',
-		'src/animation.ts',
-		'src/canvas.ts',
-		'src/boundary.ts',
-		'src/image.ts',
-		'src/types.ts',
-		'src/utils.ts',
+		'src/animation/index.ts',
+		'src/canvas/index.ts',
+		'src/boundary/index.ts',
+		'src/image/index.ts',
+		'src/types/index.ts',
+		'src/utils/index.ts',
 		'src/index.ts',
 	],
 	preserveModules: true,
@@ -29,6 +30,10 @@ export default {
 		{
 			dir: 'dist',
 			format: 'es',
+		},
+		{
+			dir: 'dist/node',
+			format: 'cjs',
 		},
 	],
 	plugins: [

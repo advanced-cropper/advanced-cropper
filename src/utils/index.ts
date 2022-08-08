@@ -4,7 +4,7 @@ import {
 	OrdinalDirection,
 	Point,
 	VerticalCardinalDirection,
-} from './types';
+} from '../types';
 
 type Protocol = 'http' | 'https';
 
