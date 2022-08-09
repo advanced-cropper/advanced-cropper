@@ -280,24 +280,27 @@ export function isOrdinalDirection(value: unknown): value is OrdinalDirection {
 	);
 }
 
-export function debounce(callback: () => void, delay?: number | (() => number)) {
+export function debounce<Arguments extends any[]>(
+	callback: (...args: Arguments) => void,
+	delay?: number | (() => number),
+) {
 	let timestamp: number;
 	let timeout: ReturnType<typeof setTimeout>;
 
-	function later() {
+	function later(...args: Arguments) {
 		const last = Date.now() - timestamp;
 		const delayValue = isFunction(delay) ? delay() : delay || 0;
 
 		if (last < delayValue && last >= 0) {
-			timeout = setTimeout(later, delayValue - last);
+			timeout = setTimeout(() => later(...args), delayValue - last);
 		} else {
-			callback();
+			callback(...args);
 		}
 	}
 
-	function result() {
+	function result(...args: Arguments) {
 		timestamp = Date.now();
-		timeout = setTimeout(later, isFunction(delay) ? delay() : delay || 0);
+		timeout = setTimeout(() => later(...args), isFunction(delay) ? delay() : delay || 0);
 	}
 
 	result.clear = () => {
