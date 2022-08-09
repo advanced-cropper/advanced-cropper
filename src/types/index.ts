@@ -259,6 +259,7 @@ export interface PostprocessAction<Name extends string = string> {
 	name?: Name;
 	immediately?: boolean;
 	transitions?: boolean;
+	interaction?: boolean;
 }
 
 export type PostprocessFunction<Settings = CoreSettings, State = CropperState> = BivarianceConstraint<

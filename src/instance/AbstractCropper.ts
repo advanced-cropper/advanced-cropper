@@ -40,7 +40,7 @@ import {
 	transformImage,
 	TransformImageAlgorithm,
 } from '../state';
-import { debounce, deepClone, deepCompare, getOptions, isArray, isFunction } from '../utils';
+import { debounce, deepClone, deepCompare, getOptions, isArray, isFunction, isUndefined } from '../utils';
 import {
 	fillMoveDirections,
 	fillResizeDirections,
@@ -58,6 +58,12 @@ export interface TransitionOptions {
 	transitions?: boolean;
 }
 
+// Interaction means that this action is interaction and should be ended gratefully
+export interface InteractionOptions {
+	interaction?: boolean;
+}
+
+// Immediately means that action should be applied immediately with postprocess and without transitions
 export interface ImmediatelyOptions {
 	immediately?: boolean;
 }
@@ -199,10 +205,20 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 
 	protected applyPostProcess = (action: PostprocessAction, state: CropperState) => {
 		const { settings, postProcess } = this.getProps();
+
+		const { name, interaction = false, transitions = false, immediately = false } = action;
+
+		const preparedAction = {
+			name,
+			interaction,
+			transitions,
+			immediately,
+		};
+
 		if (isArray(postProcess)) {
-			return postProcess.reduce((processedState, p) => p(processedState, settings, action), state);
+			return postProcess.reduce((processedState, p) => p(processedState, settings, preparedAction), state);
 		} else if (isFunction(postProcess)) {
-			return postProcess(state, settings, action);
+			return postProcess(state, settings, preparedAction);
 		} else {
 			return state;
 		}
@@ -332,9 +348,9 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 
 	public transformImage = (
 		transform: ImageTransform,
-		options: ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
+		options: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
 	) => {
-		const { transitions = true, immediately = false, normalize = true } = options;
+		const { transitions = true, interaction = true, immediately = false, normalize = true } = options;
 		const { transformImageAlgorithm, onTransformImage, onTransformImageEnd, settings } = this.getProps();
 		const { state } = this.getData();
 		const callbacks = [];
@@ -354,25 +370,25 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 			);
 			callbacks.push(onTransformImage);
 
-			if (immediately) {
+			if (interaction) {
+				this.setInteractions({
+					transformImage: {
+						rotate: !isUndefined(transform.rotate),
+						flip: !isUndefined(transform.flip),
+						scale: !isUndefined(transform.scale),
+						move: !isUndefined(transform.move),
+					},
+				});
+			} else {
 				result = this.applyPostProcess(
 					{
 						name: 'transformImageEnd',
 						transitions,
-						immediately,
+						immediately: true,
 					},
 					result,
 				);
 				callbacks.push(onTransformImageEnd);
-			} else {
-				this.setInteractions({
-					transformImage: {
-						rotate: Boolean(transform.rotate),
-						flip: Boolean(transform.flip),
-						scale: Boolean(transform.scale),
-						move: Boolean(transform.move),
-					},
-				});
 			}
 
 			this.updateState(
@@ -386,7 +402,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 	};
 
 	public transformImageEnd = (options: ImmediatelyOptions & TransitionOptions = {}) => {
-		const { immediately = false, transitions = true } = options;
+		const { immediately = true, transitions = true } = options;
 		const { state } = this.getData();
 		const { onTransformImageEnd } = this.getProps();
 		this.updateState(
@@ -419,9 +435,9 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 	public moveImage = (
 		left: number,
 		top?: number,
-		options: ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
+		options: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
 	) => {
-		const { immediately = true, transitions = true, normalize = false } = options;
+		const { interaction = false, immediately = true, transitions = true, normalize = false } = options;
 
 		this.transformImage(
 			{
@@ -430,16 +446,16 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 					top,
 				},
 			},
-			{ immediately, transitions, normalize },
+			{ interaction, immediately, transitions, normalize },
 		);
 	};
 
 	public flipImage = (
 		horizontal?: boolean,
 		vertical?: boolean,
-		options: ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
+		options: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
 	) => {
-		const { immediately = true, transitions = true } = options;
+		const { interaction = false, immediately = true, transitions = true } = options;
 
 		this.transformImage(
 			{
@@ -448,20 +464,20 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 					vertical,
 				},
 			},
-			{ immediately, transitions },
+			{ interaction, immediately, transitions },
 		);
 	};
 
 	public rotateImage = (
 		rotate: number | Rotate,
-		options: ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
+		options: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
 	) => {
-		const { immediately = true, transitions = true, normalize = false } = options;
+		const { interaction = false, immediately = true, transitions = true, normalize = false } = options;
 		this.transformImage(
 			{
 				rotate,
 			},
-			{ immediately, transitions, normalize },
+			{ interaction, immediately, transitions, normalize },
 		);
 	};
 
@@ -538,12 +554,12 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 
 	public moveCoordinates = (
 		directions: Partial<MoveDirections>,
-		options: ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
+		options: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
 	) => {
 		const data = this.getData();
 		const { moveCoordinatesAlgorithm, onMove, onMoveEnd, settings } = this.getProps();
 
-		const { transitions = false, immediately = false, normalize = true } = options;
+		const { interaction = true, transitions = false, immediately = false, normalize = true } = options;
 
 		const callbacks = [];
 
@@ -553,18 +569,21 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 				: fillMoveDirections(directions);
 
 			let result = this.applyPostProcess(
-				{ name: 'moveCoordinates', immediately, transitions },
+				{ name: 'moveCoordinates', interaction, immediately, transitions },
 				(moveCoordinatesAlgorithm || moveCoordinates)(data.state, settings, normalizedDirections),
 			);
 			callbacks.push(onMove);
 
-			if (immediately) {
-				result = this.applyPostProcess({ name: 'moveCoordinatesEnd', immediately, transitions }, result);
-				callbacks.push(onMoveEnd);
-			} else {
+			if (interaction) {
 				this.setInteractions({
 					moveCoordinates: true,
 				});
+			} else {
+				result = this.applyPostProcess(
+					{ name: 'moveCoordinatesEnd', interaction, immediately, transitions },
+					result,
+				);
+				callbacks.push(onMoveEnd);
 			}
 
 			this.updateState(
@@ -596,11 +615,11 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 	public resizeCoordinates = (
 		directions: Partial<ResizeDirections>,
 		parameters: Record<string, unknown> = {},
-		options: ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
+		options: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
 	) => {
 		const { state } = this.getData();
 		const { resizeCoordinatesAlgorithm, onResize, onResizeEnd, settings } = this.getProps();
-		const { transitions = false, immediately = false, normalize = true } = options;
+		const { interaction = true, transitions = false, immediately = false, normalize = true } = options;
 		const transitionsOptions = this.getTransitions();
 
 		if (!transitionsOptions.active && state) {
@@ -611,18 +630,21 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 				: fillResizeDirections(directions);
 
 			let result = this.applyPostProcess(
-				{ name: 'resizeCoordinates', immediately, transitions },
+				{ name: 'resizeCoordinates', interaction, immediately, transitions },
 				(resizeCoordinatesAlgorithm || resizeCoordinates)(state, settings, normalizedDirections, parameters),
 			);
 			callbacks.push(onResize);
 
-			if (immediately) {
-				result = this.applyPostProcess({ name: 'resizeCoordinatesEnd', immediately, transitions }, result);
-				callbacks.push(onResizeEnd);
-			} else {
+			if (interaction) {
 				this.setInteractions({
 					resizeCoordinates: true,
 				});
+			} else {
+				result = this.applyPostProcess(
+					{ name: 'resizeCoordinatesEnd', interaction, immediately, transitions },
+					result,
+				);
+				callbacks.push(onResizeEnd);
 			}
 
 			this.updateState(
