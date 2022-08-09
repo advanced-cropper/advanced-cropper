@@ -31,3 +31,8 @@ $handler-size: 10px !default;
 .advanced-cropper-stencil-overlay {
 	color: rgba(black, 0.5);
 }
+
+// Grid
+.advanced-cropper-stencil-grid {
+	color: rgba($line-color, 0.3);
+}

@@ -1,0 +1,19 @@
+.advanced-cropper-stencil-grid {
+	display: table;
+	border-collapse: collapse;
+	table-layout: fixed;
+	opacity: 0;
+	transition: opacity 0.3s;
+	&--visible {
+		opacity: 1;
+	}
+	&__row {
+		display: table-row;
+		height: 1px;
+	}
+	&__cell {
+		display: table-cell;
+		width: 1px;
+		border: currentColor solid 1px;
+	}
+}
