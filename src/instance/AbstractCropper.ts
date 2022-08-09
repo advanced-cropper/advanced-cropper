@@ -235,7 +235,10 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		const previousData = this.getData();
 
 		const state = isFunction(modifier) ? modifier(previousData.state, settings) : modifier;
-		const changed = !isEqualState(previousData.state, state);
+
+		const changed = (['coordinates', 'boundary', 'visibleArea', 'imageSize'] as const).some(
+			(property) => !deepCompare(previousData.state?.[property], state?.[property]),
+		);
 
 		let currentData = previousData;
 		if (changed) {
