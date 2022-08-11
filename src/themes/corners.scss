@@ -10,8 +10,7 @@ $small-handler-size: 0px !default;
 $small-handler-color: $handler-color !default;
 $handler-padding: 4px !default;
 $handler-wrapper-size: $big-handler-size + $handler-padding * 2 !default;
-$grid: false !default;
-$grid-color: $base-color !default;
+$grid-color: $line-color !default;
 
 
 // Lines
@@ -115,55 +114,6 @@ $grid-color: $base-color !default;
 }
 
 // Grid
-@if ($grid) {
-	.advanced-cropper-circle-stencil,
-	.advanced-cropper-rectangle-stencil {
-		&__preview {
-			&:after,
-			&:before {
-				content: '';
-				opacity: 0;
-				transition: opacity 0.25s;
-				position: absolute;
-				pointer-events: none;
-				z-index: 1;
-			}
-			&:after {
-				border-left: solid 1px $grid-color;
-				border-right: solid 1px $grid-color;
-				width: 33%;
-				height: 100%;
-				transform: translateX(-50%);
-				left: 50%;
-				top: 0;
-			}
-			&:before {
-				border-top: solid 1px $grid-color;
-				border-bottom: solid 1px $grid-color;
-				height: 33%;
-				width: 100%;
-				transform: translateY(-50%);
-				top: 50%;
-				left: 0;
-			}
-		}
-
-		&--moving,
-		&--resizing {
-			.advanced-cropper-rectangle-stencil,
-			.advanced-cropper-circle-stencil {
-				&__preview {
-					&:after,
-					&:before {
-						opacity: 0.7;
-					}
-				}
-			}
-		}
-	}
-}
-
-// Grid
 .advanced-cropper-stencil-grid {
-	color: rgba($line-color, 0.5);
+	color: rgba($grid-color, 0.5);
 }

@@ -1,6 +1,7 @@
 $base-color: white !default;
 $handler-color: $base-color !default;
 $line-color: $base-color !default;
+$grid-color: $line-color !default;
 $handler-size: 10px !default;
 
 // Handlers
@@ -34,5 +35,5 @@ $handler-size: 10px !default;
 
 // Grid
 .advanced-cropper-stencil-grid {
-	color: rgba($line-color, 0.4);
+	color: rgba($grid-color, 0.4);
 }
