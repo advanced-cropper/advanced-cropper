@@ -9,11 +9,23 @@
 	}
 	&__row {
 		display: table-row;
-		height: 1px;
 	}
 	&__cell {
 		display: table-cell;
-		width: 1px;
+		width: 1%;
+		height: 1%;
 		border: currentColor solid 1px;
+		&--top {
+			border-top-color: transparent;
+		}
+		&--left {
+			border-left-color: transparent;
+		}
+		&--right {
+			border-right-color: transparent;
+		}
+		&--bottom {
+			border-bottom-color: transparent;
+		}
 	}
 }
