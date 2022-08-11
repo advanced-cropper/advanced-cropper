@@ -44,10 +44,10 @@ import { debounce, deepClone, deepCompare, getOptions, isArray, isFunction, isUn
 import {
 	fillMoveDirections,
 	fillResizeDirections,
+	getCoefficient,
 	getRoundedCoordinates,
 	getStencilCoordinates,
 	isConsistentState,
-	isEqualState,
 	normalizeImageTransform,
 	normalizeMoveDirections,
 	normalizeResizeDirections,
@@ -237,7 +237,12 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		const state = isFunction(modifier) ? modifier(previousData.state, settings) : modifier;
 
 		const changed = (['coordinates', 'boundary', 'visibleArea', 'imageSize'] as const).some(
-			(property) => !deepCompare(previousData.state?.[property], state?.[property]),
+			(property) =>
+				!deepCompare(
+					previousData.state?.[property],
+					state?.[property],
+					state ? 1e-3 * getCoefficient(state) : 1e-3,
+				),
 		);
 
 		let currentData = previousData;
@@ -251,16 +256,13 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 				state: copyState(state),
 				transitions: transitions && changed,
 			};
+			this.setData(currentData);
+			runCallback(onChange, getInstance);
 		}
-		this.setData(currentData);
-
 		if (currentData.transitions && !previousData.transitions) {
 			runCallback(onTransitionsStart, getInstance);
 		}
-		runCallbacks([
-			createCallback(onChange, getInstance),
-			...callbacks.map((callback) => createCallback(callback, getInstance)),
-		]);
+		runCallbacks(callbacks.map((callback) => createCallback(callback, getInstance)));
 	};
 
 	protected setInteractions = (interactions: Partial<CropperInteractions>) => {

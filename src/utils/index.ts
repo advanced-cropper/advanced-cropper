@@ -151,7 +151,7 @@ export function distance(firstPoint: Point, secondPoint: Point) {
 }
 
 export function isRoughlyEqual(a: number, b: number, tolerance = 1e-3): boolean {
-	return Math.abs(b - a) < Math.max(tolerance, tolerance * Math.max(Math.abs(a), Math.abs(b)));
+	return Math.abs(b - a) < tolerance;
 }
 
 export function isGreater(a: number, b: number, tolerance?: number): boolean {
@@ -210,8 +210,8 @@ export function deepClone<T>(obj: T): T {
 	return result;
 }
 
-export function deepCompare(a: any, b: any) {
-	if (isNumber(a) && isNumber(b) && isRoughlyEqual(a, b)) return true;
+export function deepCompare(a: any, b: any, tolerance = 1e-3) {
+	if (isNumber(a) && isNumber(b) && isRoughlyEqual(a, b, tolerance)) return true;
 	if (a === b) return true;
 
 	if (a && b && typeof a == 'object' && typeof b == 'object') {
@@ -221,7 +221,7 @@ export function deepCompare(a: any, b: any) {
 		if (Array.isArray(a)) {
 			length = a.length;
 			if (length != b.length) return false;
-			for (i = length; i-- !== 0; ) if (!deepCompare(a[i], b[i])) return false;
+			for (i = length; i-- !== 0; ) if (!deepCompare(a[i], b[i], tolerance)) return false;
 			return true;
 		}
 
@@ -236,7 +236,7 @@ export function deepCompare(a: any, b: any) {
 
 		for (i = length; i-- !== 0; ) {
 			const key = keys[i];
-			if (!deepCompare(a[key], b[key])) return false;
+			if (!deepCompare(a[key], b[key], tolerance)) return false;
 		}
 
 		return true;
