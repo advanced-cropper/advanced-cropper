@@ -2,7 +2,6 @@ import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import typescript from '@wessberg/rollup-plugin-ts';
 import copy from 'rollup-plugin-copy';
-import del from 'rollup-plugin-delete';
 
 export default {
 	input: [

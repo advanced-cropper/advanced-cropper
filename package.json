@@ -18,7 +18,7 @@
 		"npm": ">=5"
 	},
 	"scripts": {
-		"build": "npm run build:clean &&npm run build:library && npm run build:packages",
+		"build": "npm run build:clean && npm run build:library && npm run build:packages",
 		"build:clean": "node scripts/clean.js",
 		"build:library": "cross-env NODE_ENV=production rollup -c",
 		"build:packages": "node scripts/packages.js",
@@ -28,7 +28,8 @@
 		"test": "cross-env NODE_ENV=test jest",
 		"lint": "eslint src/**/*.{js,vue}",
 		"lint:fix": "eslint --fix src/**/*.{js,vue}",
-		"publish:dist": "npm publish dist"
+		"prepare:dist": "npm run build",
+		"publish:dist": "npm run prepare:dist && npm publish dist"
 	},
 	"dependencies": {
 		"tslib": "^2.4.0"
