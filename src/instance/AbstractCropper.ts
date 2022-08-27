@@ -236,25 +236,27 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 
 		const state = isFunction(modifier) ? modifier(previousData.state, settings) : modifier;
 
-		const changed = (['coordinates', 'boundary', 'visibleArea', 'imageSize'] as const).some(
-			(property) =>
-				!deepCompare(
-					previousData.state?.[property],
-					state?.[property],
-					state ? 1e-3 * getCoefficient(state) : 1e-3,
-				),
-		);
+		const tolerance = state ? 1e-3 * getCoefficient(state) : 1e-3;
+
+		const somethingChanged = !deepCompare(previousData.state, state, tolerance);
+
+		const affectTransitionProperties = ([
+			'coordinates',
+			'boundary',
+			'visibleArea',
+			'imageSize',
+			'transforms',
+		] as const).some((property) => !deepCompare(previousData.state?.[property], state?.[property], tolerance));
 
 		let currentData = previousData;
-		if (changed) {
-			if (transitions && changed) {
+		if (somethingChanged) {
+			if (transitions && affectTransitionProperties) {
 				this.disableTransitions();
 			}
-
 			currentData = {
 				...currentData,
 				state: copyState(state),
-				transitions: transitions && changed,
+				transitions: transitions && affectTransitionProperties,
 			};
 			this.setData(currentData);
 			runCallback(onChange, getInstance);
