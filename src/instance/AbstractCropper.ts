@@ -48,6 +48,7 @@ import {
 	getRoundedCoordinates,
 	getStencilCoordinates,
 	isConsistentState,
+	normalizeFlip,
 	normalizeImageTransform,
 	normalizeMoveDirections,
 	normalizeResizeDirections,
@@ -462,14 +463,18 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		vertical?: boolean,
 		options: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
 	) => {
-		const { interaction = false, immediately = true, transitions = true } = options;
+		const { interaction = false, immediately = true, transitions = true, normalize = true } = options;
+
+		const state = this.getState();
+
+		const flip = {
+			horizontal,
+			vertical,
+		};
 
 		this.transformImage(
 			{
-				flip: {
-					horizontal,
-					vertical,
-				},
+				flip: state && normalize ? normalizeFlip(state, flip) : flip,
 			},
 			{ interaction, immediately, transitions },
 		);

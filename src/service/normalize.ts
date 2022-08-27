@@ -1,6 +1,6 @@
-import { CropperState, ImageTransform, MoveDirections, Point, ResizeDirections } from '../types';
+import { CropperState, Flip, ImageTransform, MoveDirections, Point, ResizeDirections } from '../types';
 import { getCoefficient } from './helpers';
-import { isNumber } from '../utils';
+import { isNumber, isUndefined } from '../utils';
 
 export function normalizeResizeDirections(
 	state: CropperState,
@@ -24,9 +24,23 @@ export function normalizeCenter(state: CropperState, center: Point) {
 			left: center.left * coefficient + state.visibleArea.left,
 			top: center.top * coefficient + state.visibleArea.top,
 		};
-	} else {
-		return center;
 	}
+	return center;
+}
+
+export function normalizeFlip(state: CropperState, flip: Flip) {
+	if (state) {
+		const normalizedAngle = Math.abs(state.transforms.rotate % 180);
+		if (normalizedAngle <= 45 || normalizedAngle >= 135) {
+			return flip;
+		} else {
+			return {
+				horizontal: flip.vertical,
+				vertical: flip.horizontal,
+			};
+		}
+	}
+	return flip;
 }
 
 export function fillMoveDirections(directions: Partial<MoveDirections>): MoveDirections {
@@ -35,6 +49,7 @@ export function fillMoveDirections(directions: Partial<MoveDirections>): MoveDir
 		top: isNumber(directions.top) ? directions.top : 0,
 	};
 }
+
 export function fillResizeDirections(directions: Partial<ResizeDirections>): ResizeDirections {
 	return {
 		left: isNumber(directions.left) ? directions.left : 0,
