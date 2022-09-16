@@ -1,4 +1,4 @@
-import { CoreSettings, CropperState } from '../types';
+import { CoreSettings, CropperState, Size } from '../types';
 import {
 	applyMove,
 	approximateSize,
@@ -7,6 +7,7 @@ import {
 	getAreaPositionRestrictions,
 	getAreaSizeRestrictions,
 	getAspectRatio,
+	getBrokenRatio,
 	getCenter,
 	getPositionRestrictions,
 	getSizeRestrictions,
@@ -34,11 +35,19 @@ export function reconcileState(state: CropperState, settings: CoreSettings) {
 		const areaSizeRestrictions = getAreaSizeRestrictions(state, settings);
 
 		// Fit the size of coordinates to existing size restrictions and visible area
+		const brokenRatio = getBrokenRatio(ratio(state.coordinates), aspectRatio);
+		const desiredSize: Size = brokenRatio
+			? {
+					height: state.coordinates.height,
+					width: state.coordinates.height * brokenRatio,
+			  }
+			: state.coordinates;
+
 		result.coordinates = {
-			...state.coordinates,
+			...result.coordinates,
 			...approximateSize({
-				width: state.coordinates.width,
-				height: state.coordinates.height,
+				width: desiredSize.width,
+				height: desiredSize.height,
 				aspectRatio,
 				sizeRestrictions: mergeSizeRestrictions(areaSizeRestrictions, sizeRestrictions),
 			}),
@@ -51,8 +60,9 @@ export function reconcileState(state: CropperState, settings: CoreSettings) {
 		);
 
 		const scaleModifier = Math.max(
-			result.coordinates.width / state.coordinates.width,
-			result.coordinates.height / state.coordinates.height,
+			result.coordinates.width / result.visibleArea.width,
+			result.coordinates.height / result.visibleArea.height,
+			1,
 		);
 
 		// Fit the visible area to its size restrictions and boundary aspect ratio:

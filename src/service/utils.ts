@@ -375,7 +375,9 @@ export function getCloserSize(
 				size.width &&
 				size.height
 			) {
-				return !minimum || sizeDistance(size, reference) < sizeDistance(minimum, reference) ? size : minimum;
+				return !minimum || isLower(sizeDistance(size, reference), sizeDistance(minimum, reference))
+					? size
+					: minimum;
 			} else {
 				return minimum;
 			}
