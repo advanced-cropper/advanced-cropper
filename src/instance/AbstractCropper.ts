@@ -69,6 +69,10 @@ export interface ImmediatelyOptions {
 	immediately?: boolean;
 }
 
+export interface PostprocessOptions {
+	postprocess?: boolean;
+}
+
 export interface NormalizeOptions {
 	normalize?: boolean;
 }
@@ -497,12 +501,34 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		this.resetState(boundary, image);
 	};
 
-	public setState = (newState: Partial<CropperState> | null, options: TransitionOptions = {}) => {
+	public setState = (
+		modifier: CropperState | StateModifier | null,
+		options: TransitionOptions & ImmediatelyOptions & InteractionOptions & PostprocessOptions = {},
+	) => {
+		const settings = this.getSettings();
 		const { state } = this.getData();
-		const { transitions = true } = options;
-		this.updateState(() => state && { ...state, ...newState }, {
-			transitions,
-		});
+		const { transitions = true, immediately = false, interaction = false, postprocess = false } = options;
+
+		const newState = modifier && (isFunction(modifier) ? modifier(state, settings) : { ...state, ...modifier });
+
+		this.updateState(
+			() =>
+				postprocess
+					? newState &&
+					  this.applyPostProcess(
+							{
+								name: 'setState',
+								immediately,
+								transitions,
+								interaction,
+							},
+							newState,
+					  )
+					: newState,
+			{
+				transitions,
+			},
+		);
 	};
 
 	public setCoordinates = (
