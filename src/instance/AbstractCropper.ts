@@ -328,33 +328,18 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		if (state && !isConsistentState(state, settings)) {
 			let reconciledState = (reconcileStateAlgorithm || reconcileState)(state, settings);
 
-			if (isConsistentState(reconciledState, settings)) {
-				reconciledState = this.applyPostProcess(
-					{
-						name: 'reconcileState',
-						immediately: true,
-						transitions,
-					},
-					reconciledState,
-				);
-				if (isConsistentState(reconciledState, settings)) {
-					this.updateState(reconciledState, {
-						transitions,
-					});
-				} else {
-					if (process.env.NODE_ENV !== 'production') {
-						console.error(
-							"Reconcile error: can't reconcile state. The postprocess function breaks some restrictions that was satisfied before by `reconcileStateAlgorithm`",
-						);
-					}
-				}
-			} else {
-				if (process.env.NODE_ENV !== 'production') {
-					console.error(
-						"Reconcile error: can't reconcile state. Perhaps, the restrictions are contradictory.",
-					);
-				}
-			}
+			reconciledState = this.applyPostProcess(
+				{
+					name: 'reconcileState',
+					immediately: true,
+					transitions,
+				},
+				reconciledState,
+			);
+
+			this.updateState(reconciledState, {
+				transitions,
+			});
 		}
 	};
 
