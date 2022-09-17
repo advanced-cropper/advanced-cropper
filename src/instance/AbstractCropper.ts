@@ -313,7 +313,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 	};
 
 	public resetState = (boundary: Boundary, image: CropperImage) => {
-		this.updateState(this.getDefaultState(boundary, image));
+		this.updateState(this.createDefaultState(boundary, image));
 	};
 
 	public clear = () => {
@@ -749,7 +749,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 			  };
 	};
 
-	public getDefaultState = (boundary: Boundary, image: CropperImage) => {
+	public createDefaultState = (boundary: Boundary, image: CropperImage) => {
 		const { defaultTransforms, createStateAlgorithm, priority, settings } = this.getProps();
 
 		let transforms: PartialTransforms = image.transforms;
