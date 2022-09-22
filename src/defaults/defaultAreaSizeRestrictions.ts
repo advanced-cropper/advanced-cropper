@@ -23,8 +23,10 @@ export function defaultAreaSizeRestrictions(
 	} else if (imageRestriction === ImageRestriction.fitArea) {
 		if (ratio(boundary) > ratio(imageSize)) {
 			restrictions.maxHeight = imageSize.height;
+			restrictions.maxWidth = imageSize.height * ratio(boundary);
 		} else {
 			restrictions.maxWidth = imageSize.width;
+			restrictions.maxHeight = imageSize.width / ratio(boundary);
 		}
 	}
 
