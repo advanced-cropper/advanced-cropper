@@ -418,14 +418,18 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 			},
 		});
 	};
-	zoomImage = (scale: Scale | number, options: ImmediatelyOptions & NormalizeOptions & TransitionOptions = {}) => {
-		const { immediately = true, transitions = true, normalize = false } = options;
+
+	zoomImage = (
+		scale: Scale | number,
+		options: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
+	) => {
+		const { interaction = false, immediately = true, transitions = true, normalize = false } = options;
 
 		this.transformImage(
 			{
 				scale,
 			},
-			{ immediately, transitions, normalize },
+			{ interaction, immediately, transitions, normalize },
 		);
 	};
 
