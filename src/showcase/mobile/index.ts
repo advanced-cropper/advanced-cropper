@@ -260,11 +260,3 @@ export function zoomStencil(
 
 	return state;
 }
-
-export function autoZoom(
-	state: ExtendedState | ExtendedInitializedState,
-	settings: CoreSettings & FitToImageSettings,
-	action: PostprocessAction<AbstractCropperPostprocess>,
-) {
-	return zoomStencil(fitStencilToImage(state, settings, action), settings, action);
-}
