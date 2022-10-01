@@ -15,7 +15,7 @@ export default {
 		'src/extensions/prevent-zoom/index.ts',
 		'src/extensions/fit-to-image/index.ts',
 		'src/extensions/mimes/index.ts',
-		'src/showcase/telegram/index.ts',
+		'src/showcase/mobile/index.ts',
 		'src/animation/index.ts',
 		'src/canvas/index.ts',
 		'src/boundary/index.ts',

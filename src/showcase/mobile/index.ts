@@ -160,7 +160,7 @@ export function defaultSize(state: CropperState, settings: CoreSettings) {
 	};
 }
 
-export function autoZoom(
+export function fitStencilToImage(
 	state: ExtendedState | ExtendedInitializedState,
 	settings: CoreSettings & FitToImageSettings,
 	action: PostprocessAction<AbstractCropperPostprocess>,
@@ -212,6 +212,20 @@ export function autoZoom(
 			),
 		);
 
+		return result;
+	}
+
+	return state;
+}
+
+export function zoomStencil(
+	state: ExtendedState | ExtendedInitializedState,
+	settings: CoreSettings & FitToImageSettings,
+	action: PostprocessAction<AbstractCropperPostprocess>,
+) {
+	if (isInitializedState(state) && action.immediately) {
+		const result = copyState(state);
+
 		// Auto size
 		const stencil: Size = {
 			width: 0,
@@ -245,4 +259,12 @@ export function autoZoom(
 	}
 
 	return state;
+}
+
+export function autoZoom(
+	state: ExtendedState | ExtendedInitializedState,
+	settings: CoreSettings & FitToImageSettings,
+	action: PostprocessAction<AbstractCropperPostprocess>,
+) {
+	return zoomStencil(fitStencilToImage(state, settings, action), settings, action);
 }
