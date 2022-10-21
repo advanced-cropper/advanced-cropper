@@ -27,4 +27,8 @@
 	&__stencil-wrapper {
 		position: absolute;
 	}
+
+	* {
+		box-sizing: border-box;
+	}
 }
