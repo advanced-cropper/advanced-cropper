@@ -40,7 +40,7 @@ import {
 	transformImage,
 	TransformImageAlgorithm,
 } from '../state';
-import { debounce, deepClone, deepCompare, getOptions, isArray, isFunction, isUndefined } from '../utils';
+import { debounce, deepClone, deepCompare, getOptions, isArray, isFunction, isObject, isUndefined } from '../utils';
 import {
 	fillMoveDirections,
 	fillResizeDirections,
@@ -197,7 +197,17 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		return hasInteractions(interactions);
 	};
 
-	protected disableTransitions = debounce(
+	public startTransitions = () => {
+		const { onTransitionsStart, getInstance } = this.getProps();
+		const { transitions, ...data } = this.getData();
+		this.setData({ ...data, transitions: true });
+		if (!transitions) {
+			runCallback(onTransitionsStart, getInstance);
+		}
+		this.endTransitions();
+	};
+
+	protected endTransitions = debounce(
 		() => {
 			const { onTransitionsEnd, getInstance } = this.getProps();
 			this.setData({ ...this.getData(), transitions: false });
@@ -256,7 +266,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		let currentData = previousData;
 		if (somethingChanged) {
 			if (transitions && affectTransitionProperties) {
-				this.disableTransitions();
+				this.endTransitions();
 			}
 			currentData = {
 				...currentData,
@@ -641,7 +651,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 
 	public resizeCoordinates = (
 		directions: Partial<ResizeDirections>,
-		parameters: Record<string, unknown> = {},
+		parameters: unknown,
 		options: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
 	) => {
 		const { state } = this.getData();
@@ -658,7 +668,12 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 
 			let result = this.applyPostProcess(
 				{ name: 'resizeCoordinates', interaction, immediately, transitions },
-				(resizeCoordinatesAlgorithm || resizeCoordinates)(state, settings, normalizedDirections, parameters),
+				(resizeCoordinatesAlgorithm || resizeCoordinates)(
+					state,
+					settings,
+					normalizedDirections,
+					isObject(parameters) ? parameters : {},
+				),
 			);
 			callbacks.push(onResize);
 
@@ -722,7 +737,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 
 	public getVisibleArea = () => {
 		const { state } = this.getData();
-		if (state) {
+		if (state?.visibleArea) {
 			return { ...state.visibleArea };
 		} else {
 			return null;

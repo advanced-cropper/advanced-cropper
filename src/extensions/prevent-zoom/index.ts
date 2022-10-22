@@ -26,18 +26,15 @@ export function preventZoom(state: CropperState, settings: CoreSettings, action:
 		if (ratio(result.boundary) > ratio(imageSize)) {
 			result.visibleArea.height = visibleAreaSize.height;
 			result.visibleArea.width = visibleAreaSize.height * ratio(result.boundary);
-			result.visibleArea = moveToPositionRestrictions(
-				result.visibleArea,
-				getAreaPositionRestrictions(result, settings),
-			);
 		} else {
 			result.visibleArea.width = visibleAreaSize.width;
 			result.visibleArea.height = visibleAreaSize.width / ratio(result.boundary);
-			result.visibleArea = moveToPositionRestrictions(
-				result.visibleArea,
-				getAreaPositionRestrictions(result, settings),
-			);
 		}
+
+		result.visibleArea = moveToPositionRestrictions(
+			result.visibleArea,
+			getAreaPositionRestrictions(result, settings),
+		);
 
 		return fitCoordinates(result, settings);
 	}
