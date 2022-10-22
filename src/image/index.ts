@@ -114,12 +114,12 @@ function getImageData(img: string) {
 	});
 }
 
-export function getStyleTransforms({ rotate, flip, scale }: Transforms & { scale: number }) {
-	let transform = '';
-	transform += ` rotate(${rotate}deg) `;
-	transform += ` scaleX(${scale * (flip.horizontal ? -1 : 1)}) `;
-	transform += ` scaleY(${scale * (flip.vertical ? -1 : 1)}) `;
-	return transform;
+export function getStyleTransforms(transforms: Partial<Transforms> & { scale?: number }) {
+	const { rotate = 0, flip = { horizontal: false, vertical: false }, scale = 1 } = transforms;
+
+	return ` rotate(${rotate}deg) scaleX(${scale * (flip.horizontal ? -1 : 1)}) scaleY(${
+		scale * (flip.vertical ? -1 : 1)
+	})`;
 }
 
 function getStringFromCharCode(dataView: DataView, start: number, length: number) {
