@@ -6,6 +6,7 @@ import {
 	Intersections,
 	MoveDirections,
 	Point,
+	PositionDirection,
 	PositionRestrictions,
 	RawAspectRatio,
 	ResizeDirections,
@@ -27,6 +28,15 @@ export function getCenter(object: Coordinates): Point {
 		left: object.left + object.width / 2,
 		top: object.top + object.height / 2,
 	};
+}
+
+export function getOppositeSide(side: PositionDirection): PositionDirection {
+	return ({
+		left: 'right',
+		top: 'bottom',
+		right: 'left',
+		bottom: 'top',
+	} as const)[side];
 }
 
 export function sizeDistance(a: Size, b: Size): number {

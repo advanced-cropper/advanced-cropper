@@ -6,6 +6,7 @@ import {
 	InitializedCropperState,
 	PostprocessAction,
 	RawAspectRatio,
+	ResizeAnchor,
 	ResizeDirections,
 	Size,
 } from '../../types';
@@ -36,7 +37,7 @@ import {
 } from '../../extensions/fit-to-image';
 import { getRotatedImage } from '../../extensions/fit-to-image/utils';
 import { AbstractCropperPostprocess } from '../../instance';
-import { resizeCoordinatesAlgorithm } from '../../algorithms';
+import { anchoredResizeCoordinatesAlgorithm } from '../../algorithms';
 import { deepCompare, isGreater } from '../../utils';
 import { defaultStencilConstraints } from '../../defaults';
 
@@ -92,6 +93,7 @@ export function transformImage(state: ExtendedState, settings: CoreSettings, tra
 export function resizeCoordinates(
 	state: CropperState,
 	settings: CoreSettings & FitToImageSettings,
+	anchor: ResizeAnchor,
 	directions: ResizeDirections,
 	options: ResizeOptions,
 ) {
@@ -104,19 +106,25 @@ export function resizeCoordinates(
 
 		const sizeRestrictions = getSizeRestrictions(result, settings);
 
-		result.coordinates = resizeCoordinatesAlgorithm(result.coordinates, directions, options, {
-			positionRestrictions: mergePositionRestrictions(
-				getPositionRestrictions(result, settings),
-				coordinatesToPositionRestrictions(result.visibleArea),
-			),
-			sizeRestrictions: {
-				maxWidth: Math.min(sizeRestrictions.maxWidth, imageSize.width, result.visibleArea.width),
-				maxHeight: Math.min(sizeRestrictions.maxHeight, imageSize.height, result.visibleArea.height),
-				minWidth: Math.max(Math.min(sizeRestrictions.minWidth, result.visibleArea.width), minimumSize),
-				minHeight: Math.max(Math.min(sizeRestrictions.minHeight, result.visibleArea.height), minimumSize),
+		result.coordinates = anchoredResizeCoordinatesAlgorithm(
+			result.coordinates,
+			anchor,
+			directions,
+			{ ...options, compensate: false },
+			{
+				positionRestrictions: mergePositionRestrictions(
+					getPositionRestrictions(result, settings),
+					coordinatesToPositionRestrictions(result.visibleArea),
+				),
+				sizeRestrictions: {
+					maxWidth: Math.min(sizeRestrictions.maxWidth, imageSize.width, result.visibleArea.width),
+					maxHeight: Math.min(sizeRestrictions.maxHeight, imageSize.height, result.visibleArea.height),
+					minWidth: Math.max(Math.min(sizeRestrictions.minWidth, result.visibleArea.width), minimumSize),
+					minHeight: Math.max(Math.min(sizeRestrictions.minHeight, result.visibleArea.height), minimumSize),
+				},
+				aspectRatio: getAspectRatio(result, settings),
 			},
-			aspectRatio: getAspectRatio(result, settings),
-		});
+		);
 
 		const resizedCoordinates = { ...result.coordinates };
 

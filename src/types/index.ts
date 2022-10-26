@@ -65,6 +65,8 @@ export interface AspectRatio {
 	maximum: number;
 }
 
+export type ResizeAnchor = OrdinalDirection | 'center';
+
 export type RawAspectRatio = Partial<AspectRatio> | number;
 
 export interface Diff {

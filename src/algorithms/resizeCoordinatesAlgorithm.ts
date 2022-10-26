@@ -1,15 +1,38 @@
-import { AspectRatio, Coordinates, PositionRestrictions, ResizeDirections, SizeRestrictions } from '../types';
+import {
+	AspectRatio,
+	Coordinates,
+	MoveDirections,
+	PositionRestrictions,
+	ResizeDirections,
+	SizeRestrictions,
+	ResizeAnchor,
+} from '../types';
 import { ALL_DIRECTIONS, HORIZONTAL_DIRECTIONS, VERTICAL_DIRECTIONS } from '../constants';
-import { applyDirections, getBrokenRatio, getIntersections, ratio } from '../service';
+import {
+	applyDirections,
+	applyMove,
+	diff,
+	getBrokenRatio,
+	getIntersections,
+	getOppositeSide,
+	moveToPositionRestrictions,
+	ratio,
+} from '../service';
 import { moveCoordinatesAlgorithm } from './moveCoordinatesAlgorithm';
 import { ResizeOptions } from '../state';
-import { isRoughlyEqual } from '../utils';
+import { isGreater, isRoughlyEqual } from '../utils';
 
 interface FitDirectionsParams {
 	directions: ResizeDirections;
 	coordinates: Coordinates;
 	positionRestrictions: PositionRestrictions;
 	sizeRestrictions: SizeRestrictions;
+	allowedDirections: {
+		left?: boolean;
+		right?: boolean;
+		top?: boolean;
+		bottom?: boolean;
+	};
 	preserveRatio?: boolean;
 	compensate?: boolean;
 }
@@ -20,7 +43,8 @@ export function fitDirections({
 	positionRestrictions,
 	sizeRestrictions,
 	preserveRatio,
-	compensate,
+	allowedDirections,
+	compensate = true,
 }: FitDirectionsParams): ResizeDirections {
 	const fittedDirections = { ...directions };
 
@@ -56,7 +80,11 @@ export function fitDirections({
 	// Prevent breaking limits
 	let breaks = getIntersections(applyDirections(coordinates, fittedDirections), positionRestrictions);
 
-	if (compensate) {
+	const canBeCompensated = ALL_DIRECTIONS.every((direction) => {
+		return !isGreater(breaks[getOppositeSide(direction)], 0) || allowedDirections[direction];
+	});
+
+	if (compensate && canBeCompensated) {
 		if (breaks.left && breaks.left > 0 && breaks.right === 0) {
 			fittedDirections.right += breaks.left;
 			fittedDirections.left -= breaks.left;
@@ -174,16 +202,24 @@ function distributeOverlap(overlap: number, first: number, second: number) {
 export function resizeCoordinatesAlgorithm(
 	coordinates: Coordinates,
 	directions: ResizeDirections,
-	options: ResizeOptions,
+	options: {
+		compensate?: boolean;
+		preserveAspectRatio?: boolean;
+		allowedDirections?: {
+			left?: boolean;
+			right?: boolean;
+			top?: boolean;
+			bottom?: boolean;
+		};
+		respectDirection?: 'width' | 'height';
+	},
 	limitations: ResizeLimitations,
 ): Coordinates {
 	const { aspectRatio, positionRestrictions, sizeRestrictions } = limitations;
+
 	const actualCoordinates = {
 		...coordinates,
-		right: coordinates.left + coordinates.width,
-		bottom: coordinates.top + coordinates.height,
 	};
-
 	directions = {
 		...directions,
 	};
@@ -218,6 +254,7 @@ export function resizeCoordinatesAlgorithm(
 		directions,
 		sizeRestrictions,
 		positionRestrictions,
+		allowedDirections,
 	});
 
 	// 2. Second step: fix desired box to correspondent to aspect ratio
@@ -277,6 +314,7 @@ export function resizeCoordinatesAlgorithm(
 			positionRestrictions,
 			preserveRatio: true,
 			compensate: options.compensate,
+			allowedDirections,
 		});
 	}
 
@@ -286,11 +324,9 @@ export function resizeCoordinatesAlgorithm(
 	ratioBroken = options.preserveAspectRatio
 		? ratio(actualCoordinates)
 		: getBrokenRatio(currentWidth / currentHeight, aspectRatio);
-	if (ratioBroken && Math.abs(ratioBroken - currentWidth / currentHeight) > 1e-3) {
+	if (ratioBroken && isGreater(Math.abs(ratioBroken - currentWidth / currentHeight), 0)) {
 		ALL_DIRECTIONS.forEach((direction) => {
-			if (!allowedDirections[direction]) {
-				directions[direction] = 0;
-			}
+			directions[direction] = 0;
 		});
 	}
 
@@ -307,4 +343,75 @@ export function resizeCoordinatesAlgorithm(
 		},
 		positionRestrictions,
 	);
+}
+
+function anchorToMassPoint(coordinates: Coordinates, anchor: ResizeAnchor) {
+	const plainAnchor = anchor.toLowerCase();
+	return {
+		left:
+			coordinates.left +
+			coordinates.width * (plainAnchor.indexOf('west') !== -1 ? 1 : plainAnchor.indexOf('east') !== -1 ? 0 : 0.5),
+		top:
+			coordinates.top +
+			coordinates.height *
+				(plainAnchor.indexOf('north') !== -1 ? 1 : plainAnchor.indexOf('south') !== -1 ? 0 : 0.5),
+	};
+}
+
+export function anchoredResizeCoordinatesAlgorithm(
+	coordinates: Coordinates,
+	anchor: ResizeAnchor,
+	directions: MoveDirections,
+	options: ResizeOptions,
+	limitations: ResizeLimitations,
+): Coordinates {
+	const { reference } = options;
+
+	const plainAnchor = anchor.toLowerCase();
+
+	const normalizedDirections = {
+		left: plainAnchor.indexOf('west') === -1 ? directions.left : -directions.left,
+		top: 0 && plainAnchor.indexOf('north') === -1 ? directions.top : -directions.top,
+		right: directions.left,
+		bottom: directions.top,
+	};
+
+	if (['north', 'south', 'center'].every((el) => plainAnchor.indexOf(el) === -1)) {
+		normalizedDirections.top = 0;
+		normalizedDirections.bottom = 0;
+	}
+
+	if (['west', 'east', 'center'].every((el) => plainAnchor.indexOf(el) === -1)) {
+		normalizedDirections.left = 0;
+		normalizedDirections.right = 0;
+	}
+
+	const allowedDirections = {
+		left: plainAnchor.indexOf('east') === -1,
+		top: plainAnchor.indexOf('south') === -1,
+		right: plainAnchor.indexOf('west') === -1,
+		bottom: plainAnchor.indexOf('north') === -1,
+	};
+
+	ALL_DIRECTIONS.forEach((direction) => {
+		if (!allowedDirections[direction]) {
+			normalizedDirections[direction] = 0;
+		}
+	});
+
+	let result = resizeCoordinatesAlgorithm(
+		coordinates,
+		normalizedDirections,
+		{
+			...options,
+			allowedDirections,
+		},
+		limitations,
+	);
+	if (reference) {
+		// Move the result to anchor
+		result = applyMove(result, diff(anchorToMassPoint(reference, anchor), anchorToMassPoint(result, anchor)));
+	}
+
+	return moveToPositionRestrictions(result, limitations.positionRestrictions);
 }

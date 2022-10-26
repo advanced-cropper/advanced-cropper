@@ -15,7 +15,7 @@ import {
 	PostprocessAction,
 	PostprocessFunction,
 	Priority,
-	ResizeDirections,
+	ResizeAnchor,
 	Rotate,
 	Scale,
 	VisibleArea,
@@ -650,8 +650,9 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 	};
 
 	public resizeCoordinates = (
-		directions: Partial<ResizeDirections>,
-		parameters: unknown,
+		anchor: ResizeAnchor,
+		directions: Partial<MoveDirections>,
+		parameters?: unknown,
 		options: InteractionOptions & ImmediatelyOptions & NormalizeOptions & TransitionOptions = {},
 	) => {
 		const { state } = this.getData();
@@ -671,6 +672,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 				(resizeCoordinatesAlgorithm || resizeCoordinates)(
 					state,
 					settings,
+					anchor,
 					normalizedDirections,
 					isObject(parameters) ? parameters : {},
 				),

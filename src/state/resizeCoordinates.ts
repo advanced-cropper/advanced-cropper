@@ -1,4 +1,4 @@
-import { CoreSettings, CropperState, ResizeDirections } from '../types';
+import { Coordinates, CoreSettings, CropperState, MoveDirections, ResizeAnchor } from '../types';
 import { copyState } from './copyState';
 import {
 	getAspectRatio,
@@ -9,31 +9,28 @@ import {
 	coordinatesToPositionRestrictions,
 	isInitializedState,
 } from '../service';
-import { resizeCoordinatesAlgorithm } from '../algorithms';
+import { anchoredResizeCoordinatesAlgorithm } from '../algorithms';
 
 export interface ResizeOptions {
 	compensate?: boolean;
 	preserveAspectRatio?: boolean;
-	allowedDirections?: {
-		left?: boolean;
-		right?: boolean;
-		top?: boolean;
-		bottom?: boolean;
-	};
 	respectDirection?: 'width' | 'height';
+	reference?: Coordinates | null;
 }
 
 export type ResizeAlgorithm<Settings extends CoreSettings = CoreSettings> = (
 	state: CropperState,
 	settings: Settings,
-	directions: ResizeDirections,
+	anchor: ResizeAnchor,
+	directions: MoveDirections,
 	options: ResizeOptions,
 ) => CropperState;
 
 export function resizeCoordinates(
 	state: CropperState,
 	settings: CoreSettings,
-	directions: ResizeDirections,
+	anchor: ResizeAnchor,
+	directions: MoveDirections,
 	options: ResizeOptions,
 ) {
 	const minimumSize = getMinimumSize(state);
@@ -43,7 +40,7 @@ export function resizeCoordinates(
 	return isInitializedState(state)
 		? {
 				...copyState(state),
-				coordinates: resizeCoordinatesAlgorithm(state.coordinates, directions, options, {
+				coordinates: anchoredResizeCoordinatesAlgorithm(state.coordinates, anchor, directions, options, {
 					positionRestrictions: mergePositionRestrictions(
 						getPositionRestrictions(state, settings),
 						coordinatesToPositionRestrictions(state.visibleArea),
