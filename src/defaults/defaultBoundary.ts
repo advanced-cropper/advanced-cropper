@@ -19,8 +19,9 @@ export function fitBoundary(boundary: HTMLElement, size: Size): Boundary {
 }
 
 export function fillBoundary(boundary: HTMLElement): Boundary {
+	const { width, height } = boundary.getBoundingClientRect();
 	return {
-		width: boundary.clientWidth,
-		height: boundary.clientHeight,
+		width,
+		height,
 	};
 }

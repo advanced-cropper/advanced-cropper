@@ -1,5 +1,5 @@
-import { Coordinates, CropperImage, CropperState, CropperTransitions, Transforms } from '../types';
-import { getCoefficient, getTransformedImageSize } from '../service';
+import { Coordinates, CropperImage, CropperState, CropperTransitions, Size, Transforms } from '../types';
+import { getCoefficient, getTransformedImageSize, ratio } from '../service';
 import { isBlob, isCrossOriginURL, isLocal } from '../utils';
 
 const XHR_DONE = 4;
@@ -420,11 +420,19 @@ export function getBackgroundStyle(
 export function getPreviewStyle(
 	image: CropperImage,
 	state: CropperState,
-	coefficient: number,
+	size: Size,
 	transitions: CropperTransitions | null = null,
 ) {
 	if (image && state && state.visibleArea && state.coordinates) {
-		return getImageStyle(image, state, state.coordinates, coefficient, transitions);
+		return getImageStyle(
+			image,
+			state,
+			state.coordinates,
+			ratio(state.coordinates) > ratio(size)
+				? state.coordinates.width / size.width
+				: state.coordinates.height / size.height,
+			transitions,
+		);
 	} else {
 		return {};
 	}

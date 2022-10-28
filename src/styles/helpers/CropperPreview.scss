@@ -2,9 +2,15 @@
 	overflow: hidden;
 	box-sizing: border-box;
 	position: relative;
+	display: flex;
+	flex-direction: column;
+
 	&__content {
 		overflow: hidden;
-		position: relative;
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
 	}
 
 	&__image {
@@ -19,5 +25,11 @@
 		&--visible {
 			display: block;
 		}
+	}
+
+	&__boundary {
+		flex-grow: 1;
+		min-height: 0;
+		min-width: 0;
 	}
 }

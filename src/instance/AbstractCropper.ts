@@ -127,6 +127,7 @@ export interface AbstractCropperCallbacks<Instance = unknown> {
 	onTransformImageEnd?: AbstractCropperCallback<Instance>;
 	onInteractionStart?: AbstractCropperCallback<Instance>;
 	onInteractionEnd?: AbstractCropperCallback<Instance>;
+	onUpdate?: AbstractCropperCallback<Instance>;
 }
 
 export interface AbstractCropperParameters<Settings extends CoreSettings> {
@@ -162,9 +163,12 @@ function createCallback<Instance>(
 	};
 }
 
-function runCallbacks<Instance>(callbacks: Function[]) {
+function runCallbacks<Instance>(
+	callbacks: (AbstractCropperCallback<Instance> | undefined)[],
+	getInstance?: () => Nullable<Instance>,
+) {
 	callbacks.forEach((callback) => {
-		callback();
+		runCallback(callback, getInstance);
 	});
 }
 
@@ -198,20 +202,20 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 	};
 
 	public startTransitions = () => {
-		const { onTransitionsStart, getInstance } = this.getProps();
+		const { onTransitionsStart, onUpdate, getInstance } = this.getProps();
 		const { transitions, ...data } = this.getData();
 		this.setData({ ...data, transitions: true });
 		if (!transitions) {
-			runCallback(onTransitionsStart, getInstance);
+			runCallbacks([onTransitionsStart, onUpdate], getInstance);
 		}
 		this.endTransitions();
 	};
 
 	protected endTransitions = debounce(
 		() => {
-			const { onTransitionsEnd, getInstance } = this.getProps();
+			const { onTransitionsEnd, onUpdate, getInstance } = this.getProps();
 			this.setData({ ...this.getData(), transitions: false });
-			runCallback(onTransitionsEnd, getInstance);
+			runCallbacks([onTransitionsEnd, onUpdate], getInstance);
 		},
 		() => {
 			return this.getTransitions().duration;
@@ -246,7 +250,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 	) => {
 		const { transitions = false } = options;
 
-		const { onTransitionsStart, getInstance, onChange, settings } = this.getProps();
+		const { onTransitionsStart, getInstance, onChange, onUpdate, settings } = this.getProps();
 		const previousData = this.getData();
 
 		const state = isFunction(modifier) ? modifier(previousData.state, settings) : modifier;
@@ -279,7 +283,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 		if (currentData.transitions && !previousData.transitions) {
 			runCallback(onTransitionsStart, getInstance);
 		}
-		runCallbacks(callbacks.map((callback) => createCallback(callback, getInstance)));
+		runCallbacks([...callbacks, onUpdate], getInstance);
 	};
 
 	protected setInteractions = (interactions: Partial<CropperInteractions>) => {
