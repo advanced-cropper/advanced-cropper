@@ -6,12 +6,6 @@
 	display: flex;
 	flex-direction: column;
 	color: white;
-	&__background {
-		width: 100%;
-		height: 100%;
-		position: absolute;
-		background: inherit;
-	}
 	&__boundary {
 		flex-grow: 1;
 		min-height: 0;
