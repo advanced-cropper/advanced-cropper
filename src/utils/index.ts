@@ -127,6 +127,10 @@ export function parseNumber(number: string | number) {
 	}
 }
 
+export function isBoolean(value: unknown): value is boolean {
+	return value === true || value === false;
+}
+
 export function isNumber(value: unknown): value is number {
 	return typeof value === 'number';
 }

@@ -1,5 +1,5 @@
-import { Coordinates, CoreSettings, CropperState, InitializedCropperState } from '../types';
-import { emptyCoordinates, isFunction } from '../utils';
+import { Coordinates, CoreSettings, CropperState, InitializedCropperState, InitializeSettings } from '../types';
+import { emptyCoordinates, isBoolean, isFunction, isNumber } from '../utils';
 import {
 	createAspectRatio,
 	getBrokenRatio,
@@ -60,16 +60,43 @@ export function getAspectRatio(state: CropperState, settings: CoreSettings) {
 	);
 }
 
-export function getDefaultCoordinates(state: CropperState, settings: CoreSettings) {
+export function getDefaultCoordinates(state: CropperState, settings: CoreSettings & InitializeSettings) {
 	return isFunction(settings.defaultCoordinates)
 		? settings.defaultCoordinates(state, settings)
 		: settings.defaultCoordinates;
 }
 
-export function getDefaultVisibleArea(state: CropperState, settings: CoreSettings) {
+export function getDefaultVisibleArea(state: CropperState, settings: CoreSettings & InitializeSettings) {
 	return isFunction(settings.defaultVisibleArea)
 		? settings.defaultVisibleArea(state, settings)
 		: settings.defaultVisibleArea;
+}
+export function getDefaultTransforms(state: CropperState, settings: CoreSettings & InitializeSettings) {
+	const transforms = {
+		...state.transforms,
+		flip: {
+			...state.transforms.flip,
+		},
+	};
+	if (settings.defaultTransforms) {
+		const defaultTransforms = isFunction(settings.defaultTransforms)
+			? settings.defaultTransforms(state, settings)
+			: settings.defaultTransforms;
+
+		if (isNumber(defaultTransforms.rotate)) {
+			transforms.rotate = defaultTransforms.rotate;
+		}
+		if (defaultTransforms.flip) {
+			if (isBoolean(defaultTransforms.flip.horizontal)) {
+				transforms.flip.horizontal = defaultTransforms.flip.horizontal;
+			}
+			if (isBoolean(defaultTransforms.flip.vertical)) {
+				transforms.flip.vertical = defaultTransforms.flip.vertical;
+			}
+		}
+	}
+
+	return transforms;
 }
 
 export function getTransformedImageSize(state: CropperState) {

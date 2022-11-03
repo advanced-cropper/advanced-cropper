@@ -1,5 +1,4 @@
 import { AbstractCropper, AbstractCropperData, AbstractCropperProps, AbstractCropperSettings } from './AbstractCropper';
-import { CoreSettings, ModifierSettings } from '../types';
 import { emptyInteractions } from '../service/interactions';
 
 export interface CropperInstanceProps<Settings extends AbstractCropperSettings, Instance> {
@@ -8,10 +7,10 @@ export interface CropperInstanceProps<Settings extends AbstractCropperSettings, 
 	setData?: (data: AbstractCropperData) => void;
 }
 
-export class CropperInstance<
-	Settings extends CoreSettings & ModifierSettings,
-	Instance = unknown
-> extends AbstractCropper<Settings, Instance> {
+export class CropperInstance<Settings extends AbstractCropperSettings, Instance = unknown> extends AbstractCropper<
+	Settings,
+	Instance
+> {
 	data?: AbstractCropperData;
 
 	props: CropperInstanceProps<Settings, Instance>;

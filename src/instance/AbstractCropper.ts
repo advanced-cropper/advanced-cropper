@@ -6,15 +6,13 @@ import {
 	CropperInteractions,
 	CropperState,
 	CropperTransitionsSettings,
-	DefaultTransforms,
 	ImageTransform,
+	InitializeSettings,
 	ModifierSettings,
 	MoveDirections,
 	Nullable,
-	PartialTransforms,
 	PostprocessAction,
 	PostprocessFunction,
-	Priority,
 	ResizeAnchor,
 	Rotate,
 	Scale,
@@ -103,7 +101,7 @@ export interface AbstractCropperMethodOptions {
 
 type StateModifier = (state: CropperState | null, settings: CoreSettings) => CropperState | null;
 
-export type AbstractCropperSettings = CoreSettings & ModifierSettings;
+export type AbstractCropperSettings = CoreSettings & ModifierSettings & InitializeSettings;
 
 export type AbstractCropperProps<Settings extends AbstractCropperSettings, Instance> = AbstractCropperParameters<
 	Settings
@@ -130,7 +128,7 @@ export interface AbstractCropperCallbacks<Instance = unknown> {
 	onUpdate?: AbstractCropperCallback<Instance>;
 }
 
-export interface AbstractCropperParameters<Settings extends CoreSettings> {
+export interface AbstractCropperParameters<Settings extends CoreSettings & InitializeSettings> {
 	transitions?: CropperTransitionsSettings | boolean;
 	postProcess?: PostprocessFunction<Settings> | PostprocessFunction<Settings>[];
 	setCoordinatesAlgorithm?: SetCoordinatesAlgorithm<Settings>;
@@ -141,8 +139,6 @@ export interface AbstractCropperParameters<Settings extends CoreSettings> {
 	resizeCoordinatesAlgorithm?: ResizeAlgorithm<Settings>;
 	createStateAlgorithm?: CreateStateAlgorithm<Settings>;
 	reconcileStateAlgorithm?: ReconcileStateAlgorithm<Settings>;
-	defaultTransforms?: DefaultTransforms;
-	priority?: Priority;
 }
 
 function runCallback<Instance>(callback?: AbstractCropperCallback<Instance>, getInstance?: () => Nullable<Instance>) {
@@ -152,15 +148,6 @@ function runCallback<Instance>(callback?: AbstractCropperCallback<Instance>, get
 			callback(instance as NonNullable<Instance>);
 		}
 	}
-}
-
-function createCallback<Instance>(
-	callback?: AbstractCropperCallback<Instance>,
-	getInstance?: () => Nullable<Instance>,
-) {
-	return () => {
-		runCallback(callback, getInstance);
-	};
 }
 
 function runCallbacks<Instance>(
@@ -775,12 +762,7 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 	};
 
 	public createDefaultState = (boundary: Boundary, image: CropperImage) => {
-		const { defaultTransforms, createStateAlgorithm, priority, settings } = this.getProps();
-
-		let transforms: PartialTransforms = image.transforms;
-		if (defaultTransforms) {
-			transforms = isFunction(defaultTransforms) ? defaultTransforms(image) : defaultTransforms;
-		}
+		const { createStateAlgorithm, settings } = this.getProps();
 
 		return this.applyPostProcess(
 			{
@@ -790,10 +772,8 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 			},
 			(createStateAlgorithm || createState)(
 				{
+					image,
 					boundary,
-					imageSize: { width: image.width, height: image.height },
-					transforms,
-					priority,
 				},
 				settings,
 			),

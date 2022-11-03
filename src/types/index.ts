@@ -187,10 +187,11 @@ export type DefaultCoordinates<Settings = CoreSettings> =
 	| (CoordinatesTransform | CoordinatesTransform[])
 	| BivarianceConstraint<(state: CropperState, settings: Settings) => CoordinatesTransform | CoordinatesTransform[]>;
 
-// There is the issue with recursive typing. I can't use `this` instead of `Settings`, so there
+export type DefaultTransforms<Settings = CoreSettings> =
+	| PartialTransforms
+	| BivarianceConstraint<(state: CropperState, settings: Settings) => PartialTransforms>;
+
 export interface CoreSettings {
-	defaultCoordinates: DefaultCoordinates<this>;
-	defaultVisibleArea: DefaultVisibleArea<this>;
 	areaPositionRestrictions:
 		| AreaPositionRestrictions
 		| BivarianceConstraint<(state: CropperState, settings: this) => AreaPositionRestrictions>;
@@ -204,6 +205,13 @@ export interface CoreSettings {
 		| PositionRestrictions
 		| BivarianceConstraint<(state: CropperState, settings: this) => PositionRestrictions>;
 	aspectRatio: AspectRatio | BivarianceConstraint<(state: CropperState, settings: this) => RawAspectRatio>;
+}
+
+export interface InitializeSettings {
+	defaultCoordinates: DefaultCoordinates<this>;
+	defaultVisibleArea: DefaultVisibleArea<this>;
+	defaultTransforms?: DefaultTransforms<this>;
+	priority?: Priority;
 }
 
 // The hacky way to enable bivariance instead of contravariance,
@@ -269,7 +277,5 @@ export type PostprocessFunction<Settings = CoreSettings, State = CropperState> =
 >;
 
 export type Nullable<T> = T | null | undefined;
-
-export type DefaultTransforms = PartialTransforms | ((image: CropperImage) => PartialTransforms);
 
 export type DebouncedFunction<T extends (...args: any[]) => any> = T & { clear: () => void };
