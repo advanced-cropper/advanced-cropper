@@ -358,15 +358,16 @@ function anchorToMassPoint(coordinates: Coordinates, anchor: ResizeAnchor) {
 	};
 }
 
-export function anchoredResizeCoordinatesAlgorithm(
-	coordinates: Coordinates,
-	anchor: ResizeAnchor,
-	directions: MoveDirections,
-	options: ResizeOptions,
-	limitations: ResizeLimitations,
-): Coordinates {
-	const { reference } = options;
-
+export function anchorToAllowedDirections(anchor: ResizeAnchor) {
+	const plainAnchor = anchor.toLowerCase();
+	return {
+		left: plainAnchor.indexOf('east') === -1,
+		top: plainAnchor.indexOf('south') === -1,
+		right: plainAnchor.indexOf('west') === -1,
+		bottom: plainAnchor.indexOf('north') === -1,
+	};
+}
+export function anchorMoveToResizeDirections(anchor: ResizeAnchor, directions: MoveDirections) {
 	const plainAnchor = anchor.toLowerCase();
 
 	const normalizedDirections = {
@@ -386,22 +387,31 @@ export function anchoredResizeCoordinatesAlgorithm(
 		normalizedDirections.right = 0;
 	}
 
-	const allowedDirections = {
-		left: plainAnchor.indexOf('east') === -1,
-		top: plainAnchor.indexOf('south') === -1,
-		right: plainAnchor.indexOf('west') === -1,
-		bottom: plainAnchor.indexOf('north') === -1,
-	};
-
+	const allowedDirections = anchorToAllowedDirections(anchor);
 	ALL_DIRECTIONS.forEach((direction) => {
 		if (!allowedDirections[direction]) {
 			normalizedDirections[direction] = 0;
 		}
 	});
 
+	return normalizedDirections;
+}
+
+export function anchoredResizeCoordinatesAlgorithm(
+	coordinates: Coordinates,
+	anchor: ResizeAnchor,
+	directions: MoveDirections,
+	options: ResizeOptions,
+	limitations: ResizeLimitations,
+): Coordinates {
+	const { reference } = options;
+
+	const resizeDirections = anchorMoveToResizeDirections(anchor, directions);
+	const allowedDirections = anchorToAllowedDirections(anchor);
+
 	let result = resizeCoordinatesAlgorithm(
 		coordinates,
-		normalizedDirections,
+		resizeDirections,
 		{
 			...options,
 			allowedDirections,
