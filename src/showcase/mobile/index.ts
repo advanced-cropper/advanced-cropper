@@ -36,7 +36,7 @@ import {
 	moveToImage,
 } from '../../extensions/fit-to-image';
 import { getRotatedImage } from '../../extensions/fit-to-image/utils';
-import { AbstractCropperPostprocess } from '../../instance';
+import { AbstractCropperInstancePostprocess } from '../../instance';
 import { anchoredResizeCoordinatesAlgorithm } from '../../algorithms';
 import { deepCompare, isGreater } from '../../utils';
 import { defaultStencilConstraints } from '../../defaults';
@@ -171,7 +171,7 @@ export function defaultSize(state: CropperState, settings: CoreSettings) {
 export function fitStencilToImage(
 	state: ExtendedState | ExtendedInitializedState,
 	settings: CoreSettings & FitToImageSettings,
-	action: PostprocessAction<AbstractCropperPostprocess>,
+	action: PostprocessAction<AbstractCropperInstancePostprocess>,
 ) {
 	if (isInitializedState(state) && action.immediately) {
 		const result = copyState(state);
@@ -229,7 +229,7 @@ export function fitStencilToImage(
 export function zoomStencil(
 	state: ExtendedState | ExtendedInitializedState,
 	settings: CoreSettings & FitToImageSettings,
-	action: PostprocessAction<AbstractCropperPostprocess>,
+	action: PostprocessAction<AbstractCropperInstancePostprocess>,
 ) {
 	if (isInitializedState(state) && action.immediately) {
 		const result = copyState(state);

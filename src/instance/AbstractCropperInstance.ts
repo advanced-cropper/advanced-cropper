@@ -50,8 +50,8 @@ import {
 	normalizeImageTransform,
 	normalizeMoveDirections,
 	normalizeResizeDirections,
+	hasInteractions,
 } from '../service';
-import { hasInteractions } from '../service/interactions';
 
 export interface TransitionOptions {
 	transitions?: boolean;
@@ -75,7 +75,7 @@ export interface NormalizeOptions {
 	normalize?: boolean;
 }
 
-export type AbstractCropperPostprocess =
+export type AbstractCropperInstancePostprocess =
 	| 'interactionEnd'
 	| 'createState'
 	| 'reconcileState'
@@ -89,46 +89,43 @@ export type AbstractCropperPostprocess =
 	| 'resizeCoordinates'
 	| 'resizeCoordinatesEnd';
 
-export interface AbstractCropperData {
+export interface AbstractCropperInstanceData {
 	state: CropperState | null;
 	transitions: boolean;
 	interactions: CropperInteractions;
 }
 
-export interface AbstractCropperMethodOptions {
-	transitions?: boolean;
-}
-
 type StateModifier = (state: CropperState | null, settings: CoreSettings) => CropperState | null;
 
-export type AbstractCropperSettings = CoreSettings & ModifierSettings & InitializeSettings;
+export type AbstractCropperInstanceSettings = CoreSettings & ModifierSettings & InitializeSettings;
 
-export type AbstractCropperProps<Settings extends AbstractCropperSettings, Instance> = AbstractCropperParameters<
-	Settings
-> &
-	AbstractCropperCallbacks<Instance> & {
+export type AbstractCropperInstanceProps<
+	Settings extends AbstractCropperInstanceSettings,
+	Instance
+> = AbstractCropperInstanceParameters<Settings> &
+	AbstractCropperInstanceCallbacks<Instance> & {
 		settings: Settings;
 	};
 
-export type AbstractCropperCallback<Instance> = (instance: NonNullable<Instance>) => void;
+export type AbstractCropperInstanceCallback<Instance> = (instance: NonNullable<Instance>) => void;
 
-export interface AbstractCropperCallbacks<Instance = unknown> {
+export interface AbstractCropperInstanceCallbacks<Instance = unknown> {
 	getInstance?: () => Nullable<Instance>;
-	onTransitionsStart?: AbstractCropperCallback<Instance>;
-	onTransitionsEnd?: AbstractCropperCallback<Instance>;
-	onChange?: AbstractCropperCallback<Instance>;
-	onResizeEnd?: AbstractCropperCallback<Instance>;
-	onMoveEnd?: AbstractCropperCallback<Instance>;
-	onMove?: AbstractCropperCallback<Instance>;
-	onResize?: AbstractCropperCallback<Instance>;
-	onTransformImage?: AbstractCropperCallback<Instance>;
-	onTransformImageEnd?: AbstractCropperCallback<Instance>;
-	onInteractionStart?: AbstractCropperCallback<Instance>;
-	onInteractionEnd?: AbstractCropperCallback<Instance>;
-	onUpdate?: AbstractCropperCallback<Instance>;
+	onTransitionsStart?: AbstractCropperInstanceCallback<Instance>;
+	onTransitionsEnd?: AbstractCropperInstanceCallback<Instance>;
+	onChange?: AbstractCropperInstanceCallback<Instance>;
+	onResizeEnd?: AbstractCropperInstanceCallback<Instance>;
+	onMoveEnd?: AbstractCropperInstanceCallback<Instance>;
+	onMove?: AbstractCropperInstanceCallback<Instance>;
+	onResize?: AbstractCropperInstanceCallback<Instance>;
+	onTransformImage?: AbstractCropperInstanceCallback<Instance>;
+	onTransformImageEnd?: AbstractCropperInstanceCallback<Instance>;
+	onInteractionStart?: AbstractCropperInstanceCallback<Instance>;
+	onInteractionEnd?: AbstractCropperInstanceCallback<Instance>;
+	onUpdate?: AbstractCropperInstanceCallback<Instance>;
 }
 
-export interface AbstractCropperParameters<Settings extends CoreSettings & InitializeSettings> {
+export interface AbstractCropperInstanceParameters<Settings extends CoreSettings & InitializeSettings> {
 	transitions?: CropperTransitionsSettings | boolean;
 	postProcess?: PostprocessFunction<Settings> | PostprocessFunction<Settings>[];
 	setCoordinatesAlgorithm?: SetCoordinatesAlgorithm<Settings>;
@@ -141,7 +138,10 @@ export interface AbstractCropperParameters<Settings extends CoreSettings & Initi
 	reconcileStateAlgorithm?: ReconcileStateAlgorithm<Settings>;
 }
 
-function runCallback<Instance>(callback?: AbstractCropperCallback<Instance>, getInstance?: () => Nullable<Instance>) {
+function runCallback<Instance>(
+	callback?: AbstractCropperInstanceCallback<Instance>,
+	getInstance?: () => Nullable<Instance>,
+) {
 	if (callback && getInstance) {
 		const instance = getInstance();
 		if (instance) {
@@ -151,7 +151,7 @@ function runCallback<Instance>(callback?: AbstractCropperCallback<Instance>, get
 }
 
 function runCallbacks<Instance>(
-	callbacks: (AbstractCropperCallback<Instance> | undefined)[],
+	callbacks: (AbstractCropperInstanceCallback<Instance> | undefined)[],
 	getInstance?: () => Nullable<Instance>,
 ) {
 	callbacks.forEach((callback) => {
@@ -159,12 +159,12 @@ function runCallbacks<Instance>(
 	});
 }
 
-export abstract class AbstractCropper<Settings extends AbstractCropperSettings, Instance = unknown> {
-	protected abstract setData(data: AbstractCropperData): void;
+export abstract class AbstractCropperInstance<Settings extends AbstractCropperInstanceSettings, Instance = unknown> {
+	protected abstract setData(data: AbstractCropperInstanceData): void;
 
-	protected abstract getData(): AbstractCropperData;
+	protected abstract getData(): AbstractCropperInstanceData;
 
-	protected abstract getProps(): AbstractCropperProps<Settings, Instance>;
+	protected abstract getProps(): AbstractCropperInstanceProps<Settings, Instance>;
 
 	public getTransitions = () => {
 		const data = this.getData();
@@ -232,8 +232,8 @@ export abstract class AbstractCropper<Settings extends AbstractCropperSettings, 
 
 	protected updateState = (
 		modifier: StateModifier | CropperState | null,
-		options: AbstractCropperMethodOptions = {},
-		callbacks: (AbstractCropperCallback<Instance> | undefined)[] = [],
+		options: TransitionOptions = {},
+		callbacks: (AbstractCropperInstanceCallback<Instance> | undefined)[] = [],
 	) => {
 		const { transitions = false } = options;
 

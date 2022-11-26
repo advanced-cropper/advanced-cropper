@@ -11,7 +11,7 @@ export function hasInteractions(interactions: CropperInteractions) {
 	);
 }
 
-export function emptyInteractions() {
+export function getEmptyInteractions() {
 	return {
 		moveCoordinates: false,
 		resizeCoordinates: false,

@@ -1,2 +1,1 @@
-export * from './AbstractCropper';
-export * from './CropperInstance';
+export * from './AbstractCropperInstance';
